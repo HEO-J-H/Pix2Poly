@@ -38,5 +38,9 @@ Write-Host "  Hot reload: app/*.py, static/* (see backend/run_dev.py)"
 Write-Host "  Press Ctrl+C to stop."
 Write-Host ""
 
+$uiUrl = "http://127.0.0.1:$Port/ui/"
+Start-Process cmd.exe -ArgumentList "/c", "timeout /t 2 /nobreak >nul && start $uiUrl" -WindowStyle Hidden
+Write-Host "Opening browser in 2 seconds -> $uiUrl" -ForegroundColor DarkGray
+
 $env:PORT = $Port
 python run_dev.py
