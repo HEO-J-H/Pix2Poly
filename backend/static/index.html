@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pix2Poly</title>
+  <style>
+    :root { font-family: system-ui, sans-serif; background: #0f1419; color: #e7e9ea; }
+    body { max-width: 52rem; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.5rem; font-weight: 600; }
+    section { background: #1a2332; border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+    label { display: block; font-size: 0.85rem; color: #8b98a5; margin-bottom: 0.35rem; }
+    input[type="url"], input[type="text"] { width: 100%; box-sizing: border-box; padding: 0.5rem 0.65rem; border-radius: 6px; border: 1px solid #38444d; background: #0f1419; color: inherit; }
+    button { margin-top: 0.75rem; padding: 0.45rem 1rem; border-radius: 6px; border: none; background: #1d9bf0; color: #fff; font-weight: 600; cursor: pointer; }
+    button:hover { filter: brightness(1.08); }
+    button.secondary { background: #38444d; }
+    pre { background: #0f1419; padding: 1rem; border-radius: 6px; overflow: auto; font-size: 0.8rem; max-height: 20rem; }
+    .hint { font-size: 0.8rem; color: #8b98a5; margin-top: 0.5rem; }
+    ul.candidates { max-height: 12rem; overflow: auto; font-size: 0.85rem; padding-left: 1.2rem; }
+  </style>
+</head>
+<body>
+  <h1>Pix2Poly — API 테스트</h1>
+  <p class="hint">백엔드를 띄운 뒤 이 페이지에서 잡을 만들 수 있습니다. (<code>uvicorn app.main:app --reload --port 8000</code>)</p>
+
+  <section>
+    <label for="base">API base</label>
+    <input id="base" type="text" value="" placeholder="http://localhost:8000" />
+  </section>
+
+  <section>
+    <h2 style="font-size:1rem;margin-top:0">단일 이미지</h2>
+    <form id="form-single">
+      <label><input type="file" id="single-file" accept="image/*" required /></label>
+      <button type="submit">POST /v1/jobs/single-image</button>
+    </form>
+  </section>
+
+  <section>
+    <h2 style="font-size:1rem;margin-top:0">다중 이미지</h2>
+    <form id="form-multi">
+      <label><input type="file" id="multi-files" accept="image/*" multiple required /></label>
+      <button type="submit">POST /v1/jobs/multi-image</button>
+    </form>
+  </section>
+
+  <section>
+    <h2 style="font-size:1rem;margin-top:0">URL 인제스트 (미리보기)</h2>
+    <form id="form-ingest">
+      <label for="ingest-url">페이지 URL</label>
+      <input id="ingest-url" type="url" placeholder="https://example.com" required />
+      <button type="submit" class="secondary">POST /v1/ingest/url</button>
+    </form>
+    <ul id="candidates" class="candidates" hidden></ul>
+  </section>
+
+  <section>
+    <h2 style="font-size:1rem;margin-top:0">URL 잡 생성</h2>
+    <form id="form-url-job">
+      <label for="job-url">페이지 URL</label>
+      <input id="job-url" type="url" placeholder="https://example.com" required />
+      <button type="submit">POST /v1/jobs/url</button>
+    </form>
+  </section>
+
+  <section>
+    <h2 style="font-size:1rem;margin-top:0">응답</h2>
+    <pre id="out">(아직 없음)</pre>
+  </section>
+
+  <script>
+    (function () {
+      var baseEl = document.getElementById("base");
+      baseEl.value = window.location.origin;
+      function base() { return (baseEl.value || "").replace(/\/$/, ""); }
+      function show(obj) {
+        document.getElementById("out").textContent = JSON.stringify(obj, null, 2);
+      }
+      async function parseJson(r) {
+        var t = await r.text();
+        try { return JSON.parse(t); } catch (e) { return { _raw: t, _status: r.status }; }
+      }
+      document.getElementById("form-single").onsubmit = async function (e) {
+        e.preventDefault();
+        var f = document.getElementById("single-file").files[0];
+        if (!f) return;
+        var fd = new FormData();
+        fd.append("file", f);
+        var r = await fetch(base() + "/v1/jobs/single-image", { method: "POST", body: fd });
+        show(await parseJson(r));
+      };
+      document.getElementById("form-multi").onsubmit = async function (e) {
+        e.preventDefault();
+        var files = document.getElementById("multi-files").files;
+        if (files.length < 2) { show({ error: "2장 이상 선택하세요" }); return; }
+        var fd = new FormData();
+        for (var i = 0; i < files.length; i++) fd.append("files", files[i]);
+        fd.append("min_images", "2");
+        var r = await fetch(base() + "/v1/jobs/multi-image", { method: "POST", body: fd });
+        show(await parseJson(r));
+      };
+      document.getElementById("form-ingest").onsubmit = async function (e) {
+        e.preventDefault();
+        var url = document.getElementById("ingest-url").value;
+        var r = await fetch(base() + "/v1/ingest/url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ page_url: url, max_candidates: 30 }),
+        });
+        var data = await parseJson(r);
+        show(data);
+        var ul = document.getElementById("candidates");
+        ul.innerHTML = "";
+        if (data.candidates && data.candidates.length) {
+          ul.hidden = false;
+          data.candidates.forEach(function (u) {
+            var li = document.createElement("li");
+            li.textContent = u;
+            ul.appendChild(li);
+          });
+        } else ul.hidden = true;
+      };
+      document.getElementById("form-url-job").onsubmit = async function (e) {
+        e.preventDefault();
+        var url = document.getElementById("job-url").value;
+        var r = await fetch(base() + "/v1/jobs/url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ page_url: url, max_candidates: 50 }),
+        });
+        show(await parseJson(r));
+      };
+    })();
+  </script>
+</body>
+</html>

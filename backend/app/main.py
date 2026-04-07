@@ -1,13 +1,17 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 from uuid import UUID
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from starlette.responses import RedirectResponse
 
 from app.schemas import JobResponse, JobStatus, JobType, UrlIngestResponse, UrlJobCreate
 from app.services.jobs import JobRecord, job_store
+from app.services.storage import save_job_files
 from app.services.url_ingest import fetch_page_image_candidates
 
 app = FastAPI(
@@ -45,16 +49,21 @@ async def create_single_image_job(
     file: UploadFile = File(...),
     notes: Optional[str] = Form(None),
 ) -> JobResponse:
-    rec = await job_store.create(
-        JobType.single_image,
-        detail={
+    rec = await job_store.create(JobType.single_image, detail={})
+    raw = await file.read()
+    upload_paths = save_job_files(rec.job_id, [(file.filename, raw)])
+    await job_store.set_status(
+        rec.job_id,
+        JobStatus.queued,
+        "Awaiting worker integration",
+        detail_update={
             "filename": file.filename,
             "content_type": file.content_type,
             "notes": notes,
+            "upload_paths": upload_paths,
             "pipeline": "pending: single-image 3D + PBR + mesh optimize",
         },
     )
-    await job_store.set_status(rec.job_id, JobStatus.queued, "Awaiting worker integration")
     return _to_response(rec)
 
 
@@ -69,16 +78,23 @@ async def create_multi_image_job(
             status_code=400,
             detail=f"At least {min_images} images required, got {len(files)}",
         )
-    rec = await job_store.create(
-        JobType.multi_image,
-        detail={
+    rec = await job_store.create(JobType.multi_image, detail={})
+    pairs: List[Tuple[Optional[str], bytes]] = []
+    for uf in files:
+        pairs.append((uf.filename, await uf.read()))
+    upload_paths = save_job_files(rec.job_id, pairs)
+    await job_store.set_status(
+        rec.job_id,
+        JobStatus.queued,
+        "Awaiting worker integration",
+        detail_update={
             "count": len(files),
             "filenames": [f.filename for f in files],
             "notes": notes,
+            "upload_paths": upload_paths,
             "pipeline": "pending: multi-view 3D + PBR + mesh optimize",
         },
     )
-    await job_store.set_status(rec.job_id, JobStatus.queued, "Awaiting worker integration")
     return _to_response(rec)
 
 
@@ -132,3 +148,13 @@ async def get_job(job_id: UUID) -> JobResponse:
     if not rec:
         raise HTTPException(status_code=404, detail="Job not found")
     return _to_response(rec)
+
+
+_STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+if _STATIC_DIR.is_dir():
+    app.mount("/ui", StaticFiles(directory=str(_STATIC_DIR), html=True), name="ui")
+
+
+@app.get("/")
+async def root() -> RedirectResponse:
+    return RedirectResponse(url="/ui/")

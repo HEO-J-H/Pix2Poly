@@ -25,7 +25,10 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-API 문서: `http://localhost:8000/docs`
+- API 문서: `http://localhost:8000/docs`
+- 브라우저 테스트 UI: `http://localhost:8000/` → `/ui/` 로 연결 (단일·다중 이미지, URL 인제스트)
+
+업로드 파일은 `backend/uploads/<job_id>/` 에 저장됩니다. (향후 3D 결과물은 `backend/outputs/<job_id>/` 예정)
 
 ## API
 
