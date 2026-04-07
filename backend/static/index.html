@@ -17,11 +17,13 @@
     pre { background: #0f1419; padding: 1rem; border-radius: 6px; overflow: auto; font-size: 0.8rem; max-height: 20rem; }
     .hint { font-size: 0.8rem; color: #8b98a5; margin-top: 0.5rem; }
     ul.candidates { max-height: 12rem; overflow: auto; font-size: 0.85rem; padding-left: 1.2rem; }
+    .warn-file { display: none; background: #3d1f24; padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid #e0245e; margin-bottom: 1rem; }
   </style>
 </head>
 <body>
-  <h1>Pix2Poly — API 테스트</h1>
-  <p class="hint">백엔드를 띄운 뒤 이 페이지에서 잡을 만들 수 있습니다. (<code>uvicorn app.main:app --reload --port 8000</code>)</p>
+  <h1>Pix2Poly — 로컬 API 테스트</h1>
+  <p id="file-protocol-warn" class="warn-file">이 파일을 <code>file://</code> 로 직접 연 경우 브라우저 보안 때문에 API 호출이 실패할 수 있습니다. 저장소 루트에서 <code>scripts\start-local.bat</code> 또는 <code>.\scripts\start-local.ps1</code> 로 서버를 띄운 뒤 <strong>http://127.0.0.1:8000/ui/</strong> 로 접속하세요.</p>
+  <p class="hint">로컬 전용: 백엔드가 떠 있어야 합니다. 아래 API base는 서버 주소와 같게 맞춥니다.</p>
 
   <section>
     <label for="base">API base</label>
@@ -71,7 +73,12 @@
   <script>
     (function () {
       var baseEl = document.getElementById("base");
-      baseEl.value = window.location.origin;
+      if (window.location.protocol === "file:") {
+        document.getElementById("file-protocol-warn").style.display = "block";
+        baseEl.value = "http://127.0.0.1:8000";
+      } else {
+        baseEl.value = window.location.origin;
+      }
       function base() { return (baseEl.value || "").replace(/\/$/, ""); }
       function show(obj) {
         document.getElementById("out").textContent = JSON.stringify(obj, null, 2);
