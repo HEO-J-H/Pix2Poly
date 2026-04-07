@@ -34,7 +34,9 @@ Write-Host ""
 Write-Host "Pix2Poly (local)" -ForegroundColor Cyan
 Write-Host "  UI:    http://127.0.0.1:${Port}/ui/"
 Write-Host "  API:   http://127.0.0.1:${Port}/docs"
+Write-Host "  Hot reload: app/*.py, static/* (see backend/run_dev.py)"
 Write-Host "  Press Ctrl+C to stop."
 Write-Host ""
 
-uvicorn app.main:app --reload --host 127.0.0.1 --port $Port
+$env:PORT = $Port
+python run_dev.py

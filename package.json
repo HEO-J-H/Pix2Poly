@@ -1,0 +1,11 @@
+{
+  "name": "pix2poly",
+  "private": true,
+  "description": "Optional nodemon: full process restart on file change. Default dev: backend/run_dev.py (uvicorn --reload).",
+  "scripts": {
+    "dev:nodemon": "nodemon"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

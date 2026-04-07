@@ -18,6 +18,6 @@ echo   UI:  http://127.0.0.1:%PORT%/ui/
 echo   API: http://127.0.0.1:%PORT%/docs
 echo.
 
-uvicorn app.main:app --reload --host 127.0.0.1 --port %PORT%
+python run_dev.py
 
 pause

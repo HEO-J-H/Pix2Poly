@@ -13,6 +13,9 @@ ENV/
 dist/
 build/
 
+# Node (optional nodemon)
+node_modules/
+
 # IDE
 .idea/
 .vscode/

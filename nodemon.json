@@ -1,0 +1,7 @@
+{
+  "watch": ["backend/app", "backend/static"],
+  "ext": "py,html,htm,css,js,json",
+  "ignore": ["backend/uploads/**", "backend/outputs/**", "backend/.venv/**"],
+  "exec": ".venv\\Scripts\\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+  "cwd": "./backend"
+}
