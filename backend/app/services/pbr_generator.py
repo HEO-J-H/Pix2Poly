@@ -75,14 +75,15 @@ def _box_blur(arr: np.ndarray, radius: int) -> np.ndarray:
     except ImportError:
         pass
     # Pure NumPy: cumsum-based box filter
-    h, w = arr.shape
+    # 누적합 앞에 0 을 붙여야 창 합계 = cs[i+k] - cs[i] 가 정확히 h(w) 개 나온다
+    # (이전 구현은 길이가 1 어긋나 OpenCV 없는 기본 설치에서 항상 ValueError)
+    k = 2 * radius + 1
     pad = np.pad(arr, radius, mode="reflect")
-    cs = np.cumsum(pad, axis=0)
-    cs = cs[2 * radius + 1 :] - cs[: h + 2 * radius + 1 - (2 * radius + 1)]
-    # horizontal
-    cs2 = np.cumsum(cs, axis=1)
-    out = cs2[:, 2 * radius + 1 :] - cs2[:, : w + 2 * radius + 1 - (2 * radius + 1)]
-    return out / ((2 * radius + 1) ** 2)
+    cs = np.concatenate([np.zeros((1, pad.shape[1])), np.cumsum(pad, axis=0)], axis=0)
+    vert = cs[k:] - cs[:-k]
+    cs2 = np.concatenate([np.zeros((vert.shape[0], 1)), np.cumsum(vert, axis=1)], axis=1)
+    out = cs2[:, k:] - cs2[:, :-k]
+    return out / (k * k)
 
 
 # ---------------------------------------------------------------------------
