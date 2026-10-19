@@ -60,20 +60,25 @@ async def create_single_image_job(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     notes: Optional[str] = Form(None),
+    engine: Optional[str] = Form(None),
 ) -> JobResponse:
+    if engine and engine not in ("heightfield", "img2threejs", "triposr"):
+        raise HTTPException(status_code=400, detail=f"Unsupported engine: {engine}")
+    chosen_engine = engine or "heightfield"
     rec = await job_store.create(JobType.single_image, detail={})
     raw = await file.read()
     upload_paths = save_job_files(rec.job_id, [(file.filename, raw)])
     await job_store.set_status(
         rec.job_id,
         JobStatus.queued,
-        "Queued: mesh generation (OBJ/GLB)",
+        f"Queued: mesh generation (engine={chosen_engine})",
         detail_update={
             "filename": file.filename,
             "content_type": file.content_type,
             "notes": notes,
+            "engine": chosen_engine,
             "upload_paths": upload_paths,
-            "pipeline": "single-image → heightfield mesh → outputs/model.obj + model.glb",
+            "pipeline": f"single-image → {chosen_engine} mesh → outputs/model.obj + model.glb",
         },
     )
     background_tasks.add_task(build_mesh_for_image_job, rec.job_id)

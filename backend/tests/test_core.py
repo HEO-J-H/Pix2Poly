@@ -37,6 +37,19 @@ def test_job_lookup_unknown_is_404():
     assert r.status_code == 404
 
 
+def test_single_image_with_img2threejs_engine(png):
+    client = TestClient(app)
+    with open(png, "rb") as f:
+        r = client.post(
+            "/v1/jobs/single-image",
+            files={"file": ("test.png", f, "image/png")},
+            data={"engine": "img2threejs", "notes": "test img2threejs"},
+        )
+    assert r.status_code == 200
+    data = r.json()
+    assert data["status"] == "queued"
+
+
 def test_box_blur_numpy_matches_naive():
     from app.services.pbr_generator import _box_blur
     import builtins
