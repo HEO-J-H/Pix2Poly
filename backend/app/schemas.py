@@ -18,6 +18,7 @@ class JobType(str, Enum):
     single_image = "single_image"
     multi_image = "multi_image"
     url = "url"
+    video_url = "video_url"
 
 
 class SingleImageJobCreate(BaseModel):
@@ -34,6 +35,17 @@ class MultiImageJobCreate(BaseModel):
 class UrlJobCreate(BaseModel):
     page_url: HttpUrl
     max_candidates: int = Field(default=50, ge=1, le=200)
+
+
+class VideoUrlJobCreate(BaseModel):
+    """Video page URL or direct media URL; worker will ingest frames then reconstruct."""
+
+    video_url: HttpUrl
+    notes: Optional[str] = None
+    pipeline_hint: str = Field(
+        default="auto",
+        description="auto | colmap_frames | neural_monocular",
+    )
 
 
 class JobResponse(BaseModel):

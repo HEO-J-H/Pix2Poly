@@ -12,22 +12,36 @@ flowchart LR
   API[FastAPI]
   Queue[Job queue]
   Ingest[URL ingest]
+  Vid[Video URL ingest]
   S2D[Single-image 3D]
   M2D[Multi-image 3D]
+  V2D[Video frames to 3D]
   PBR[PBR estimation]
   Mesh[Retopo / Bake]
 
   Client --> API
   API --> Queue
   API --> Ingest
+  API --> Vid
   Queue --> S2D
   Queue --> M2D
+  Queue --> V2D
   S2D --> PBR
   M2D --> PBR
+  V2D --> PBR
   PBR --> Mesh
   Mesh --> Storage[(Artifacts)]
   API --> Storage
 ```
+
+### 영상 URL 잡 (설계)
+
+1. API가 **영상 페이지 URL 또는 직접 미디어 URL**을 받아 잡 생성  
+2. 워커가 **다운로드(또는 스트림) → ffmpeg 프레임 추출**  
+3. **경로 A**: COLMAP SfM+MVS (클래식) / **경로 B**: 단안 영상 신경망 재구성(MonST3R, SLAM3R 등)  
+4. 결과 메시/GS → PBR·리토폴로지와 합류  
+
+참고 문헌·링크는 **`docs/video-to-3d-references.md`**.
 
 현재 저장소의 `backend`는 **API + 인메모리 잡 상태**까지 구현하고, 실제 TripoSR/InstantMesh/MVSplat 등은 **외부 워커 프로세스 또는 컨테이너**로 연결하는 것을 권장한다.
 

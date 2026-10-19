@@ -1,143 +1,996 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pix2Poly</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pix2Poly — AI 3D 모델링</title>
   <style>
-    :root { font-family: system-ui, sans-serif; background: #0f1419; color: #e7e9ea; }
-    body { max-width: 52rem; margin: 2rem auto; padding: 0 1rem; }
-    h1 { font-size: 1.5rem; font-weight: 600; }
-    section { background: #1a2332; border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
-    label { display: block; font-size: 0.85rem; color: #8b98a5; margin-bottom: 0.35rem; }
-    input[type="url"], input[type="text"] { width: 100%; box-sizing: border-box; padding: 0.5rem 0.65rem; border-radius: 6px; border: 1px solid #38444d; background: #0f1419; color: inherit; }
-    button { margin-top: 0.75rem; padding: 0.45rem 1rem; border-radius: 6px; border: none; background: #1d9bf0; color: #fff; font-weight: 600; cursor: pointer; }
-    button:hover { filter: brightness(1.08); }
-    button.secondary { background: #38444d; }
-    pre { background: #0f1419; padding: 1rem; border-radius: 6px; overflow: auto; font-size: 0.8rem; max-height: 20rem; }
-    .hint { font-size: 0.8rem; color: #8b98a5; margin-top: 0.5rem; }
-    ul.candidates { max-height: 12rem; overflow: auto; font-size: 0.85rem; padding-left: 1.2rem; }
-    .warn-file { display: none; background: #3d1f24; padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid #e0245e; margin-bottom: 1rem; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0b0e14;
+      --surface: #141820;
+      --surface2:#1c2230;
+      --border:  #2a3248;
+      --text:    #d8dde8;
+      --muted:   #7a8499;
+      --accent:  #4f8ef7;
+      --accent2: #3dd68c;
+      --warn:    #f7a84f;
+      --err:     #f75f5f;
+      --ok:      #3dd68c;
+      --radius:  6px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top bar ─────────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .65rem 1.25rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar h1 { font-size: 1.1rem; letter-spacing: .02em; color: var(--accent); }
+    .topbar .spacer { flex: 1; }
+    .badge {
+      padding: .2rem .55rem;
+      border-radius: 20px;
+      font-size: .74rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .badge.ok  { color: var(--ok);   border-color: var(--ok); }
+    .badge.err { color: var(--err);  border-color: var(--err); }
+
+    /* ── Three-column layout ─────────────────────── */
+    .workspace {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* Left panel */
+    .panel-left {
+      width: 310px;
+      min-width: 240px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    /* Center */
+    .panel-center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    /* Right panel */
+    .panel-right {
+      width: 280px;
+      min-width: 220px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    /* ── Panel sections ──────────────────────────── */
+    .panel-section {
+      padding: .85rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-section-title {
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: .55rem;
+    }
+
+    /* ── Input mode tabs ─────────────────────────── */
+    .mode-tabs {
+      display: flex;
+      gap: .3rem;
+      flex-wrap: wrap;
+      padding: .6rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .mode-tab {
+      flex: 1;
+      min-width: 60px;
+      padding: .4rem .3rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--muted);
+      font-size: .75rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all .15s;
+    }
+    .mode-tab:hover, .mode-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ── Forms ───────────────────────────────────── */
+    label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: .3rem; }
+    input[type="text"], input[type="url"], input[type="file"], textarea, select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      padding: .45rem .65rem;
+      font-size: .82rem;
+      outline: none;
+    }
+    input[type="text"]:focus, input[type="url"]:focus { border-color: var(--accent); }
+
+    .input-pane { display: none; }
+    .input-pane.active { display: block; }
+
+    /* ── Buttons ─────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .35rem;
+      padding: .45rem .9rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: .83rem;
+      cursor: pointer;
+      transition: opacity .15s;
+      text-decoration: none;
+    }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .4; cursor: default; }
+    .btn.secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+    .btn.secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.small { padding: .3rem .65rem; font-size: .75rem; }
+    .btn.ok-btn { background: var(--ok); }
+    .btn.warn-btn { background: var(--warn); color: #111; }
+
+    /* ── Preview thumbnails ──────────────────────── */
+    .thumb-grid { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .5rem; }
+    .thumb-grid img { width: 64px; height: 64px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border); }
+
+    /* ── Image candidate grid ────────────────────── */
+    .candidate-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+      gap: .4rem;
+      max-height: 320px;
+      overflow-y: auto;
+      margin-top: .5rem;
+    }
+    .candidate-item {
+      position: relative;
+      cursor: pointer;
+    }
+    .candidate-item img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 2px solid var(--border);
+      transition: border-color .1s;
+    }
+    .candidate-item.selected img { border-color: var(--accent); }
+    .candidate-item input[type="checkbox"] {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: auto;
+    }
+
+    /* ── 3D Viewer ───────────────────────────────── */
+    .viewer-wrap {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      min-height: 0;
+    }
+    #viewer-canvas {
+      display: block;
+      width: 100%;
+      flex: 1;
+      min-height: 320px;
+      background: #080b10;
+      cursor: grab;
+      border-bottom: 1px solid var(--border);
+    }
+    #viewer-canvas:active { cursor: grabbing; }
+
+    .viewer-toolbar {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .5rem .85rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .viewer-toolbar .poly-info {
+      font-size: .75rem;
+      color: var(--muted);
+      min-width: 110px;
+    }
+    .viewer-toolbar label { margin: 0; color: var(--muted); font-size: .75rem; }
+    #simplify-slider {
+      flex: 1;
+      min-width: 80px;
+      max-width: 180px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .viewer-hint {
+      font-size: .72rem;
+      color: var(--muted);
+      padding: .35rem .85rem;
+      background: var(--surface);
+    }
+
+    /* ── Texture tabs (right panel) ──────────────── */
+    .tex-tabs {
+      display: flex;
+      gap: .25rem;
+      flex-wrap: wrap;
+      margin-bottom: .5rem;
+    }
+    .tex-tab {
+      padding: .25rem .55rem;
+      font-size: .72rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .tex-tab:hover, .tex-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    #tex-preview {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: contain;
+      border-radius: var(--radius);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: none;
+    }
+    #tex-preview.show { display: block; }
+
+    /* ── Job output ──────────────────────────────── */
+    .output-pre {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: .6rem .75rem;
+      font-size: .75rem;
+      font-family: "Consolas", monospace;
+      overflow-x: auto;
+      max-height: 240px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: var(--text);
+    }
+
+    .download-row { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .5rem; }
+
+    /* ── Status badge colours ────────────────────── */
+    .status-queued   { color: var(--warn); }
+    .status-running  { color: var(--accent); }
+    .status-succeeded{ color: var(--ok); }
+    .status-failed   { color: var(--err); }
+
+    /* ── Progress bar ────────────────────────────── */
+    .progress-bar {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: .4rem;
+    }
+    .progress-bar-inner {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width .3s;
+    }
+    .progress-bar-inner.running { animation: pulse 1.2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+    /* ── Toast ───────────────────────────────────── */
+    #toast-root {
+      position: fixed;
+      bottom: 1.2rem;
+      right: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+      z-index: 999;
+    }
+    .toast {
+      padding: .55rem 1rem;
+      border-radius: var(--radius);
+      font-size: .8rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      animation: slidein .2s ease;
+    }
+    .toast.ok  { border-color: var(--ok);  color: var(--ok); }
+    .toast.err { border-color: var(--err); color: var(--err); }
+    @keyframes slidein { from{transform:translateX(30px);opacity:0} to{transform:none;opacity:1} }
+
+    /* ── Recent IDs ──────────────────────────────── */
+    .recent-ids { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .3rem; }
+    .ghost {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--muted);
+      font-size: .72rem;
+      padding: .2rem .5rem;
+      cursor: pointer;
+    }
+    .ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Responsive ──────────────────────────────── */
+    @media (max-width: 900px) {
+      .panel-left, .panel-right { width: 220px; }
+    }
+    @media (max-width: 640px) {
+      .workspace { flex-direction: column; }
+      .panel-left, .panel-right { width: 100%; border: none; border-bottom: 1px solid var(--border); }
+    }
+
+    /* ── Row helper ──────────────────────────────── */
+    .row { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+    .mt { margin-top: .5rem; }
+    .hint { font-size: .75rem; color: var(--muted); margin-top: .35rem; }
   </style>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three":          "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/":  "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 <body>
-  <h1>Pix2Poly — 로컬 API 테스트</h1>
-  <p id="file-protocol-warn" class="warn-file">이 파일을 <code>file://</code> 로 직접 연 경우 브라우저 보안 때문에 API 호출이 실패할 수 있습니다. 저장소 루트에서 <code>scripts\start-local.bat</code> 또는 <code>.\scripts\start-local.ps1</code> 로 서버를 띄운 뒤 <strong>http://127.0.0.1:8000/ui/</strong> 로 접속하세요.</p>
-  <p class="hint">로컬 전용: 백엔드가 떠 있어야 합니다. 아래 API base는 서버 주소와 같게 맞춥니다.</p>
 
-  <section>
-    <label for="base">API base</label>
-    <input id="base" type="text" value="" placeholder="http://localhost:8000" />
-  </section>
+<!-- ── Top bar ─────────────────────────────────────────── -->
+<div class="topbar">
+  <h1>Pix2Poly</h1>
+  <span id="health-badge" class="badge">연결 확인 중…</span>
+  <span class="badge">로컬</span>
+  <div class="spacer"></div>
+  <input id="api-base" type="text" placeholder="http://127.0.0.1:8000"
+         style="width:200px;padding:.3rem .6rem;font-size:.8rem;" autocomplete="off" />
+  <button class="btn secondary small" id="btn-health">연결</button>
+</div>
 
-  <section>
-    <h2 style="font-size:1rem;margin-top:0">단일 이미지</h2>
-    <form id="form-single">
-      <label><input type="file" id="single-file" accept="image/*" required /></label>
-      <button type="submit">POST /v1/jobs/single-image</button>
-    </form>
-  </section>
+<!-- ── Workspace ───────────────────────────────────────── -->
+<div class="workspace">
 
-  <section>
-    <h2 style="font-size:1rem;margin-top:0">다중 이미지</h2>
-    <form id="form-multi">
-      <label><input type="file" id="multi-files" accept="image/*" multiple required /></label>
-      <button type="submit">POST /v1/jobs/multi-image</button>
-    </form>
-  </section>
+  <!-- ── LEFT: Input panel ─────────────────────────────── -->
+  <div class="panel-left">
 
-  <section>
-    <h2 style="font-size:1rem;margin-top:0">URL 인제스트 (미리보기)</h2>
-    <form id="form-ingest">
-      <label for="ingest-url">페이지 URL</label>
-      <input id="ingest-url" type="url" placeholder="https://example.com" required />
-      <button type="submit" class="secondary">POST /v1/ingest/url</button>
-    </form>
-    <ul id="candidates" class="candidates" hidden></ul>
-  </section>
+    <!-- Mode tabs -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="single">단일 이미지</button>
+      <button class="mode-tab" data-mode="multi">다중 이미지</button>
+      <button class="mode-tab" data-mode="url">URL 이미지</button>
+      <button class="mode-tab" data-mode="video">영상 URL</button>
+    </div>
 
-  <section>
-    <h2 style="font-size:1rem;margin-top:0">URL 잡 생성</h2>
-    <form id="form-url-job">
-      <label for="job-url">페이지 URL</label>
-      <input id="job-url" type="url" placeholder="https://example.com" required />
-      <button type="submit">POST /v1/jobs/url</button>
-    </form>
-  </section>
+    <!-- ── Single image ── -->
+    <div class="input-pane active panel-section" id="pane-single">
+      <div class="panel-section-title">단일 이미지 → 3D</div>
+      <label>이미지 파일</label>
+      <input type="file" id="single-file" accept="image/*" />
+      <div class="thumb-grid" id="single-preview-wrap">
+        <img id="single-preview" hidden alt="미리보기" style="width:100%;height:auto;max-height:140px;object-fit:contain;margin-top:.4rem;" />
+      </div>
+      <div class="hint mt">heightfield (CPU) 또는 TripoSR(GPU) 메시를 생성합니다.</div>
+      <div class="mt">
+        <button class="btn" id="btn-single" style="width:100%">3D 생성</button>
+      </div>
+    </div>
 
-  <section>
-    <h2 style="font-size:1rem;margin-top:0">응답</h2>
-    <pre id="out">(아직 없음)</pre>
-  </section>
+    <!-- ── Multi image ── -->
+    <div class="input-pane panel-section" id="pane-multi">
+      <div class="panel-section-title">다중 이미지 → 3D (SfM)</div>
+      <label>이미지 파일 (2개 이상)</label>
+      <input type="file" id="multi-files" accept="image/*" multiple />
+      <div class="thumb-grid" id="multi-preview"></div>
+      <div class="hint mt">3장 이상 + <code>PIX2POLY_MESH_BACKEND=colmap</code> 시 COLMAP SfM 사용.</div>
+      <div class="mt">
+        <button class="btn" id="btn-multi" style="width:100%">3D 생성</button>
+      </div>
+    </div>
 
-  <script>
-    (function () {
-      var baseEl = document.getElementById("base");
-      if (window.location.protocol === "file:") {
-        document.getElementById("file-protocol-warn").style.display = "block";
-        baseEl.value = "http://127.0.0.1:8000";
+    <!-- ── URL images ── -->
+    <div class="input-pane panel-section" id="pane-url">
+      <div class="panel-section-title">URL 이미지 → 3D</div>
+      <label>페이지 URL</label>
+      <input type="url" id="url-page" placeholder="https://example.com/product" />
+      <div class="mt row">
+        <button class="btn secondary small" id="btn-url-ingest">이미지 후보 가져오기</button>
+      </div>
+      <div id="url-candidates-wrap" style="display:none;margin-top:.6rem;">
+        <div class="panel-section-title" style="margin-bottom:.3rem;">후보 이미지 선택</div>
+        <div class="candidate-grid" id="url-candidate-grid"></div>
+        <div class="mt row">
+          <button class="btn small" id="btn-select-all">전체 선택</button>
+          <button class="btn secondary small" id="btn-select-none">선택 해제</button>
+        </div>
+        <div class="mt">
+          <button class="btn ok-btn" id="btn-url-3d" style="width:100%">선택 이미지로 3D 생성</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Video URL ── -->
+    <div class="input-pane panel-section" id="pane-video">
+      <div class="panel-section-title">영상 URL → 3D</div>
+      <label>영상 직접 URL (.mp4 등)</label>
+      <input type="url" id="video-url" placeholder="https://example.com/video.mp4" />
+      <div class="hint mt">
+        ffmpeg로 프레임 추출 후 COLMAP 또는 heightfield 폴백.<br>
+        최대 <strong>500MB</strong> / <strong>60프레임</strong>.
+      </div>
+      <div class="mt">
+        <button class="btn" id="btn-video" style="width:100%">3D 생성</button>
+      </div>
+    </div>
+
+    <!-- Job ID polling -->
+    <div class="panel-section">
+      <div class="panel-section-title">잡 조회</div>
+      <label>Job ID</label>
+      <div class="row">
+        <input id="job-id" type="text" placeholder="uuid" style="flex:1;" />
+        <button class="btn secondary small" id="btn-fetch-job">조회</button>
+      </div>
+      <div class="mt row" style="font-size:.75rem;color:var(--muted);">
+        <label style="margin:0;cursor:pointer;">
+          <input type="checkbox" id="poll-job" style="width:auto;" />
+          2초마다 자동 조회
+        </label>
+      </div>
+      <div class="recent-ids" id="recent-wrap"></div>
+    </div>
+
+  </div><!-- /panel-left -->
+
+  <!-- ── CENTER: 3D viewer ──────────────────────────────── -->
+  <div class="panel-center">
+    <!-- Toolbar above canvas -->
+    <div class="viewer-toolbar">
+      <span class="poly-info" id="poly-count">삼각형: —</span>
+      <label>폴리곤</label>
+      <input type="range" id="simplify-slider" min="0.05" max="1" step="0.01" value="1" />
+      <span id="simplify-pct" style="font-size:.72rem;color:var(--muted);min-width:32px;">100%</span>
+      <div class="spacer"></div>
+      <div id="job-status-badge" class="badge" style="display:none;"></div>
+    </div>
+
+    <!-- 3D canvas -->
+    <div class="viewer-wrap">
+      <canvas id="viewer-canvas"></canvas>
+    </div>
+
+    <!-- Hint -->
+    <div class="viewer-hint">
+      조작: 좌/가운데 드래그 → 회전 · 우클릭 드래그 → 이동(팬) · 휠 → 확대/축소 (블렌더 유사)
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-bar">
+      <div class="progress-bar-inner" id="progress-bar-inner"></div>
+    </div>
+  </div><!-- /panel-center -->
+
+  <!-- ── RIGHT: Textures + output ─────────────────────── -->
+  <div class="panel-right">
+
+    <!-- PBR Texture panel -->
+    <div class="panel-section">
+      <div class="panel-section-title">PBR 텍스처</div>
+      <div class="tex-tabs">
+        <button class="tex-tab active" data-tex="albedo">Albedo</button>
+        <button class="tex-tab" data-tex="normal">Normal</button>
+        <button class="tex-tab" data-tex="roughness">Roughness</button>
+        <button class="tex-tab" data-tex="metallic">Metallic</button>
+        <button class="tex-tab" data-tex="ao">AO</button>
+      </div>
+      <img id="tex-preview" alt="텍스처 미리보기" />
+      <p class="hint" id="tex-hint" style="margin-top:.35rem;">잡이 완료되면 텍스처가 표시됩니다.</p>
+    </div>
+
+    <!-- Downloads -->
+    <div class="panel-section">
+      <div class="panel-section-title">다운로드</div>
+      <div class="download-row" id="output-downloads">
+        <span class="hint">결과물이 없습니다.</span>
+      </div>
+    </div>
+
+    <!-- Last response JSON -->
+    <div class="panel-section" style="flex:1;">
+      <div class="panel-section-title">마지막 응답</div>
+      <pre id="output" class="output-pre">아직 요청이 없습니다.</pre>
+    </div>
+
+  </div><!-- /panel-right -->
+
+</div><!-- /workspace -->
+
+<!-- Toast container -->
+<div id="toast-root"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ─── State ────────────────────────────────────────────────────────────────
+  var LS_BASE = "pix2poly_api_base";
+  var LS_JOBS = "pix2poly_recent_jobs";
+  var pollTimer = null;
+  var outEl = document.getElementById("output");
+  var recentWrap = document.getElementById("recent-wrap");
+  var healthBadge = document.getElementById("health-badge");
+  var apiBaseEl = document.getElementById("api-base");
+  var jobStatusBadge = document.getElementById("job-status-badge");
+  var progressBar = document.getElementById("progress-bar-inner");
+
+  // ─── API base ─────────────────────────────────────────────────────────────
+  apiBaseEl.value = localStorage.getItem(LS_BASE) || "http://127.0.0.1:8000";
+  function base() { return apiBaseEl.value.trim().replace(/\/$/, ""); }
+  function saveBase() { localStorage.setItem(LS_BASE, base()); }
+  function uploadUrl(rel) {
+    if (!rel) return "";
+    return base() + "/" + String(rel).replace(/^\//, "");
+  }
+
+  // ─── Toast ────────────────────────────────────────────────────────────────
+  function toast(msg, ok) {
+    var t = document.createElement("div");
+    t.className = "toast " + (ok ? "ok" : "err");
+    t.textContent = msg;
+    document.getElementById("toast-root").appendChild(t);
+    setTimeout(function () { t.remove(); }, 4000);
+  }
+
+  // ─── Mode tabs ────────────────────────────────────────────────────────────
+  document.querySelectorAll(".mode-tab").forEach(function (btn) {
+    btn.onclick = function () {
+      document.querySelectorAll(".mode-tab").forEach(function (b) { b.classList.remove("active"); });
+      document.querySelectorAll(".input-pane").forEach(function (p) { p.classList.remove("active"); });
+      btn.classList.add("active");
+      var pane = document.getElementById("pane-" + btn.dataset.mode);
+      if (pane) pane.classList.add("active");
+    };
+  });
+
+  // ─── Simplify slider pct display ──────────────────────────────────────────
+  var simplifySlider = document.getElementById("simplify-slider");
+  var simplifyPct    = document.getElementById("simplify-pct");
+  if (simplifySlider) {
+    simplifySlider.oninput = function () {
+      simplifyPct.textContent = Math.round(parseFloat(simplifySlider.value) * 100) + "%";
+    };
+  }
+
+  // ─── Fetch helper ────────────────────────────────────────────────────────
+  async function fetchJson(url, opts) {
+    var r = await fetch(url, opts);
+    var text = await r.text();
+    var data;
+    try { data = JSON.parse(text); } catch (e) { data = { _raw: text, _status: r.status }; }
+    if (!r.ok) {
+      var err = data.detail || data.message || data._raw || r.statusText;
+      throw new Error(typeof err === "string" ? err : JSON.stringify(err));
+    }
+    return data;
+  }
+
+  // ─── Enrich display: convert relative paths to full URLs ─────────────────
+  function enrichForDisplay(data) {
+    if (!data || !data.detail) return data;
+    var d = JSON.parse(JSON.stringify(data));
+    if (d.detail.upload_paths)
+      d.detail._preview_urls = d.detail.upload_paths.map(uploadUrl);
+    if (d.detail.output_paths)
+      d.detail._output_urls = d.detail.output_paths.map(uploadUrl);
+    if (d.detail.pbr_paths && typeof d.detail.pbr_paths === "object" && !d.detail.pbr_paths.error) {
+      d.detail._pbr_urls = {};
+      Object.keys(d.detail.pbr_paths).forEach(function (k) {
+        d.detail._pbr_urls[k] = uploadUrl(d.detail.pbr_paths[k]);
+      });
+    }
+    return d;
+  }
+
+  // ─── showOut ─────────────────────────────────────────────────────────────
+  function showOut(obj) {
+    var dl = document.getElementById("output-downloads");
+    if (dl) dl.innerHTML = "";
+
+    if (typeof obj === "string") {
+      outEl.textContent = obj;
+      import("./viewer3d.js").then(function (m) { m.hideViewer(); }).catch(function () {});
+      return;
+    }
+    outEl.textContent = JSON.stringify(obj, null, 2);
+
+    // Status badge
+    if (obj.status) {
+      jobStatusBadge.style.display = "";
+      jobStatusBadge.className = "badge status-" + obj.status;
+      jobStatusBadge.textContent = obj.status;
+    }
+    // Progress bar
+    if (progressBar) {
+      if (obj.status === "running" || obj.status === "queued") {
+        progressBar.className = "progress-bar-inner running";
+        progressBar.style.width = "60%";
       } else {
-        baseEl.value = window.location.origin;
+        progressBar.className = "progress-bar-inner";
+        progressBar.style.width = obj.status === "succeeded" ? "100%" : "0%";
       }
-      function base() { return (baseEl.value || "").replace(/\/$/, ""); }
-      function show(obj) {
-        document.getElementById("out").textContent = JSON.stringify(obj, null, 2);
-      }
-      async function parseJson(r) {
-        var t = await r.text();
-        try { return JSON.parse(t); } catch (e) { return { _raw: t, _status: r.status }; }
-      }
-      document.getElementById("form-single").onsubmit = async function (e) {
-        e.preventDefault();
-        var f = document.getElementById("single-file").files[0];
-        if (!f) return;
-        var fd = new FormData();
-        fd.append("file", f);
-        var r = await fetch(base() + "/v1/jobs/single-image", { method: "POST", body: fd });
-        show(await parseJson(r));
+    }
+
+    // Download buttons
+    var outs = obj.detail && obj.detail._output_urls;
+    if (dl && outs && outs.length) {
+      outs.forEach(function (u) {
+        var a = document.createElement("a");
+        a.href = u;
+        a.className = "btn secondary small";
+        a.download = "";
+        a.target = "_blank";
+        a.rel = "noopener";
+        var fname = u.split("/").pop().split("?")[0];
+        a.textContent = fname.toUpperCase();
+        dl.appendChild(a);
+      });
+    } else if (dl) {
+      dl.innerHTML = '<span class="hint">결과물이 없습니다.</span>';
+    }
+
+    // Update texture panel
+    var pbrUrls = obj.detail && obj.detail._pbr_urls;
+    if (pbrUrls) {
+      window._currentPbrUrls = pbrUrls;
+      updateTexPanel("albedo");
+    }
+
+    // Update 3D viewer
+    import("./viewer3d.js").then(function (m) {
+      window._apiBase = base();
+      m.updateViewerFromJob(obj);
+    }).catch(function () {});
+  }
+
+  // ─── Texture tab logic ───────────────────────────────────────────────────
+  var texPreview = document.getElementById("tex-preview");
+  var texHint    = document.getElementById("tex-hint");
+
+  function updateTexPanel(mapName) {
+    var urls = window._currentPbrUrls || {};
+    var url  = urls[mapName];
+    if (url) {
+      texPreview.src = url;
+      texPreview.className = "show";
+      texHint.style.display = "none";
+      // sync 3D viewer 2D panel
+      import("./viewer3d.js").then(function (m) {
+        if (m.showTexture) m.showTexture(mapName);
+      }).catch(function () {});
+    } else {
+      texPreview.className = "";
+      texHint.style.display = "";
+    }
+  }
+
+  document.querySelectorAll(".tex-tab").forEach(function (btn) {
+    btn.onclick = function () {
+      document.querySelectorAll(".tex-tab").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      updateTexPanel(btn.dataset.tex);
+    };
+  });
+
+  // ─── Recent jobs ─────────────────────────────────────────────────────────
+  function pushRecent(id) {
+    if (!id) return;
+    var list = [];
+    try { list = JSON.parse(localStorage.getItem(LS_JOBS) || "[]"); } catch (e) {}
+    list = list.filter(function (x) { return x !== id; });
+    list.unshift(id);
+    list = list.slice(0, 12);
+    try { localStorage.setItem(LS_JOBS, JSON.stringify(list)); } catch (e) {}
+    renderRecent();
+  }
+  function renderRecent() {
+    var list = [];
+    try { list = JSON.parse(localStorage.getItem(LS_JOBS) || "[]"); } catch (e) {}
+    if (!list.length) { recentWrap.innerHTML = ""; return; }
+    recentWrap.innerHTML = "";
+    list.forEach(function (id) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "ghost";
+      b.textContent = id.slice(0, 8) + "…";
+      b.title = id;
+      b.onclick = function () {
+        document.getElementById("job-id").value = id;
+        fetchJob();
       };
-      document.getElementById("form-multi").onsubmit = async function (e) {
-        e.preventDefault();
-        var files = document.getElementById("multi-files").files;
-        if (files.length < 2) { show({ error: "2장 이상 선택하세요" }); return; }
-        var fd = new FormData();
-        for (var i = 0; i < files.length; i++) fd.append("files", files[i]);
-        fd.append("min_images", "2");
-        var r = await fetch(base() + "/v1/jobs/multi-image", { method: "POST", body: fd });
-        show(await parseJson(r));
-      };
-      document.getElementById("form-ingest").onsubmit = async function (e) {
-        e.preventDefault();
-        var url = document.getElementById("ingest-url").value;
-        var r = await fetch(base() + "/v1/ingest/url", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ page_url: url, max_candidates: 30 }),
-        });
-        var data = await parseJson(r);
-        show(data);
-        var ul = document.getElementById("candidates");
-        ul.innerHTML = "";
-        if (data.candidates && data.candidates.length) {
-          ul.hidden = false;
-          data.candidates.forEach(function (u) {
-            var li = document.createElement("li");
-            li.textContent = u;
-            ul.appendChild(li);
-          });
-        } else ul.hidden = true;
-      };
-      document.getElementById("form-url-job").onsubmit = async function (e) {
-        e.preventDefault();
-        var url = document.getElementById("job-url").value;
-        var r = await fetch(base() + "/v1/jobs/url", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ page_url: url, max_candidates: 50 }),
-        });
-        show(await parseJson(r));
-      };
-    })();
-  </script>
+      recentWrap.appendChild(b);
+    });
+  }
+
+  // ─── Health check ────────────────────────────────────────────────────────
+  async function checkHealth() {
+    healthBadge.textContent = "확인 중…";
+    healthBadge.className = "badge";
+    try {
+      await fetchJson(base() + "/health");
+      healthBadge.textContent = "연결됨";
+      healthBadge.className = "badge ok";
+    } catch (e) {
+      healthBadge.textContent = "연결 실패";
+      healthBadge.className = "badge err";
+    }
+  }
+  document.getElementById("btn-health").onclick = function () { saveBase(); checkHealth(); };
+  apiBaseEl.addEventListener("change", saveBase);
+
+  // ─── Single image upload ─────────────────────────────────────────────────
+  document.getElementById("single-file").onchange = function () {
+    var f = this.files && this.files[0];
+    var img = document.getElementById("single-preview");
+    if (!f) { img.hidden = true; return; }
+    img.hidden = false;
+    img.src = URL.createObjectURL(f);
+  };
+
+  document.getElementById("btn-single").onclick = async function () {
+    var btn = this;
+    var f = document.getElementById("single-file").files[0];
+    if (!f) { toast("파일을 선택하세요.", false); return; }
+    btn.disabled = true;
+    saveBase();
+    try {
+      var fd = new FormData();
+      fd.append("file", f);
+      var data = await fetchJson(base() + "/v1/jobs/single-image", { method: "POST", body: fd });
+      data = enrichForDisplay(data);
+      showOut(data);
+      if (data.job_id) { document.getElementById("job-id").value = data.job_id; pushRecent(data.job_id); }
+      toast("단일 이미지 잡이 생성되었습니다.", true);
+    } catch (e) {
+      toast(e.message || String(e), false);
+      showOut({ error: String(e.message || e) });
+    }
+    btn.disabled = false;
+  };
+
+  // ─── Multi image upload ───────────────────────────────────────────────────
+  document.getElementById("multi-files").onchange = function () {
+    var box = document.getElementById("multi-preview");
+    box.innerHTML = "";
+    var files = this.files;
+    for (var i = 0; i < files.length; i++) {
+      var im = document.createElement("img");
+      im.src = URL.createObjectURL(files[i]);
+      im.alt = "";
+      box.appendChild(im);
+    }
+  };
+
+  document.getElementById("btn-multi").onclick = async function () {
+    var btn = this;
+    var files = document.getElementById("multi-files").files;
+    if (!files || files.length < 2) { toast("이미지를 2개 이상 선택하세요.", false); return; }
+    btn.disabled = true;
+    saveBase();
+    try {
+      var fd = new FormData();
+      for (var i = 0; i < files.length; i++) fd.append("files", files[i]);
+      var data = await fetchJson(base() + "/v1/jobs/multi-image", { method: "POST", body: fd });
+      data = enrichForDisplay(data);
+      showOut(data);
+      if (data.job_id) { document.getElementById("job-id").value = data.job_id; pushRecent(data.job_id); }
+      toast("다중 이미지 잡이 생성되었습니다.", true);
+    } catch (e) {
+      toast(e.message || String(e), false);
+      showOut({ error: String(e.message || e) });
+    }
+    btn.disabled = false;
+  };
+
+  // ─── URL ingest + candidate selection ────────────────────────────────────
+  var selectedUrls = new Set();
+
+  document.getElementById("btn-url-ingest").onclick = async function () {
+    var btn = this;
+    var pageUrl = document.getElementById("url-page").value.trim();
+    if (!pageUrl) { toast("URL을 입력하세요.", false); return; }
+    btn.disabled = true;
+    saveBase();
+    try {
+      var data = await fetchJson(base() + "/v1/ingest/url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ page_url: pageUrl }),
+      });
+      var candidates = data.candidates || [];
+      if (!candidates.length) { toast("이미지 후보를 찾지 못했습니다.", false); return; }
+
+      var wrap = document.getElementById("url-candidates-wrap");
+      var grid = document.getElementById("url-candidate-grid");
+      grid.innerHTML = "";
+      selectedUrls.clear();
+
+      candidates.forEach(function (url) {
+        var item = document.createElement("div");
+        item.className = "candidate-item";
+        var cb = document.createElement("input");
+        cb.type = "checkbox";
+        var img = document.createElement("img");
+        img.src = url;
+        img.alt = "";
+        img.onerror = function () { item.style.display = "none"; };
+        img.onclick = function () { cb.checked = !cb.checked; toggleCandidate(cb, url, item); };
+        cb.onchange = function () { toggleCandidate(cb, url, item); };
+        item.appendChild(cb);
+        item.appendChild(img);
+        grid.appendChild(item);
+      });
+
+      wrap.style.display = "";
+      toast("이미지 후보 " + candidates.length + "개를 찾았습니다.", true);
+    } catch (e) {
+      toast(e.message || String(e), false);
+    }
+    btn.disabled = false;
+  };
+
+  function toggleCandidate(cb, url, item) {
+    if (cb.checked) { selectedUrls.add(url); item.classList.add("selected"); }
+    else { selectedUrls.delete(url); item.classList.remove("selected"); }
+  }
+
+  document.getElementById("btn-select-all").onclick = function () {
+    document.querySelectorAll("#url-candidate-grid .candidate-item").forEach(function (item) {
+      var cb = item.querySelector("input[type=checkbox]");
+      var url = item.querySelector("img").src;
+      cb.checked = true;
+      selectedUrls.add(url);
+      item.classList.add("selected");
+    });
+  };
+  document.getElementById("btn-select-none").onclick = function () {
+    document.querySelectorAll("#url-candidate-grid .candidate-item").forEach(function (item) {
+      item.querySelector("input[type=checkbox]").checked = false;
+      item.classList.remove("selected");
+    });
+    selectedUrls.clear();
+  };
+
+  document.getElementById("btn-url-3d").onclick = async function () {
+    var btn = this;
+    if (!selectedUrls.size) { toast("이미지를 선택하세요.", false); return; }
+    btn.disabled = true;
+    saveBase();
+    try {
+      var data = await fetchJson(base() + "/v1/jobs/url-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selected_urls: Array.from(selectedUrls) }),
+      });
+      data = enrichForDisplay(data);
+      showOut(data);
+      if (data.job_id) { document.getElementById("job-id").value = data.job_id; pushRecent(data.job_id); }
+      toast("URL 이미지 잡이 생성되었습니다.", true);
+    } catch (e) {
+      toast(e.message || String(e), false);
+      showOut({ error: String(e.message || e) });
+    }
+    btn.disabled = false;
+  };
+
+  // ─── Video URL ────────────────────────────────────────────────────────────
+  document.getElementById("btn-video").onclick = async function () {
+    var btn = this;
+    var vurl = document.getElementById("video-url").value.trim();
+    if (!vurl) { toast("영상 URL을 입력하세요.", false); return; }
+    btn.disabled = true;
+    saveBase();
+    try {
+      var data = await fetchJson(base() + "/v1/jobs/video-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ video_url: vurl }),
+      });
+      data = enrichForDisplay(data);
+      showOut(data);
+      if (data.job_id) { document.getElementById("job-id").value = data.job_id; pushRecent(data.job_id); }
+      toast("영상 잡이 생성되었습니다.", true);
+    } catch (e) {
+      toast(e.message || String(e), false);
+      showOut({ error: String(e.message || e) });
+    }
+    btn.disabled = false;
+  };
+
+  // ─── Job fetch / poll ─────────────────────────────────────────────────────
+  async function fetchJob() {
+    var id = document.getElementById("job-id").value.trim();
+    if (!id) { toast("Job ID를 입력하세요.", false); return; }
+    saveBase();
+    try {
+      var data = await fetchJson(base() + "/v1/jobs/" + encodeURIComponent(id));
+      data = enrichForDisplay(data);
+      showOut(data);
+    } catch (e) {
+      toast(e.message || String(e), false);
+      showOut({ error: String(e.message || e) });
+    }
+  }
+
+  document.getElementById("btn-fetch-job").onclick = fetchJob;
+  document.getElementById("poll-job").onchange = function () {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    if (this.checked) { pollTimer = setInterval(fetchJob, 2000); }
+  };
+
+  // ─── Init ─────────────────────────────────────────────────────────────────
+  checkHealth();
+  renderRecent();
+
+  // Warn if opened via file://
+  if (location.protocol === "file:") {
+    toast("file:// 로 열면 API가 동작하지 않습니다. http://127.0.0.1:8000/ui/ 로 접속하세요.", false);
+  }
+})();
+</script>
 </body>
 </html>

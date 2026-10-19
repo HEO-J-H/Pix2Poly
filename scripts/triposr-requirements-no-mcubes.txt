@@ -1,0 +1,14 @@
+# TripoSR requirements minus torchmcubes (install torchmcubes after VS C++ Build Tools or via Docker/WSL)
+# See scripts/install-triposr-windows.bat
+omegaconf==2.3.0
+Pillow==10.1.0
+einops==0.7.0
+transformers==4.35.0
+trimesh==4.0.5
+rembg
+onnxruntime
+huggingface-hub
+imageio[ffmpeg]
+gradio
+xatlas==0.0.9
+moderngl==5.10.0

@@ -1,5 +1,10 @@
 """
-Run FastAPI with uvicorn --reload and watch multiple file types (py, html, css, js, json).
+Run FastAPI with uvicorn --reload.
+
+Watches only backend/app (Python). Static files under backend/static are served as-is;
+refresh the browser after editing HTML/CSS/JS — reloading the server for static edits
+can cause reload loops on Windows (WatchFiles + file touches).
+
 Usage (from backend/): python run_dev.py
 Environment: PORT (default 8000)
 """
@@ -16,10 +21,9 @@ def main() -> None:
     os.chdir(backend)
     port = os.environ.get("PORT", "8000")
 
-    # Watch only source dirs (avoids .venv/uploads and Windows glob issues with ** in --reload-exclude)
+    # Watch app/ only — do not watch static/ (avoids infinite reload on static\index.html on Windows)
     reload_dirs = [
         backend / "app",
-        backend / "static",
     ]
     include_patterns = [
         "*.py",

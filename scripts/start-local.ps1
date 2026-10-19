@@ -34,7 +34,7 @@ Write-Host ""
 Write-Host "Pix2Poly (local)" -ForegroundColor Cyan
 Write-Host "  UI:    http://127.0.0.1:${Port}/ui/"
 Write-Host "  API:   http://127.0.0.1:${Port}/docs"
-Write-Host "  Hot reload: app/*.py, static/* (see backend/run_dev.py)"
+Write-Host "  Hot reload: backend/app only (see backend/run_dev.py); static -> browser refresh"
 Write-Host "  Press Ctrl+C to stop."
 Write-Host ""
 

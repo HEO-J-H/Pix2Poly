@@ -1,5 +1,7 @@
 @echo off
 setlocal
+cd /d "%~dp0.."
+call "%~dp0apply-triposr-env.bat"
 cd /d "%~dp0..\backend"
 
 if not exist ".venv\Scripts\python.exe" (

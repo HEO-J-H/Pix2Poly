@@ -14,7 +14,7 @@ URL 기반 이미지 분석으로 최적화된 3D 오브젝트와 PBR 텍스처�
 
 - `backend/`: FastAPI 서버 (잡 생성·조회, URL 인제스트)
 - `scripts/`: **로컬 전용** 실행 스크립트 (Windows)
-- `docs/`: 기술 조사 및 시스템 설계
+- `docs/`: 기술 조사 및 시스템 설계 (`video-to-3d-references.md`, **`gpu-worker.md`**: TripoSR GPU 워커 연동)
 
 ## 로컬 전용 실행 (권장)
 
@@ -36,9 +36,10 @@ GitHub Pages 없이 **본인 PC에서만** 서버 + 테스트 UI를 띄우는 �
 
 `run.bat` / `scripts\start-local.*` 는 내부에서 **`backend/run_dev.py`** 를 실행합니다.
 
-- **uvicorn `--reload` + WatchFiles** 로 `backend/app/` · `backend/static/` 아래 파일이 바뀌면 서버가 다시 로드됩니다.
-- 감시 확장자: `.py`, `.html`, `.htm`, `.css`, `.js`, `.json`
-- `.venv`, `uploads/`, `outputs/` 는 감시 경로에서 빼 두었습니다 (전체 `backend/` 대신 `app/` + `static/` 만 감시).
+- **uvicorn `--reload` + WatchFiles** 로 `backend/app/` 아래 소스가 바뀌면 서버가 다시 로드됩니다.
+- **`backend/static/`(HTML/CSS/JS)은 감시하지 않습니다.** 정적 파일은 저장 후 브라우저에서 새로고침하면 됩니다. `static`까지 감시하면 Windows에서 `index.html` 등이 반복 감지되어 **무한 재시작**에 빠질 수 있습니다.
+- 감시 확장자: `.py`, `.html`, `.htm`, `.css`, `.js`, `.json` (위 `app/` 경로 안에서만 적용)
+- `.venv`, `uploads/`, `outputs/`, **`static/`** 은 감시하지 않습니다.
 
 ### (선택) nodemon으로 프로세스 전체 재시작
 
@@ -61,7 +62,24 @@ pip install -r requirements.txt
 python run_dev.py
 ```
 
-업로드 파일은 `backend/uploads/<job_id>/` 에 저장됩니다. (향후 3D 결과물은 `backend/outputs/<job_id>/` 예정)
+- 업로드: `backend/uploads/<job_id>/`
+- **단일·다중 이미지 잡**: 백그라운드에서 **명도(heightfield) 기반 메시**를 생성해  
+  `backend/outputs/<job_id>/model.obj` · `model.glb` 로 저장합니다. 브라우저에서 `/outputs/...` 또는 UI의 다운로드 버튼으로 받을 수 있습니다.  
+  (이 방식은 AI 단일뷰 3D가 아니라 **즉시 동작하는 베이스라인**입니다.)  
+- **FBX**: 런타임에 FBX 인코더를 넣지 않았습니다. Blender/MeshLab 등에서 OBJ를 가져와 FBX로 내보내면 됩니다.
+
+### TripoSR GPU 워커 (선택)
+
+기본은 CPU **heightfield** 입니다. **TripoSR**을 쓰려면 TripoSR을 별도 클론·설치한 뒤 환경 변수를 설정합니다. 자세한 절차·트러블슈팅은 **`docs/gpu-worker.md`** 를 보세요.
+
+- `PIX2POLY_MESH_BACKEND=triposr`
+- `PIX2POLY_TRIPOSR_REPO_PATH` = TripoSR 클론 경로
+- `PIX2POLY_TRIPOSR_PYTHON` = TripoSR용 `python.exe` (PyTorch+CUDA)
+- `PIX2POLY_TRIPOSR_DEVICE` = 선택 (`cuda:0` / `cpu`; `run.bat`은 기본 `cuda:0`)
+
+Windows에서 GPU용 PyTorch·`torchmcubes` 정렬: `scripts/setup-triposr-gpu-windows.bat`
+
+**InstantMesh** 는 레포마다 출력 경로가 달라 자동 복사 로직은 넣지 않았습니다. 동일 문서에 확장 방법을 적어 두었습니다.
 
 ## API
 
@@ -70,6 +88,7 @@ python run_dev.py
 | POST | `/v1/jobs/single-image` | 단일 이미지 잡 |
 | POST | `/v1/jobs/multi-image` | 다중 이미지 잡 |
 | POST | `/v1/jobs/url` | URL에서 이미지 후보 수집 후 잡 |
+| POST | `/v1/jobs/video-url` | 영상 URL 잡 (프레임·3D 파이프라인은 워커 연동 예정) |
 | GET | `/v1/jobs/{job_id}` | 잡 상태 조회 |
 
 ## 참고

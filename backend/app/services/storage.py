@@ -13,7 +13,7 @@ OUTPUT_ROOT = _BACKEND_ROOT / "outputs"
 _SAFE_NAME = re.compile(r"[^A-Za-z0-9._\-]+")
 
 
-def _sanitize_filename(name: str | None) -> str:
+def _sanitize_filename(name: Optional[str]) -> str:
     if not name:
         return "upload.bin"
     base = Path(name).name
@@ -32,6 +32,15 @@ def ensure_output_dir(job_id: UUID) -> Path:
     d = OUTPUT_ROOT / str(job_id)
     d.mkdir(parents=True, exist_ok=True)
     return d
+
+
+def resolve_under_uploads(rel: str) -> Path:
+    """Resolve relative path (e.g. uploads/uuid/file.png); must stay under uploads/."""
+    p = (_BACKEND_ROOT / rel.replace("\\", "/")).resolve()
+    upl = UPLOAD_ROOT.resolve()
+    if not str(p).startswith(str(upl)):
+        raise ValueError("Path must be under uploads/")
+    return p
 
 
 def save_job_files(job_id: UUID, files: List[Tuple[Optional[str], bytes]]) -> List[str]:

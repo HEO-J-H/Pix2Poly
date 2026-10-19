@@ -30,3 +30,9 @@ Thumbs.db
 uploads/
 outputs/
 *.log
+
+# 외부 도구·대용량 (로컬 설치, 저장소에 올리지 않음)
+colmap/
+colmap.zip
+third_party/
+Image/

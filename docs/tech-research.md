@@ -35,9 +35,24 @@
 - 고폴리 → 저폴리 베이크 (Normal/AO 등)
 - 웹/모바일/PC 프리셋
 
-## 6) MVP 순서 제안
+## 6) URL·영상 → 3D (접목)
+
+- **전통**: 영상에서 프레임 추출 → **COLMAP** (SfM+MVS) → 메시/포인트클라우드  
+  - 문헌: Schönberger & Frahm, *Structure-from-Motion Revisited* (CVPR 2016), 도구: [COLMAP](https://colmap.github.io/)
+- **신경망(단안 영상)**: 예) **MonST3R**, **SLAM3R**, **NeuralRecon**, **MoDGS**, **Shape of Motion** — 동적 장면·실시간/품질 트레이드오프 선택
+- **제품**: 프레임 샘플링 간격, 최대 길이, GPU 메모리 상한, 워커 분리(ffmpeg + 추론 컨테이너)
+
+상세 링크·표는 **`docs/video-to-3d-references.md`** 참고.
+
+### GPU 단일 이미지 3D (TripoSR / InstantMesh)
+
+- **TripoSR**: 피드포워드 메시, MIT, `PIX2POLY_MESH_BACKEND=triposr` 로 Pix2Poly와 연동 가능 — **`docs/gpu-worker.md`**
+- **InstantMesh**: 품질·속도 트레이드오프 다름; 현재 저장소는 **자동 러너 미포함**, 문서에 확장 가이드
+
+## 7) MVP 순서 제안
 
 1. 단일 이미지 파이프라인
 2. URL 인제스트 + 이미지 선택
 3. 다중 이미지 파이프라인
-4. 리토폴로지·베이크 자동화 고도화
+4. **영상 URL 잡** (프레임 추출 → COLMAP 또는 신경망 워커)
+5. 리토폴로지·베이크 자동화 고도화
