@@ -84,6 +84,13 @@ Windows에서 GPU용 PyTorch·`torchmcubes` 정렬: `scripts/setup-triposr-gpu-w
 
 **InstantMesh** 는 레포마다 출력 경로가 달라 자동 복사 로직은 넣지 않았습니다. 동일 문서에 확장 방법을 적어 두었습니다.
 
+## img2threejs 연동 (선택 엔진)
+
+Claude Code 등에서 `/img2threejs <이미지>` 로 생성한 `spec.json` 을 Pix2Poly 에 업로드하여 Three.js 코드(`createObjectModel.ts`)를 생성할 수 있습니다.
+
+1. 로컬 환경변수 설정: `IMG2THREEJS_HOME=<img2threejs 레포 경로>`
+2. API / UI에서 `POST /v1/jobs/img2threejs-spec` 로 `spec.json` 업로드
+
 ## API
 
 | Method | Path | 설명 |
@@ -92,6 +99,8 @@ Windows에서 GPU용 PyTorch·`torchmcubes` 정렬: `scripts/setup-triposr-gpu-w
 | POST | `/v1/jobs/multi-image` | 다중 이미지 잡 |
 | POST | `/v1/jobs/url` | URL에서 이미지 후보 수집 후 잡 |
 | POST | `/v1/jobs/video-url` | 영상 URL 잡 (프레임·3D 파이프라인은 워커 연동 예정) |
+| POST | `/v1/jobs/img2threejs-spec` | img2threejs 스펙(spec.json) 기반 Three.js 코드 생성 잡 |
+| GET | `/v1/engines` | 사용 가능한 엔진 목록 조회 |
 | GET | `/v1/jobs/{job_id}` | 잡 상태 조회 |
 
 ## 참고
