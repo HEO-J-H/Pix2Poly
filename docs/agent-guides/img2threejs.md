@@ -45,3 +45,4 @@
 ## 진행 기록·배운 점
 - 2026-10-20 PR #1: 엔진 이름만 추가 → 사람이 수정 요청. 교훈: '선택 엔진'은 실제 호출·결과 파일·사용 불가 시 명확한 오류까지가 한 세트.
 - 2026-10-22 [보류] 1단계 (PR #1 대체): backend/app/services/engines.py 엔진 목록(availa: 서비스 구현 코드와 테스트 코드는 올바른 디렉토리(services vs tests)에 분리하여 작성해야 합니다.
+- 2026-10-22 [보류] 2단계 (PR #1 대체): backend/app/services/img2threejs_runner.py b: 테스트 실패 — 8 passed, 1 warning in 0.47s 보안: ['위험 함수 사용: subprocess']
