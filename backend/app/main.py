@@ -40,7 +40,7 @@ app.add_middleware(
 )
 
 
-@app.get("/health")
+@app.get("/health", response_model=Dict[str, str])
 async def health() -> Dict[str, str]:
     return {"status": "ok"}
 
