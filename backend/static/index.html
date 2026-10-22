@@ -415,6 +415,7 @@
       <button class="mode-tab" data-mode="multi">다중 이미지</button>
       <button class="mode-tab" data-mode="url">URL 이미지</button>
       <button class="mode-tab" data-mode="video">영상 URL</button>
+      <button class="mode-tab" data-mode="img2threejs">img2threejs</button>
     </div>
 
     <!-- ── Single image ── -->
@@ -475,6 +476,19 @@
       </div>
       <div class="mt">
         <button class="btn" id="btn-video" style="width:100%">3D 생성</button>
+      </div>
+    </div>
+
+    <!-- ── img2threejs Spec ── -->
+    <div class="input-pane panel-section" id="pane-img2threejs">
+      <div class="panel-section-title">img2threejs 스펙 → Three.js 코드</div>
+      <label>spec.json 파일</label>
+      <input type="file" id="img2threejs-file" accept=".json,application/json" />
+      <div class="hint mt">
+        Claude Code 등에서 <code>/img2threejs</code> 로 생성한 <code>spec.json</code>을 업로드하세요.
+      </div>
+      <div class="mt">
+        <button class="btn" id="btn-img2threejs" style="width:100%">코드 생성</button>
       </div>
     </div>
 
@@ -954,6 +968,28 @@
       showOut(data);
       if (data.job_id) { document.getElementById("job-id").value = data.job_id; pushRecent(data.job_id); }
       toast("영상 잡이 생성되었습니다.", true);
+    } catch (e) {
+      toast(e.message || String(e), false);
+      showOut({ error: String(e.message || e) });
+    }
+    btn.disabled = false;
+  };
+
+  // ─── img2threejs Spec upload ──────────────────────────────────────────────
+  document.getElementById("btn-img2threejs").onclick = async function () {
+    var btn = this;
+    var f = document.getElementById("img2threejs-file").files[0];
+    if (!f) { toast("spec.json 파일을 선택하세요.", false); return; }
+    btn.disabled = true;
+    saveBase();
+    try {
+      var fd = new FormData();
+      fd.append("file", f);
+      var data = await fetchJson(base() + "/v1/jobs/img2threejs-spec", { method: "POST", body: fd });
+      data = enrichForDisplay(data);
+      showOut(data);
+      if (data.job_id) { document.getElementById("job-id").value = data.job_id; pushRecent(data.job_id); }
+      toast("img2threejs 잡이 생성되었습니다.", true);
     } catch (e) {
       toast(e.message || String(e), false);
       showOut({ error: String(e.message || e) });
