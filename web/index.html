@@ -18,6 +18,10 @@ header h1{margin:0;font-size:26px}header p{margin:4px 0 0;color:var(--muted)}
 .drop{display:grid;place-items:center;text-align:center;min-height:150px;border:2px dashed var(--line);border-radius:12px;cursor:pointer;color:var(--muted);padding:12px}
 .drop.on{border-color:var(--accent);background:var(--accent-soft)}
 .drop img{max-width:100%;max-height:180px;border-radius:8px}
+.queue{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.queue button{padding:0;border:2px solid transparent;border-radius:8px;background:none;position:relative;width:56px;height:56px;cursor:pointer}
+.queue button.on{border-color:var(--accent)}.queue img{width:100%;height:100%;object-fit:cover;border-radius:6px;display:block}
+.queue .ok{position:absolute;right:2px;bottom:2px;font-size:11px;background:var(--surface);border-radius:6px;padding:0 3px}
 label{display:block;margin-top:14px;font-size:13px;color:var(--muted)}
 input[type=range]{width:100%}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
@@ -34,6 +38,7 @@ button:disabled{opacity:.5;cursor:default}
 footer{margin-top:28px;font-size:13px;color:var(--muted)}
 footer a{color:var(--accent)}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
 "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
@@ -48,22 +53,27 @@ footer a{color:var(--accent)}
   <div class="grid">
     <section class="card">
       <div id="drop" class="drop" tabindex="0" role="button" aria-label="이미지 선택">
-        <div id="dropText">이미지를 끌어다 놓거나 눌러서 선택<br><small>PNG·JPG·WEBP · 붙여넣기(Ctrl+V)도 됩니다</small></div>
+        <div id="dropText">이미지를 끌어다 놓거나 눌러서 선택 (<b>여러 장 가능</b>)<br><small>PNG·JPG·WEBP · 붙여넣기(Ctrl+V)도 됩니다</small></div>
       </div>
-      <input id="file" type="file" accept="image/*" hidden>
+      <input id="file" type="file" accept="image/*" multiple hidden>
+      <div id="queue" class="queue" aria-label="선택한 이미지 목록"></div>
       <label>메시 해상도 <b id="gridV">128</b> × <b id="gridV2">128</b>
         <input id="grid" type="range" min="32" max="256" step="16" value="128"></label>
       <label>높이 <b id="hV">0.45</b><input id="height" type="range" min="0" max="1.2" step="0.05" value="0.45"></label>
       <label>노멀 세기 <b id="nV">2.0</b><input id="nstr" type="range" min="0.5" max="6" step="0.5" value="2"></label>
       <label><input id="invert" type="checkbox"> 높이 반전 (어두운 곳을 튀어나오게)</label>
       <div class="row"><button id="go" class="primary" disabled>3D 만들기</button>
+        <button id="clear" type="button" hidden>목록 비우기</button>
         <button id="sample" type="button">예시 이미지로 해 보기</button></div>
       <div id="status" class="status"></div>
       <div class="row">
         <button id="dlGlb" disabled>GLB 받기</button>
         <button id="dlObj" disabled>OBJ+MTL 받기</button>
         <button id="dlPbr" disabled>PBR 맵 PNG 받기</button>
+        <button id="dlZip" disabled hidden>전체 ZIP 받기</button>
       </div>
+      <p class="note">여러 장을 넣으면 <b>한 장씩 각각</b> 메시·PBR 맵을 만들고 전체를 ZIP 으로 받을 수 있습니다 (바닥재·벽면 텍스처 세트 등).
+        여러 각도 사진을 <b>하나의 3D 물체로 합치는 재구성</b>(사진 측량, COLMAP)은 무거워서 로컬 버전에서만 됩니다.</p>
       <p class="note">높이맵 방식이라 부조·바닥재·벽면·로고처럼 <b>한쪽 면</b>이 중요한 소재에 적합합니다. 물체 전체(뒷면 포함)를 만드는 TripoSR(GPU)·영상 재구성(COLMAP)은 <a href="https://github.com/HEO-J-H/Pix2Poly#로컬-전용-실행-권장">로컬 설치 버전</a>에서 쓸 수 있습니다.</p>
     </section>
     <section class="card">
@@ -80,6 +90,7 @@ import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
 import { imageToRGB, pbrMaps, toCanvas, heightfield, toOBJ } from "./pix2poly.js";
 
 const $ = (id) => document.getElementById(id);
+let items = [], cur = -1;   // 여러 장: [{name, img, url, result}]
 let img = null, result = null;
 
 // ── 3D 뷰
@@ -101,48 +112,84 @@ new ResizeObserver(resize).observe(canvas);
 renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
 
 // ── 이미지 입력
-function load(file) {
-  if (!file || !file.type.startsWith("image/")) return;
-  const url = URL.createObjectURL(file), im = new Image();
-  im.onload = () => {
-    img = im; $("go").disabled = false;
-    $("drop").innerHTML = ""; const p = new Image(); p.src = url; p.alt = "선택한 이미지"; $("drop").append(p);
-    $("status").textContent = `${im.naturalWidth}×${im.naturalHeight} 이미지 준비됨`;
-  };
-  im.src = url;
+function load(files) {
+  const list = [...(files || [])].filter((f) => f && f.type.startsWith("image/"));
+  if (!list.length) return Promise.resolve();
+  const start = items.length;
+  return Promise.all(list.map((file) => new Promise((ok) => {
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => { items.push({ name: file.name.replace(/\.[^.]+$/, "") || "image", img: im, url, result: null }); ok(); };
+    im.onerror = ok;
+    im.src = url;
+  }))).then(() => {
+    if (items.length === start) return;
+    select(start);
+    $("go").disabled = false;
+    $("go").textContent = items.length > 1 ? `3D 만들기 (${items.length}장)` : "3D 만들기";
+    $("clear").hidden = items.length < 2;
+    $("status").textContent = items.length > 1 ? `${items.length}장 준비됨 — 한 장씩 각각 만듭니다`
+      : `${img.naturalWidth}×${img.naturalHeight} 이미지 준비됨`;
+  });
+}
+function select(i) {
+  cur = i; img = items[i].img; result = items[i].result;
+  $("drop").innerHTML = ""; const p = new Image(); p.src = items[i].url; p.alt = items[i].name; $("drop").append(p);
+  $("queue").innerHTML = "";
+  if (items.length > 1) items.forEach((it, k) => {
+    const b = document.createElement("button");
+    b.className = k === i ? "on" : ""; b.title = it.name; b.setAttribute("aria-label", `${it.name} 보기`);
+    b.innerHTML = `<img src="${it.url}" alt="">${it.result ? '<span class="ok">✓</span>' : ""}`;
+    b.onclick = () => select(k);
+    $("queue").append(b);
+  });
+  if (result) show(result.mesh, result.canvases);
+  for (const b of ["dlGlb", "dlObj", "dlPbr"]) $(b).disabled = !result;
 }
 $("drop").onclick = () => $("file").click();
 $("drop").onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") $("file").click(); };
-$("file").onchange = (e) => load(e.target.files[0]);
+$("file").onchange = (e) => load(e.target.files);
 $("drop").ondragover = (e) => { e.preventDefault(); $("drop").classList.add("on"); };
 $("drop").ondragleave = () => $("drop").classList.remove("on");
-$("drop").ondrop = (e) => { e.preventDefault(); $("drop").classList.remove("on"); load(e.dataTransfer.files[0]); };
+$("drop").ondrop = (e) => { e.preventDefault(); $("drop").classList.remove("on"); load(e.dataTransfer.files); };
 $("sample").onclick = async () => {
   const b = await (await fetch("sample.png")).blob();
-  load(new File([b], "sample.png", { type: "image/png" }));
-  setTimeout(() => $("go").click(), 400);
+  await load([new File([b], "sample.png", { type: "image/png" })]);
+  $("go").click();
 };
-window.addEventListener("paste", (e) => load([...e.clipboardData.files][0]));
+window.addEventListener("paste", (e) => load(e.clipboardData.files));
+$("clear").onclick = () => {
+  items = []; cur = -1; img = result = null; $("queue").innerHTML = "";
+  $("drop").innerHTML = '<div id="dropText">이미지를 끌어다 놓거나 눌러서 선택 (<b>여러 장 가능</b>)</div>';
+  $("clear").hidden = $("dlZip").hidden = true; $("go").disabled = true; $("go").textContent = "3D 만들기"; $("status").textContent = "";
+};
 for (const [id, out] of [["grid", "gridV"], ["height", "hV"], ["nstr", "nV"]])
   $(id).oninput = () => { $(out).textContent = $(id).value; if (id === "grid") $("gridV2").textContent = $(id).value; };
 
 // ── 생성
-$("go").onclick = () => {
-  $("go").disabled = true; $("status").textContent = "만드는 중…";
-  setTimeout(() => {
-    const t0 = performance.now();
-    const tex = imageToRGB(img, 512), maps = pbrMaps(tex.rgb, 512, 512, +$("nstr").value);
-    const n = +$("grid").value, grid = imageToRGB(img, n), gray = pbrMaps(grid.rgb, n, n).gray;
+function build(im) {
+    const tex = imageToRGB(im, 512), maps = pbrMaps(tex.rgb, 512, 512, +$("nstr").value);
+    const n = +$("grid").value, grid = imageToRGB(im, n), gray = pbrMaps(grid.rgb, n, n).gray;
     const m = heightfield(gray, n, n, +$("height").value, $("invert").checked);
     const cv = {
       albedo: tex.canvas, normal: toCanvas(maps.normal, 512, 512, 3), roughness: toCanvas(maps.roughness, 512, 512, 1),
       metallic: toCanvas(maps.metallic, 512, 512, 1), ao: toCanvas(maps.ao, 512, 512, 1),
     };
-    result = { mesh: m, canvases: cv };
-    show(m, cv);
-    $("status").textContent = `완료 · 정점 ${(n * n).toLocaleString()}개 · 삼각형 ${((n - 1) * (n - 1) * 2).toLocaleString()}개 · ${Math.round(performance.now() - t0)}ms`;
-    for (const b of ["go", "dlGlb", "dlObj", "dlPbr"]) $(b).disabled = false;
-  }, 30);
+    return { mesh: m, canvases: cv, n };
+}
+$("go").onclick = async () => {
+  $("go").disabled = true;
+  const t0 = performance.now();
+  for (let k = 0; k < items.length; k++) {
+    $("status").textContent = `만드는 중… ${k + 1}/${items.length}`;
+    await new Promise((r) => setTimeout(r, 30));   // 화면이 멈추지 않게 한 장씩
+    items[k].result = build(items[k].img);
+  }
+  select(cur < 0 ? 0 : cur);
+  const n = items[cur].result.n;
+  $("status").textContent = `완료 ${items.length}장 · 장당 정점 ${(n * n).toLocaleString()}개 · ${Math.round(performance.now() - t0)}ms`
+    + (items.length > 1 ? " · 썸네일을 눌러 하나씩 보기" : "");
+  $("go").disabled = false;
+  $("dlZip").hidden = items.length < 2; $("dlZip").disabled = false;
 };
 
 function texOf(c, srgb) {
@@ -186,6 +233,25 @@ $("dlObj").onclick = () => {
     { type: "text/plain" }), "model.mtl");
 };
 $("dlPbr").onclick = () => { for (const [k, c] of Object.entries(result.canvases)) c.toBlob((b) => save(b, `${k}.png`)); };
+$("dlZip").onclick = async () => {   // 이미지마다 폴더: model.glb · model.obj · model.mtl · PBR 5장
+  $("dlZip").disabled = true; $("status").textContent = "ZIP 만드는 중…";
+  const zip = new JSZip(), used = new Set(), keep = cur;
+  for (const it of items.filter((x) => x.result)) {
+    let name = it.name;
+    for (let j = 2; used.has(name); j++) name = `${it.name}_${j}`;
+    used.add(name);
+    const dir = zip.folder(name);
+    select(items.indexOf(it));
+    const glb = await new GLTFExporter().parseAsync(mesh, { binary: true });
+    dir.file("model.glb", glb); dir.file("model.obj", toOBJ(it.result.mesh));
+    dir.file("model.mtl", "newmtl pix2poly\nKd 1 1 1\nmap_Kd albedo.png\nnorm normal.png\nmap_Pr roughness.png\nmap_Pm metallic.png\n");
+    for (const [k, c] of Object.entries(it.result.canvases))
+      dir.file(`${k}.png`, await new Promise((ok) => c.toBlob(ok)));
+  }
+  select(keep);
+  save(await zip.generateAsync({ type: "blob" }), "pix2poly.zip");
+  $("status").textContent = `ZIP 완료 (${used.size}장)`; $("dlZip").disabled = false;
+};
 </script>
 </body>
 </html>
