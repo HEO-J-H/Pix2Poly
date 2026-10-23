@@ -8,7 +8,9 @@ from app.services.pbr_generator import generate_pbr_maps
 
 
 def test_health():
-    assert TestClient(app).get("/health").json() == {"status": "ok"}
+    res = TestClient(app).get("/health")
+    assert res.status_code == 200
+    assert res.json() == {"status": "ok"}
 
 
 def test_mesh_from_image_writes_obj_and_glb(png, tmp_path):
