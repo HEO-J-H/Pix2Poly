@@ -42,7 +42,7 @@ app.add_middleware(
 
 @app.get("/health")
 async def health() -> Dict[str, str]:
-    return {"status": "ok"}
+    return {"status": "ok", "trellis_cpp": "supported"}
 
 
 def _to_response(rec: JobRecord) -> JobResponse:

@@ -10,7 +10,9 @@ from app.services.pbr_generator import generate_pbr_maps
 def test_health():
     res = TestClient(app).get("/health")
     assert res.status_code == 200
-    assert res.json() == {"status": "ok"}
+    data = res.json()
+    assert data["status"] == "ok"
+    assert data.get("trellis_cpp") == "supported"
 
 
 def test_mesh_from_image_writes_obj_and_glb(png, tmp_path):
