@@ -12,3 +12,4 @@
 - [x] (agent) PR #3 다시 하기 — AssetFurnace(image-to-3dlab) 파이프라인 검토: · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [x] (agent) [p-8a35f7e4cc|운영·비용] Trellis.cpp C++ GPU 추론 도입 검토: Python 기반 TripoSR 외에 C++/GGML 기반 Trellis.cpp를 로컬 선택 엔진으로 추가하여 저사양 환경에서의 추론 속도 개선 및 메모리 효율화 검토
 - [ ] (agent:승인대기) PR #4 다시 하기 — Trellis.cpp C++ GPU 추론 도입 검토: Python 기반 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기 — PR #7 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/7
+- [ ] (agent) PR #7 다시 하기 — PR #4 다시 하기 — Trellis.cpp C++ GPU 추론 도입 검토: Python 기반 · 사람 요 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
