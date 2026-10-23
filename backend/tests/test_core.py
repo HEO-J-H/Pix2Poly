@@ -39,6 +39,11 @@ def test_job_lookup_unknown_is_404():
     assert r.status_code == 404
 
 
+def test_url_images_job_empty_selection():
+    res = TestClient(app).post("/v1/jobs/url-images", json={"selected_urls": []})
+    assert res.status_code == 400
+
+
 def test_box_blur_numpy_matches_naive():
     from app.services.pbr_generator import _box_blur
     import builtins
