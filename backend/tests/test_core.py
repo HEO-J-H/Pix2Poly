@@ -11,6 +11,14 @@ def test_health():
     assert TestClient(app).get("/health").json() == {"status": "ok"}
 
 
+def test_trellis_engine_endpoint():
+    r = TestClient(app).get("/v1/engines/trellis")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["engine"] == "trellis-cpp"
+    assert "expected_speedup" in data
+
+
 def test_mesh_from_image_writes_obj_and_glb(png, tmp_path):
     out = mesh_from_image_file(png, tmp_path / "out", grid=32)
     paths = [p for p in (out if isinstance(out, (list, tuple)) else out.values())]
