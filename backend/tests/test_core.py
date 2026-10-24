@@ -1,10 +1,10 @@
 import numpy as np
 from fastapi.testclient import TestClient
 
-from app.main import app
-from app.services import url_ingest
-from app.services.mesh_from_image import mesh_from_image_file
-from app.services.pbr_generator import generate_pbr_maps
+from backend.app.main import app
+from backend.app.services import url_ingest
+from backend.app.services.mesh_from_image import mesh_from_image_file
+from backend.app.services.pbr_generator import generate_pbr_maps
 
 
 def test_health():
@@ -45,7 +45,7 @@ def test_url_images_job_empty_selection():
 
 
 def test_box_blur_numpy_matches_naive():
-    from app.services.pbr_generator import _box_blur
+    from backend.app.services.pbr_generator import _box_blur
     import builtins
     real_import = builtins.__import__
 
