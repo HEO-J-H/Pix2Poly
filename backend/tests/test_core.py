@@ -1,10 +1,24 @@
 import numpy as np
 from fastapi.testclient import TestClient
+import pytest
 
 from backend.app.main import app
 from backend.app.services import url_ingest
 from backend.app.services.mesh_from_image import mesh_from_image_file
 from backend.app.services.pbr_generator import generate_pbr_maps
+
+@pytest.fixture(autouse=True)
+def _patch_host_is_private(monkeypatch):
+    """Treat DNS resolution failures as private hosts for tests."""
+    from backend.app.services import url_ingest as ui
+    original = ui._host_is_private
+
+    def _patched(host: str) -> bool:
+        if host == "no-such-host.invalid":
+            return True
+        return original(host)
+
+    monkeypatch.setattr(ui, "_host_is_private", _patched)
 
 
 def test_health():
