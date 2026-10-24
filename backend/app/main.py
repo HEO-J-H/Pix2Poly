@@ -56,11 +56,7 @@ def _to_response(rec: JobRecord) -> JobResponse:
 
 
 @app.post("/v1/jobs/single-image", response_model=JobResponse)
-async def create_single_image_job(
-    background_tasks: BackgroundTasks,
-    file: UploadFile = File(...),
-    notes: Optional[str] = Form(None),
-) -> JobResponse:
+async def create_single_image_job(background_tasks: BackgroundTasks, file: UploadFile = File(...), notes: Optional[str] = Form(None)) -> JobResponse:
     rec = await job_store.create(JobType.single_image, detail={})
     raw = await file.read()
     upload_paths = save_job_files(rec.job_id, [(file.filename, raw)])
