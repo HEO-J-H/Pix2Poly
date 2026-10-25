@@ -18,6 +18,11 @@ header h1{margin:0;font-size:26px}header p{margin:4px 0 0;color:var(--muted)}
 .drop{display:grid;place-items:center;text-align:center;min-height:150px;border:2px dashed var(--line);border-radius:12px;cursor:pointer;color:var(--muted);padding:12px}
 .drop.on{border-color:var(--accent);background:var(--accent-soft)}
 .drop img{max-width:100%;max-height:180px;border-radius:8px}
+.mv h2{margin:0 0 4px;font-size:18px}.mv small{color:var(--muted);font-weight:400}
+.consent{display:block;margin-top:10px;font-size:13px;color:var(--muted)}
+a.btn{display:inline-block}
+.grid{grid-template-areas:"a b" "c b"}.grid>section:nth-child(1){grid-area:a}.grid>section.mv{grid-area:c}.grid>section:last-child{grid-area:b}
+@media (max-width:860px){.grid{grid-template-areas:"a" "b" "c"}}
 .queue{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .queue button{padding:0;border:2px solid transparent;border-radius:8px;background:none;position:relative;width:56px;height:56px;cursor:pointer}
 .queue button.on{border-color:var(--accent)}.queue img{width:100%;height:100%;object-fit:cover;border-radius:6px;display:block}
@@ -76,6 +81,23 @@ footer a{color:var(--accent)}
         여러 각도 사진을 <b>하나의 3D 물체로 합치는 재구성</b>(사진 측량, COLMAP)은 무거워서 로컬 버전에서만 됩니다.</p>
       <p class="note">높이맵 방식이라 부조·바닥재·벽면·로고처럼 <b>한쪽 면</b>이 중요한 소재에 적합합니다. 물체 전체(뒷면 포함)를 만드는 TripoSR(GPU)·영상 재구성(COLMAP)은 <a href="https://github.com/HEO-J-H/Pix2Poly#로컬-전용-실행-권장">로컬 설치 버전</a>에서 쓸 수 있습니다.</p>
     </section>
+    <section class="card mv">
+      <h2>📷 여러 각도 사진 → 하나의 3D <small>(AI)</small></h2>
+      <p class="note">한 제품을 <b>서로 다른 각도에서 2~4장</b>(앞·옆·뒤 등) 찍어 넣으면, AI 가 하나의 3D 모델을 색까지 입혀 만듭니다.
+        배경이 단순하고 제품이 화면 가운데 크게 나온 사진일수록 좋아요.</p>
+      <div id="mvDrop" class="drop" tabindex="0" role="button" aria-label="여러 각도 사진 선택">
+        <div>사진 2~4장을 끌어다 놓거나 눌러서 선택</div>
+      </div>
+      <input id="mvFile" type="file" accept="image/*" multiple hidden>
+      <div id="mvQueue" class="queue"></div>
+      <label class="consent"><input id="mvConsent" type="checkbox"> 사진이 <a id="mvEngine" target="_blank" rel="noopener">AI 공개 데모 서버(Hugging Face)</a>로
+        전송되는 것에 동의합니다. 무료 공유 GPU 라 대기·하루 사용량 제한이 있어요.</label>
+      <div class="row"><button id="mvGo" class="primary" disabled>하나의 3D 로 만들기</button>
+        <button id="mvSample" type="button">예시(버섯 3장)로 해 보기</button></div>
+      <div id="mvStatus" class="status" aria-live="polite"></div>
+      <div class="row"><a id="mvGlb" class="btn" hidden download="pix2poly_multiview.glb">GLB 받기</a>
+        <a id="mvVideo" class="btn" hidden target="_blank" rel="noopener">회전 영상 보기</a></div>
+    </section>
     <section class="card">
       <canvas id="view" aria-label="3D 미리보기 (드래그로 회전, 휠로 확대)"></canvas>
       <div class="maps" id="maps"></div>
@@ -88,6 +110,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
 import { imageToRGB, pbrMaps, toCanvas, heightfield, toOBJ } from "./pix2poly.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 const $ = (id) => document.getElementById(id);
 let items = [], cur = -1;   // 여러 장: [{name, img, url, result}]
@@ -199,7 +222,7 @@ function texOf(c, srgb) {
   return t;
 }
 function show(m, cv) {
-  if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); }
+  if (mesh) { scene.remove(mesh); mesh.geometry?.dispose(); }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.BufferAttribute(m.pos, 3));
   geo.setAttribute("uv", new THREE.BufferAttribute(m.uv, 2));
@@ -233,6 +256,52 @@ $("dlObj").onclick = () => {
     { type: "text/plain" }), "model.mtl");
 };
 $("dlPbr").onclick = () => { for (const [k, c] of Object.entries(result.canvases)) c.toBlob((b) => save(b, `${k}.png`)); };
+// ── 여러 각도 → 하나의 3D (AI)
+let mvFiles = [];
+const mv = await import("./multiview.js").catch((e) => { $("mvStatus").textContent = "AI 기능을 불러오지 못했습니다: " + e.message; return null; });
+if (mv) { $("mvEngine").href = mv.ENGINE.url; $("mvEngine").title = mv.ENGINE.name; }
+function mvSet(files) {
+  mvFiles = [...files].filter((f) => f.type.startsWith("image/")).slice(0, 8);
+  $("mvQueue").innerHTML = mvFiles.map((f) => `<button type="button" title="${f.name}"><img src="${URL.createObjectURL(f)}" alt=""></button>`).join("");
+  $("mvGo").disabled = !(mvFiles.length >= 2 && $("mvConsent").checked && mv);
+  $("mvStatus").textContent = mvFiles.length < 2 ? "다른 각도 사진을 2장 이상 넣어 주세요" : `${mvFiles.length}장 준비됨`;
+}
+$("mvDrop").onclick = () => $("mvFile").click();
+$("mvDrop").onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") $("mvFile").click(); };
+$("mvFile").onchange = (e) => mvSet(e.target.files);
+$("mvDrop").ondragover = (e) => { e.preventDefault(); $("mvDrop").classList.add("on"); };
+$("mvDrop").ondragleave = () => $("mvDrop").classList.remove("on");
+$("mvDrop").ondrop = (e) => { e.preventDefault(); $("mvDrop").classList.remove("on"); mvSet(e.dataTransfer.files); };
+$("mvConsent").onchange = () => { $("mvGo").disabled = !(mvFiles.length >= 2 && $("mvConsent").checked && mv); };
+$("mvSample").onclick = async () => {
+  const base = "https://huggingface.co/spaces/trellis-community/TRELLIS/resolve/main/assets/example_multi_image/";
+  const files = await Promise.all([1, 2, 3].map(async (i) =>
+    new File([await (await fetch(`${base}mushroom_${i}.png`)).blob()], `mushroom_${i}.png`, { type: "image/png" })));
+  mvSet(files);
+  if (!$("mvConsent").checked) $("mvStatus").textContent = "예시 3장 준비됨 — 위 동의에 체크하고 '하나의 3D 로 만들기'를 눌러 주세요";
+};
+$("mvGo").onclick = async () => {
+  $("mvGo").disabled = true; $("mvGlb").hidden = $("mvVideo").hidden = true;
+  try {
+    const r = await mv.generate(mvFiles, (t) => { $("mvStatus").textContent = t; });
+    const blob = await (await fetch(r.glbUrl)).blob();
+    const url = URL.createObjectURL(blob);
+    const gltf = await new GLTFLoader().loadAsync(url);
+    if (mesh) { scene.remove(mesh); }
+    mesh = gltf.scene; mesh.name = "Pix2Poly-multiview";
+    const box = new THREE.Box3().setFromObject(mesh), size = box.getSize(new THREE.Vector3()).length() || 1;
+    mesh.position.sub(box.getCenter(new THREE.Vector3())); mesh.scale.setScalar(2 / size);
+    scene.add(mesh); $("maps").innerHTML = "";
+    $("mvGlb").href = url; $("mvGlb").hidden = false;
+    if (r.videoUrl) { $("mvVideo").href = r.videoUrl; $("mvVideo").hidden = false; }
+    $("mvStatus").textContent = `완료 · ${r.seconds}초 · 오른쪽 미리보기에서 돌려 보세요 (${(blob.size / 1e6).toFixed(1)}MB)`;
+  } catch (e) {
+    $("mvStatus").textContent = "실패: " + (e.message || e);
+  } finally {
+    $("mvGo").disabled = !(mvFiles.length >= 2 && $("mvConsent").checked);
+  }
+};
+
 $("dlZip").onclick = async () => {   // 이미지마다 폴더: model.glb · model.obj · model.mtl · PBR 5장
   $("dlZip").disabled = true; $("status").textContent = "ZIP 만드는 중…";
   const zip = new JSZip(), used = new Set(), keep = cur;
