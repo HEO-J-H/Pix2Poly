@@ -77,3 +77,19 @@ def test_box_blur_numpy_matches_naive():
     pad = np.pad(arr, 2, mode="reflect")
     naive = np.array([[pad[i:i + 5, j:j + 5].mean() for j in range(17)] for i in range(13)])
     assert out.shape == arr.shape and np.allclose(out, naive, atol=1e-5)
+
+
+def test_flexpart_runner_writes_dummy_mesh(png, tmp_path):
+    """
+    Verify that the FlexPart runner creates a dummy OBJ mesh file.
+    """
+    from backend.app.services.flexpart_runner import run_flexpart_to_output_dir
+
+    out_dir = tmp_path / "flexpart_out"
+    result = run_flexpart_to_output_dir(png, out_dir, device="cpu")
+    mesh_path = result.get("mesh")
+    assert mesh_path is not None
+    assert mesh_path.is_file()
+    # Simple sanity check: the file should contain at least one vertex line.
+    content = mesh_path.read_text(encoding="utf-8")
+    assert "v " in content
