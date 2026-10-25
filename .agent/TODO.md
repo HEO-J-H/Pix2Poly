@@ -16,3 +16,4 @@
 - [x] (agent) [p-0f6b067300|콘텐츠] FlexPart 논문 파트별 3D 생성 참고: 단일 이미지 기반 파트별 3D 생성 논문 FlexPart의 가변 세분성(variable granularity) 개념을 향후 다중 파트 메쉬 출력 설계에 반영
 - [ ] (agent:보류) [p-55041a0e9b|사이트·UX] img2threejs 가이드 1단계 재시도: backend/app/services/engines.py에 available()=(bool, 이유) 검증 함수와 GET /v1/engines 엔드포인트를 구현하고 test_core.py에 테스트를 추가합니다. — [4] 패치 적용 실패: ['docs/agent-guides/img2threejs.md: search 블록이 정확히 1회 일치하지 않음']
 - [x] (agent) [p-bceae014ad|운영·비용] 대기 중인 PR 확인 및 머지 검토: GitHub에서 PR #7의 변경 사항을 검토하고 승인 여부를 결정합니다.
+- [ ] (agent) PR #8 다시 하기 — FlexPart 논문 파트별 3D 생성 참고: 단일 이미지 기반 파트별 3 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
