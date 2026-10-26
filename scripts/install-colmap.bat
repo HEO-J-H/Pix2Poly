@@ -3,6 +3,7 @@ rem Pix2Poly - COLMAP(사진측량, BSD 라이선스) 공식 릴리스를 내려
 rem NVIDIA GPU 가 있으면 CUDA판(정밀 복원), 없으면 일반판(대략적인 형태)을 받습니다.
 rem 출처: https://github.com/colmap/colmap/releases (공식 저장소만 사용)
 setlocal
+chcp 65001 >nul
 cd /d "%~dp0.."
 set VER=4.2.1
 set KIND=nocuda
