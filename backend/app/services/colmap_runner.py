@@ -29,10 +29,18 @@ import sys
 from pathlib import Path
 
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+# scripts/install-colmap.bat 이 공식 릴리스를 여기에 풀어 둠 (COLMAP.bat 이 DLL 경로를 잡아 줌)
+BUNDLED = (REPO_ROOT / "colmap" / "COLMAP.bat", REPO_ROOT / "colmap" / "bin" / "colmap.exe")
+
+
 def _colmap_bin() -> str:
     env = os.environ.get("PIX2POLY_COLMAP_PATH", "").strip()
     if env and Path(env).is_file():
         return env
+    for b in BUNDLED:
+        if b.is_file():
+            return str(b)
     found = shutil.which("colmap")
     if found:
         return found
@@ -42,8 +50,26 @@ def _colmap_bin() -> str:
     )
 
 
+_CUDA: bool | None = None
+
+
+def colmap_has_cuda() -> bool:
+    """COLMAP 이 CUDA 빌드인지 (-h 첫 줄에 'with CUDA' / 'without CUDA'). 정밀(dense) 복원은 CUDA 필요."""
+    global _CUDA
+    if _CUDA is None:
+        try:
+            out = subprocess.run([_colmap_bin(), "-h"], capture_output=True, timeout=30).stdout.decode(errors="replace")
+            _CUDA = "with CUDA" in out
+        except (OSError, subprocess.SubprocessError, FileNotFoundError):
+            _CUDA = False
+    return _CUDA
+
+
 def _use_gpu() -> int:
-    return 1 if os.environ.get("PIX2POLY_COLMAP_GPU", "0").strip() == "1" else 0
+    env = os.environ.get("PIX2POLY_COLMAP_GPU", "").strip()
+    if env in ("0", "1"):
+        return int(env)
+    return 1 if colmap_has_cuda() else 0
 
 
 def _run(cmd: list[str], cwd: Path) -> None:
@@ -84,7 +110,7 @@ def run_colmap_sfm(
         "--database_path", str(db_path),
         "--image_path", str(image_dir),
         "--ImageReader.single_camera", "1",
-        "--SiftExtraction.use_gpu", str(gpu),
+        "--FeatureExtraction.use_gpu", str(gpu),
     ], work_dir)
 
     # 2. Feature matching
@@ -92,7 +118,7 @@ def run_colmap_sfm(
     _run([
         colmap, matcher,
         "--database_path", str(db_path),
-        "--SiftMatching.use_gpu", str(gpu),
+        "--FeatureMatching.use_gpu", str(gpu),
     ], work_dir)
 
     # 3. Sparse reconstruction (SfM mapper)
@@ -111,6 +137,12 @@ def run_colmap_sfm(
         if not models:
             raise RuntimeError("COLMAP mapper produced no sparse model.")
         sparse_model = models[0]
+
+    if not gpu:  # CUDA 없는 PC: 정밀 복원 불가 → 희소 점으로 대략적인 형태만
+        sparse_ply = work_dir / "sparse.ply"
+        _run([colmap, "model_converter", "--input_path", str(sparse_model),
+              "--output_path", str(sparse_ply), "--output_type", "PLY"], work_dir)
+        return sparse_ply
 
     # 4. Image undistortion
     _run([
@@ -150,6 +182,22 @@ def ply_to_mesh(ply_path: Path, out_dir: Path) -> tuple[Path, Path]:
     Returns (obj_path, glb_path).
     """
     import numpy as np
+
+    # 1순위: COLMAP 내장 poisson_mesher (추가 설치 없음)
+    try:
+        meshed = ply_path.with_name("meshed-poisson.ply")
+        _run([_colmap_bin(), "poisson_mesher", "--input_path", str(ply_path), "--output_path", str(meshed),
+              "--PoissonMeshing.trim", "7"], ply_path.parent)
+        import trimesh
+        tm = trimesh.load(str(meshed), process=False)
+        if len(getattr(tm, "faces", [])) > 0:
+            out_dir.mkdir(parents=True, exist_ok=True)
+            obj_path, glb_path = out_dir / "model.obj", out_dir / "model.glb"
+            tm.export(str(obj_path))
+            tm.export(str(glb_path))
+            return obj_path, glb_path
+    except (RuntimeError, FileNotFoundError, OSError, ValueError, ImportError):
+        pass
 
     try:
         import open3d as o3d  # type: ignore
@@ -202,6 +250,19 @@ def ply_to_mesh(ply_path: Path, out_dir: Path) -> tuple[Path, Path]:
     return obj_path, glb_path
 
 
+MIN_POINTS = 1500  # 이보다 적으면 메시가 뭉개진 덩어리 — 결과 대신 이유를 알려 줌
+
+
+def _ply_vertex_count(path: Path) -> int:
+    with open(path, "rb") as f:
+        for line in f:
+            if line.startswith(b"element vertex"):
+                return int(line.split()[-1])
+            if line.startswith(b"end_header"):
+                break
+    return 0
+
+
 def run_colmap_pipeline(
     image_dir: Path,
     out_dir: Path,
@@ -215,6 +276,11 @@ def run_colmap_pipeline(
     work_dir.mkdir(parents=True, exist_ok=True)
     try:
         fused_ply = run_colmap_sfm(image_dir, work_dir, sequential=sequential)
+        n = _ply_vertex_count(fused_ply)
+        if n < MIN_POINTS:
+            raise RuntimeError(
+                f"복원된 점이 {n}개뿐이라 형태를 만들 수 없습니다. 사진을 더 겹치게(옆 사진과 60% 이상) 찍거나, "
+                "NVIDIA GPU 가 있으면 scripts/install-colmap.bat 으로 GPU판을 설치하세요(정밀 복원).")
         obj_abs, glb_abs = ply_to_mesh(fused_ply, out_dir)
     finally:
         # Clean up large intermediate files to save disk

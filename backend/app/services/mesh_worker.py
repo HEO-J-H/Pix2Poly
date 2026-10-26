@@ -1,6 +1,7 @@
 """Background mesh generation: heightfield (CPU), TripoSR (GPU), or COLMAP (multi-image)."""
 from __future__ import annotations
 
+import asyncio
 import traceback
 from uuid import UUID
 
@@ -17,6 +18,8 @@ from app.settings_mesh import (
     triposr_python,
     triposr_repo_path,
 )
+
+MIN_COLMAP_IMAGES = 5  # 사진측량은 겹치는 사진이 충분해야 함
 
 
 async def build_mesh_for_image_job(job_id: UUID) -> None:
@@ -39,23 +42,26 @@ async def build_mesh_for_image_job(job_id: UUID) -> None:
         out_dir = ensure_output_dir(job_id)
         backend = mesh_backend()
 
-        # COLMAP multi-image path: use when >= 3 images + colmap backend
-        if backend == "colmap" or (len(paths) >= 3 and backend in ("colmap",)):
-            from app.services.colmap_runner import run_colmap_pipeline, colmap_available
+        # 여러 각도 사진 → COLMAP 사진측량 (이 PC 에서만 실행, 외부 서버 전송 없음)
+        from app.services.colmap_runner import colmap_available, colmap_has_cuda, run_colmap_pipeline
 
+        use_colmap = backend == "colmap" or (rec.type == JobType.multi_image and len(paths) >= MIN_COLMAP_IMAGES
+                                             and colmap_available())
+        if use_colmap:
             if not colmap_available():
-                raise RuntimeError(
-                    "COLMAP binary not found. Install COLMAP and ensure it is on PATH, "
-                    "or set PIX2POLY_COLMAP_PATH. Falling back is not automatic — "
-                    "set PIX2POLY_MESH_BACKEND=heightfield for CPU fallback."
-                )
-            # Build an image directory with all uploaded images
+                raise RuntimeError("COLMAP 이 설치되지 않았습니다 — scripts/install-colmap.bat 을 실행하세요.")
+            dense = colmap_has_cuda()
+            await job_store.set_status(job_id, JobStatus.running,
+                                       f"사진 {len(paths)}장으로 3D 복원 중 ({'정밀·GPU' if dense else '대략·CPU'}) — 수 분 걸립니다")
             img_dir = UPLOAD_ROOT / str(job_id)
-            obj_abs, glb_abs = run_colmap_pipeline(img_dir, out_dir)
-            method = "colmap_sfm_poisson"
-            note = "COLMAP SfM + MVS + Poisson reconstruction from multi-image set."
-            ok_msg = "Mesh ready (COLMAP SfM)."
-
+            obj_abs, glb_abs = await asyncio.to_thread(run_colmap_pipeline, img_dir, out_dir)
+            method = "colmap_dense_poisson" if dense else "colmap_sparse_poisson"
+            note = ("COLMAP SfM + MVS (GPU) + Poisson — 사진측량 결과." if dense else
+                    "CUDA 없는 COLMAP: 희소 점으로 만든 대략적인 형태입니다. NVIDIA GPU 가 있으면 install-colmap.bat 으로 GPU판 설치.")
+            ok_msg = f"메시 완성 (COLMAP, 사진 {len(paths)}장)"
+        elif rec.type == JobType.multi_image:
+            note_multi = (f"사진 {len(paths)}장 — 여러 각도 복원은 {MIN_COLMAP_IMAGES}장 이상 필요" if colmap_available()
+                          else "COLMAP 미설치 — scripts/install-colmap.bat 실행 후 여러 각도 복원 가능")
         elif backend == "instantmesh":
             await job_store.set_status(
                 job_id,
@@ -70,7 +76,9 @@ async def build_mesh_for_image_job(job_id: UUID) -> None:
             )
             return
 
-        if backend == "triposr":
+        if use_colmap:
+            pass
+        elif backend == "triposr":
             from app.services.triposr_runner import run_triposr_to_output_dir
 
             repo = triposr_repo_path()
@@ -98,6 +106,8 @@ async def build_mesh_for_image_job(job_id: UUID) -> None:
                 "FBX: import OBJ in Blender and export."
             )
             ok_msg = "Mesh ready (heightfield from luminance)."
+            if rec.type == JobType.multi_image and not use_colmap:
+                note = note_multi + " · 지금은 첫 사진으로 부조(높이맵) 메시를 만들었습니다."
 
         backend_root = OUTPUT_ROOT.parent
         obj_rel = str(obj_abs.relative_to(backend_root)).replace("\\", "/")

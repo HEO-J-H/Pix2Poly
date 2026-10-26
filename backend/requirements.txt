@@ -6,6 +6,7 @@ python-multipart>=0.0.12
 numpy>=1.23.0
 pillow>=10.0.0
 trimesh>=4.0.0
+scipy>=1.10  # trimesh 메시 처리(COLMAP 결과 읽기)
 # Optional: better PBR map quality (Sobel/blur via OpenCV)
 # opencv-python-headless>=4.9.0
 # Optional: Poisson mesh from COLMAP point cloud

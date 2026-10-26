@@ -6,42 +6,70 @@
 <title>Pix2Poly — 이미지로 3D 메시·PBR 텍스처 만들기</title>
 <meta name="description" content="사진 한 장으로 높이맵 3D 메시(GLB·OBJ)와 PBR 텍스처 5종(Albedo·Normal·Roughness·Metallic·AO)을 브라우저에서 바로 만듭니다. 이미지는 서버로 전송되지 않습니다.">
 <style>
-:root{--bg:#f5f6f8;--surface:#fff;--line:rgba(0,0,0,.09);--text:#1b1d22;--muted:#5d6370;--accent:#2f6df6;--accent-soft:rgba(47,109,246,.1)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1115;--surface:#181b21;--line:rgba(255,255,255,.1);--text:#eef0f4;--muted:#9aa1ad;--accent:#6b9bff;--accent-soft:rgba(107,155,255,.14)}}
+/* 휴먼 인터페이스 원칙: 내용이 먼저(뷰어 크게), 한 화면에 주 동작 하나, 44px 터치 영역, 단계적 공개(세부 조정은 접기), 명확한 피드백 */
+:root{--bg:#f5f5f7;--surface:#fff;--line:rgba(0,0,0,.1);--text:#1d1d1f;--muted:#6e6e73;--accent:#0a66ff;--accent-soft:rgba(10,102,255,.1);--ok:#1f9d55;--warn:#b25000;--radius:14px;--viewer:#1c1d21}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--surface:#1c1c1e;--line:rgba(255,255,255,.12);--text:#f5f5f7;--muted:#a1a1a6;--accent:#4c8dff;--accent-soft:rgba(76,141,255,.16);--ok:#34c759;--warn:#ff9f0a;--viewer:#111214}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,"Segoe UI","Noto Sans KR",sans-serif}
-.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
-header h1{margin:0;font-size:26px}header p{margin:4px 0 0;color:var(--muted)}
-.grid{display:grid;grid-template-columns:340px 1fr;gap:16px;margin-top:18px}
-@media (max-width:860px){.grid{grid-template-columns:1fr}}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
-.drop{display:grid;place-items:center;text-align:center;min-height:150px;border:2px dashed var(--line);border-radius:12px;cursor:pointer;color:var(--muted);padding:12px}
-.drop.on{border-color:var(--accent);background:var(--accent-soft)}
-.drop img{max-width:100%;max-height:180px;border-radius:8px}
-.mv h2{margin:0 0 4px;font-size:18px}.mv small{color:var(--muted);font-weight:400}
-.consent{display:block;margin-top:10px;font-size:13px;color:var(--muted)}
-a.btn{display:inline-block}
-.grid{grid-template-areas:"a b" "c b"}.grid>section:nth-child(1){grid-area:a}.grid>section.mv{grid-area:c}.grid>section:last-child{grid-area:b}
-@media (max-width:860px){.grid{grid-template-areas:"a" "b" "c"}}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1200px;margin:0 auto;padding:24px 16px 56px}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+header h1{margin:0;font-size:28px;letter-spacing:-.02em}header p{margin:2px 0 0;color:var(--muted);font-size:15px}
+.seg{display:inline-flex;background:var(--line);border-radius:12px;padding:3px;gap:2px;max-width:100%}
+.seg button{min-height:40px;border:0;background:none;border-radius:10px;padding:0 14px;font:600 15px/1.2 inherit;color:var(--text);cursor:pointer}
+.seg button[aria-selected="true"]{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.grid{display:grid;grid-template-columns:380px 1fr;gap:16px;margin-top:18px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.viewer{position:sticky;top:16px}
+@media (max-width:900px){.viewer{position:static;order:-1}#view{height:44vh}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+.card h2{margin:0 0 4px;font-size:19px;letter-spacing:-.01em}
+.lead{margin:0 0 6px;color:var(--muted);font-size:14px}
+.step{display:flex;gap:10px;align-items:center;margin:16px 0 8px;font-weight:700;font-size:15px}
+.step i{font-style:normal;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;flex:none}
+.drop{display:grid;place-items:center;text-align:center;min-height:140px;border:2px dashed var(--line);border-radius:12px;cursor:pointer;color:var(--muted);padding:14px;transition:background .15s,border-color .15s}
+.drop:hover,.drop.on{border-color:var(--accent);background:var(--accent-soft)}
+.drop img{max-width:100%;max-height:170px;border-radius:8px}
 .queue{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.queue button{padding:0;border:2px solid transparent;border-radius:8px;background:none;position:relative;width:56px;height:56px;cursor:pointer}
-.queue button.on{border-color:var(--accent)}.queue img{width:100%;height:100%;object-fit:cover;border-radius:6px;display:block}
-.queue .ok{position:absolute;right:2px;bottom:2px;font-size:11px;background:var(--surface);border-radius:6px;padding:0 3px}
-label{display:block;margin-top:14px;font-size:13px;color:var(--muted)}
-input[type=range]{width:100%}
+.queue button{padding:0;border:2px solid transparent;border-radius:9px;background:none;position:relative;width:52px;height:52px;min-height:0;cursor:pointer}
+.queue button.on{border-color:var(--accent)}.queue img{width:100%;height:100%;object-fit:cover;border-radius:7px;display:block}
+.queue .ok{position:absolute;right:2px;bottom:2px;font-size:11px;background:var(--surface);border-radius:6px;padding:0 3px;color:var(--ok)}
+details{margin-top:12px;border-top:1px solid var(--line);padding-top:4px}
+summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600;color:var(--muted);list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"›";display:inline-block;margin-right:8px;transition:transform .15s}details[open]>summary::before{transform:rotate(90deg)}
+label{display:block;margin-top:12px;font-size:14px;color:var(--muted)}
+input[type=range]{width:100%;min-height:32px;accent-color:var(--accent)}
+input[type=checkbox]{width:20px;height:20px;vertical-align:-4px;margin:0 6px 0 0;accent-color:var(--accent)}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-button,a.btn{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--text);padding:9px 12px;border-radius:10px;font:600 14px/1 inherit;cursor:pointer;text-decoration:none}
-button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-button:disabled{opacity:.5;cursor:default}
-#view{width:100%;height:min(62vh,560px);border-radius:12px;background:#22252c;display:block}
+button,a.btn{appearance:none;min-height:44px;border:1px solid var(--line);background:var(--surface);color:var(--text);padding:0 16px;border-radius:12px;font:600 15px/1 inherit;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+button.primary,a.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;flex:1;justify-content:center}
+button.link{border:0;background:none;color:var(--accent);padding:0 4px}
+button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.status{font-size:14px;color:var(--muted);min-height:22px;margin-top:10px}
+.status.err{color:var(--warn)}
+.export{margin-top:14px;padding-top:4px;border-top:1px solid var(--line)}
+.export[hidden],[data-mode-panel][hidden]{display:none}
+.stage{position:relative}
+#view{width:100%;height:min(66vh,600px);border-radius:var(--radius);background:var(--viewer);display:block;touch-action:none}
+.empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#9a9ca3;font-size:15px;pointer-events:none;padding:20px}
+.empty[hidden]{display:none}
+.hint{font-size:13px;color:var(--muted);margin:8px 0 0}
 .maps{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
-@media (max-width:560px){.maps{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.maps{grid-template-columns:repeat(3,1fr)}}
 .maps figure{margin:0;text-align:center;font-size:12px;color:var(--muted)}
 .maps canvas{width:100%;aspect-ratio:1;border-radius:8px;border:1px solid var(--line);display:block}
-.note{font-size:13px;color:var(--muted);margin-top:12px}
-.status{font-size:13px;color:var(--muted);min-height:20px;margin-top:8px}
+.note{font-size:14px;color:var(--muted);margin-top:10px}
+.choice{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
+.choice.rec{border-color:var(--accent);background:var(--accent-soft)}
+.choice h3{margin:0 0 4px;font-size:16px}.badge{display:inline-block;font-size:12px;font-weight:700;color:var(--accent)}
+.choice ol{margin:8px 0 0;padding-left:20px;font-size:14px}.choice li{margin:5px 0}
+details.choice{padding-top:2px}
+code{background:var(--accent-soft);padding:1px 6px;border-radius:6px;font-size:13px}
+.consent{display:block;margin-top:10px;font-size:13px;color:var(--muted)}
 footer{margin-top:28px;font-size:13px;color:var(--muted)}
-footer a{color:var(--accent)}
+footer a,.note a,.choice a{color:var(--accent)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script type="importmap">
@@ -52,54 +80,98 @@ footer a{color:var(--accent)}
 <body>
 <div class="wrap">
   <header>
-    <h1>🧱 Pix2Poly</h1>
-    <p>사진 한 장으로 <b>3D 메시(GLB·OBJ)</b>와 <b>PBR 텍스처 5종</b>을 만듭니다. 이미지는 서버로 보내지 않고 이 브라우저 안에서만 처리합니다.</p>
+    <div>
+      <h1>🧱 Pix2Poly</h1>
+      <p>사진으로 3D 메시와 PBR 텍스처를 만듭니다.</p>
+    </div>
+    <div class="seg" role="tablist" aria-label="만들기 방식">
+      <button role="tab" id="tabOne" aria-selected="true" data-mode="one">사진 1장 → 부조 3D</button>
+      <button role="tab" id="tabMulti" aria-selected="false" data-mode="multi">여러 각도 → 하나의 3D</button>
+    </div>
   </header>
   <div class="grid">
-    <section class="card">
+    <div>
+    <section class="card" data-mode-panel="one" role="tabpanel" aria-labelledby="tabOne">
+      <h2>사진 1장으로 부조 3D</h2>
+      <p class="lead">바닥재·벽면·로고처럼 <b>한쪽 면</b>이 중요한 소재에 맞습니다. 사진은 이 브라우저 밖으로 나가지 않습니다.</p>
+      <div class="step"><i>1</i>사진 고르기</div>
       <div id="drop" class="drop" tabindex="0" role="button" aria-label="이미지 선택">
-        <div id="dropText">이미지를 끌어다 놓거나 눌러서 선택 (<b>여러 장 가능</b>)<br><small>PNG·JPG·WEBP · 붙여넣기(Ctrl+V)도 됩니다</small></div>
+        <div id="dropText">끌어다 놓거나 눌러서 선택<br><small>여러 장 가능 · PNG·JPG·WEBP · 붙여넣기(Ctrl+V)</small></div>
       </div>
       <input id="file" type="file" accept="image/*" multiple hidden>
       <div id="queue" class="queue" aria-label="선택한 이미지 목록"></div>
-      <label>메시 해상도 <b id="gridV">128</b> × <b id="gridV2">128</b>
-        <input id="grid" type="range" min="32" max="256" step="16" value="128"></label>
-      <label>높이 <b id="hV">0.45</b><input id="height" type="range" min="0" max="1.2" step="0.05" value="0.45"></label>
-      <label>노멀 세기 <b id="nV">2.0</b><input id="nstr" type="range" min="0.5" max="6" step="0.5" value="2"></label>
-      <label><input id="invert" type="checkbox"> 높이 반전 (어두운 곳을 튀어나오게)</label>
-      <div class="row"><button id="go" class="primary" disabled>3D 만들기</button>
-        <button id="clear" type="button" hidden>목록 비우기</button>
-        <button id="sample" type="button">예시 이미지로 해 보기</button></div>
-      <div id="status" class="status"></div>
-      <div class="row">
-        <button id="dlGlb" disabled>GLB 받기</button>
-        <button id="dlObj" disabled>OBJ+MTL 받기</button>
-        <button id="dlPbr" disabled>PBR 맵 PNG 받기</button>
-        <button id="dlZip" disabled hidden>전체 ZIP 받기</button>
+      <div class="row" style="margin-top:6px"><button id="sample" type="button" class="link">예시 이미지로 해 보기</button>
+        <button id="clear" type="button" class="link" hidden>목록 비우기</button></div>
+      <details>
+        <summary>세부 조정</summary>
+        <label>메시 해상도 <b id="gridV">128</b> × <b id="gridV2">128</b>
+          <input id="grid" type="range" min="32" max="256" step="16" value="128"></label>
+        <label>높이 <b id="hV">0.45</b><input id="height" type="range" min="0" max="1.2" step="0.05" value="0.45"></label>
+        <label>노멀 세기 <b id="nV">2.0</b><input id="nstr" type="range" min="0.5" max="6" step="0.5" value="2"></label>
+        <label><input id="invert" type="checkbox">높이 반전 (어두운 곳을 튀어나오게)</label>
+      </details>
+      <div class="step"><i>2</i>만들기</div>
+      <div class="row" style="margin-top:0"><button id="go" class="primary" disabled>3D 만들기</button></div>
+      <div id="status" class="status" aria-live="polite"></div>
+      <div id="export" class="export" hidden>
+        <div class="step"><i>3</i>내려받기</div>
+        <div class="row" style="margin-top:0">
+          <button id="dlGlb" disabled>GLB</button>
+          <button id="dlObj" disabled>OBJ + MTL</button>
+          <button id="dlPbr" disabled>PBR 맵 PNG</button>
+          <button id="dlZip" disabled hidden>전체 ZIP</button>
+        </div>
       </div>
-      <p class="note">여러 장을 넣으면 <b>한 장씩 각각</b> 메시·PBR 맵을 만들고 전체를 ZIP 으로 받을 수 있습니다 (바닥재·벽면 텍스처 세트 등).
-        여러 각도 사진을 <b>하나의 3D 물체로 합치는 재구성</b>(사진 측량, COLMAP)은 무거워서 로컬 버전에서만 됩니다.</p>
-      <p class="note">높이맵 방식이라 부조·바닥재·벽면·로고처럼 <b>한쪽 면</b>이 중요한 소재에 적합합니다. 물체 전체(뒷면 포함)를 만드는 TripoSR(GPU)·영상 재구성(COLMAP)은 <a href="https://github.com/HEO-J-H/Pix2Poly#로컬-전용-실행-권장">로컬 설치 버전</a>에서 쓸 수 있습니다.</p>
     </section>
-    <section class="card mv">
-      <h2>📷 여러 각도 사진 → 하나의 3D <small>(AI)</small></h2>
-      <p class="note">한 제품을 <b>서로 다른 각도에서 2~4장</b>(앞·옆·뒤 등) 찍어 넣으면, AI 가 하나의 3D 모델을 색까지 입혀 만듭니다.
-        배경이 단순하고 제품이 화면 가운데 크게 나온 사진일수록 좋아요.</p>
-      <div id="mvDrop" class="drop" tabindex="0" role="button" aria-label="여러 각도 사진 선택">
-        <div>사진 2~4장을 끌어다 놓거나 눌러서 선택</div>
+
+    <section class="card mv" data-mode-panel="multi" role="tabpanel" aria-labelledby="tabMulti" hidden>
+      <h2>여러 각도 사진 → 하나의 3D</h2>
+      <p class="lead">한 물체를 빙 돌며 찍은 사진으로 <b>뒷면까지 있는 입체</b>를 만듭니다.</p>
+
+      <div class="choice rec">
+        <h3>💻 내 PC에서 만들기</h3>
+        <span class="badge">권장 · 사진이 밖으로 나가지 않음 · 사용량 제한 없음</span>
+        <p class="note" style="margin-top:6px">공식 오픈소스 <a href="https://colmap.github.io/" target="_blank" rel="noopener">COLMAP</a>(사진측량, BSD 라이선스)으로 이 PC 안에서만 계산합니다.</p>
+        <ol>
+          <li><a href="https://github.com/HEO-J-H/Pix2Poly/archive/refs/heads/main.zip">Pix2Poly 내려받기 (ZIP)</a> → 압축 풀기 <small>(Windows · Python 3.10 이상)</small></li>
+          <li><code>scripts\install-colmap.bat</code> 더블클릭 — 공식 COLMAP 자동 설치 (NVIDIA GPU 가 있으면 정밀판)</li>
+          <li><code>run.bat</code> 더블클릭 → 열린 화면의 <b>여러 장</b>에 사진 넣기</li>
+        </ol>
+        <details>
+          <summary>잘 나오게 찍는 법</summary>
+          <ol>
+            <li>물체 주위를 한 바퀴 돌며 <b>15~40장</b> (최소 5장), 옆 사진과 <b>60% 이상 겹치게</b></li>
+            <li>물체는 그대로 두고 사람이 돌기 · 흔들린 사진은 빼기</li>
+            <li>반짝이·투명·무늬 없는 단색 표면은 복원이 어렵습니다 (무광 처리·무늬 테이프가 도움)</li>
+            <li>NVIDIA GPU 가 없으면 대략적인 형태만 — 복원이 안 되면 이유를 알려 줍니다</li>
+          </ol>
+        </details>
       </div>
-      <input id="mvFile" type="file" accept="image/*" multiple hidden>
-      <div id="mvQueue" class="queue"></div>
-      <label class="consent"><input id="mvConsent" type="checkbox"> 사진이 <a id="mvEngine" target="_blank" rel="noopener">AI 공개 데모 서버(Hugging Face)</a>로
-        전송되는 것에 동의합니다. 무료 공유 GPU 라 대기·하루 사용량 제한이 있어요.</label>
-      <div class="row"><button id="mvGo" class="primary" disabled>하나의 3D 로 만들기</button>
-        <button id="mvSample" type="button">예시(버섯 3장)로 해 보기</button></div>
-      <div id="mvStatus" class="status" aria-live="polite"></div>
-      <div class="row"><a id="mvGlb" class="btn" hidden download="pix2poly_multiview.glb">GLB 받기</a>
-        <a id="mvVideo" class="btn" hidden target="_blank" rel="noopener">회전 영상 보기</a></div>
+
+      <details class="choice">
+        <summary>🌐 설치 없이 브라우저에서 (공개 AI 데모 · 선택)</summary>
+        <p class="note" style="margin-top:0">2~4장으로 AI(TRELLIS, MIT)가 형태를 추정합니다. <b>사진이 Hugging Face 서버로 전송</b>되고, 무료 공유 GPU 라 대기·하루 사용량 제한이 있어요.</p>
+        <div id="mvDrop" class="drop" tabindex="0" role="button" aria-label="여러 각도 사진 선택">
+          <div>사진 2~4장을 끌어다 놓거나 눌러서 선택</div>
+        </div>
+        <input id="mvFile" type="file" accept="image/*" multiple hidden>
+        <div id="mvQueue" class="queue"></div>
+        <label class="consent"><input id="mvConsent" type="checkbox">사진이 <a id="mvEngine" target="_blank" rel="noopener">공개 데모 서버(Hugging Face)</a>로 전송되는 것에 동의합니다.</label>
+        <div class="row"><button id="mvGo" class="primary" disabled>하나의 3D 로 만들기</button>
+          <button id="mvSample" type="button" class="link">예시(버섯 3장)</button></div>
+        <div id="mvStatus" class="status" aria-live="polite"></div>
+        <div class="row"><a id="mvGlb" class="btn" hidden download="pix2poly_multiview.glb">GLB 받기</a>
+          <a id="mvVideo" class="btn" hidden target="_blank" rel="noopener">회전 영상</a></div>
+      </details>
     </section>
-    <section class="card">
-      <canvas id="view" aria-label="3D 미리보기 (드래그로 회전, 휠로 확대)"></canvas>
+    </div>
+
+    <section class="card viewer" aria-label="3D 미리보기">
+      <div class="stage">
+        <canvas id="view" aria-label="3D 미리보기 (드래그로 회전, 휠·두 손가락으로 확대)"></canvas>
+        <div id="empty" class="empty">사진을 넣고 [3D 만들기]를 누르면 여기에 나타납니다</div>
+      </div>
+      <p class="hint">드래그: 회전 · 휠/두 손가락: 확대 · 오른쪽 드래그: 이동</p>
       <div class="maps" id="maps"></div>
     </section>
   </div>
@@ -113,6 +185,14 @@ import { imageToRGB, pbrMaps, toCanvas, heightfield, toOBJ } from "./pix2poly.js
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 const $ = (id) => document.getElementById(id);
+// ── 방식 전환 (세그먼트) — 선택은 주소(#multi)에 남겨 새로고침·공유해도 유지
+function setMode(m) {
+  for (const t of document.querySelectorAll(".seg [data-mode]")) t.setAttribute("aria-selected", String(t.dataset.mode === m));
+  for (const p of document.querySelectorAll("[data-mode-panel]")) p.hidden = p.dataset.modePanel !== m;
+  history.replaceState(null, "", m === "multi" ? "#multi" : location.pathname + location.search);
+}
+for (const t of document.querySelectorAll(".seg [data-mode]")) t.onclick = () => setMode(t.dataset.mode);
+setMode(location.hash === "#multi" ? "multi" : "one");
 let items = [], cur = -1;   // 여러 장: [{name, img, url, result}]
 let img = null, result = null;
 
@@ -167,6 +247,7 @@ function select(i) {
   });
   if (result) show(result.mesh, result.canvases);
   for (const b of ["dlGlb", "dlObj", "dlPbr"]) $(b).disabled = !result;
+  $("export").hidden = !result;
 }
 $("drop").onclick = () => $("file").click();
 $("drop").onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") $("file").click(); };
@@ -182,8 +263,8 @@ $("sample").onclick = async () => {
 window.addEventListener("paste", (e) => load(e.clipboardData.files));
 $("clear").onclick = () => {
   items = []; cur = -1; img = result = null; $("queue").innerHTML = "";
-  $("drop").innerHTML = '<div id="dropText">이미지를 끌어다 놓거나 눌러서 선택 (<b>여러 장 가능</b>)</div>';
-  $("clear").hidden = $("dlZip").hidden = true; $("go").disabled = true; $("go").textContent = "3D 만들기"; $("status").textContent = "";
+  $("drop").innerHTML = '<div id="dropText">끌어다 놓거나 눌러서 선택<br><small>여러 장 가능</small></div>';
+  $("clear").hidden = $("dlZip").hidden = $("export").hidden = true; $("go").disabled = true; $("go").textContent = "3D 만들기"; $("status").textContent = "";
 };
 for (const [id, out] of [["grid", "gridV"], ["height", "hV"], ["nstr", "nV"]])
   $(id).oninput = () => { $(out).textContent = $(id).value; if (id === "grid") $("gridV2").textContent = $(id).value; };
@@ -233,7 +314,7 @@ function show(m, cv) {
     metalnessMap: texOf(cv.metallic), aoMap: texOf(cv.ao), side: THREE.DoubleSide,
   });
   geo.setAttribute("uv2", geo.getAttribute("uv"));
-  mesh = new THREE.Mesh(geo, mat); mesh.name = "Pix2Poly"; scene.add(mesh);
+  mesh = new THREE.Mesh(geo, mat); mesh.name = "Pix2Poly"; scene.add(mesh); $("empty").hidden = true;
   $("maps").innerHTML = "";
   for (const [k, c] of Object.entries(cv)) {
     const f = document.createElement("figure"), cc = document.createElement("canvas");
@@ -281,7 +362,7 @@ $("mvSample").onclick = async () => {
   if (!$("mvConsent").checked) $("mvStatus").textContent = "예시 3장 준비됨 — 위 동의에 체크하고 '하나의 3D 로 만들기'를 눌러 주세요";
 };
 $("mvGo").onclick = async () => {
-  $("mvGo").disabled = true; $("mvGlb").hidden = $("mvVideo").hidden = true;
+  $("mvGo").disabled = true; $("mvGlb").hidden = $("mvVideo").hidden = true; $("mvStatus").classList.remove("err");
   try {
     const r = await mv.generate(mvFiles, (t) => { $("mvStatus").textContent = t; });
     const blob = await (await fetch(r.glbUrl)).blob();
@@ -291,12 +372,12 @@ $("mvGo").onclick = async () => {
     mesh = gltf.scene; mesh.name = "Pix2Poly-multiview";
     const box = new THREE.Box3().setFromObject(mesh), size = box.getSize(new THREE.Vector3()).length() || 1;
     mesh.position.sub(box.getCenter(new THREE.Vector3())); mesh.scale.setScalar(2 / size);
-    scene.add(mesh); $("maps").innerHTML = "";
+    scene.add(mesh); $("maps").innerHTML = ""; $("empty").hidden = true;
     $("mvGlb").href = url; $("mvGlb").hidden = false;
     if (r.videoUrl) { $("mvVideo").href = r.videoUrl; $("mvVideo").hidden = false; }
     $("mvStatus").textContent = `완료 · ${r.seconds}초 · 오른쪽 미리보기에서 돌려 보세요 (${(blob.size / 1e6).toFixed(1)}MB)`;
   } catch (e) {
-    $("mvStatus").textContent = "실패: " + (e.message || e);
+    $("mvStatus").textContent = "실패: " + (e.message || e); $("mvStatus").classList.add("err");
   } finally {
     $("mvGo").disabled = !(mvFiles.length >= 2 && $("mvConsent").checked);
   }

@@ -7,6 +7,14 @@ URL 기반 이미지 분석으로 최적화된 3D 오브젝트와 PBR 텍스처�
 **여러 각도 사진 → 하나의 3D (AI)**: 한 제품을 2~4장 찍어 넣으면 공개 AI 데모(TRELLIS, MIT)로 색까지 입힌 GLB 를 만듭니다 —
 무료 공유 GPU 라 대기·하루 사용량 제한이 있고, 이 기능만 사진이 Hugging Face 서버로 전송됩니다(동의 후). 설계: `docs/agent-guides/multiview.md`. TripoSR(GPU)·영상 재구성(COLMAP) 같은 고급 기능은 아래 로컬 실행 버전에서 사용합니다.
 
+## 여러 각도 사진 → 하나의 3D, 내 PC에서 (외부 전송 없음)
+
+1. 이 저장소를 내려받아 압축 풀기 (Windows, Python 3.10+)
+2. `scripts\install-colmap.bat` — 공식 [COLMAP](https://github.com/colmap/colmap/releases)(BSD) 설치. NVIDIA GPU 가 있으면 CUDA판(정밀 복원), 없으면 일반판(대략적인 형태)
+3. `run.bat` → 화면의 **여러 장**에 같은 물체를 돌며 찍은 사진 **5장 이상**(권장 15~40장, 옆 사진과 60% 이상 겹치게)
+
+사진 5장 이상 + COLMAP 이 있으면 자동으로 사진측량(SfM → MVS → Poisson 메시)을 쓰고, 복원된 점이 너무 적으면 결과 대신 이유를 알려 줍니다.
+
 ## 핵심 목표
 
 - 단일 이미지 기반 3D 생성 (Single Image to 3D)
