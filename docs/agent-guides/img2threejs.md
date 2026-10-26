@@ -27,7 +27,8 @@
 ## 3. 단계별 과제 (위에서부터 하나씩 — 각 단계는 테스트 통과로 끝)
 1. **엔진 목록 `backend/app/services/engines.py`** — `ENGINES = {"heightfield": ..., "triposr": ..., "img2threejs": ...}` 각 항목에
    `available() -> tuple[bool, str]`(가능 여부, 이유). img2threejs 는 `IMG2THREEJS_HOME` 과 두 스크립트 존재로 판단.
-   `GET /v1/engines` 가 `[{name, available, reason}]` 반환. 테스트: 환경변수 없음 → img2threejs available=False + 이유에 'IMG2THREEJS_HOME'.
+   `GET /v1/engines` 엔드포인트는 `available()` 함수를 활용하여 각 엔진의 상태(`name`, `available`, `reason`)를 반환한다.
+   테스트: 환경변수 없음 → img2threejs available=False + 이유에 'IMG2THREEJS_HOME'.
 2. **어댑터 `backend/app/services/img2threejs_runner.py`** — `build_from_spec(spec_path, out_dir) -> dict[str, Path]`:
    검증 스크립트 실행(실패 시 stderr 를 담은 ValueError) → 생성 스크립트로 `out_dir/createObjectModel.ts` 생성 → spec 사본 저장.
    테스트: 가짜 스크립트로 성공(파일 생성)·검증 실패(ValueError)·시간 초과 처리.
