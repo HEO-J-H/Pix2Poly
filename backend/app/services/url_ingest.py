@@ -11,19 +11,53 @@ USER_AGENT = "Pix2Poly/0.1 (+https://github.com/HEO-J-H/Pix2Poly)"
 
 
 def _host_is_private(hostname: str) -> bool:
+    """공인(global) 주소가 아니면 True — 사설·루프백·링크로컬(169.254 메타데이터)·예약·멀티캐스트·0.0.0.0 모두 차단."""
     try:
         infos = __import__("socket").getaddrinfo(hostname, None)
     except OSError:
         return True
     for info in infos:
-        addr = info[4][0]
         try:
-            ip = ipaddress.ip_address(addr)
-            if ip.is_private or ip.is_loopback or ip.is_link_local:
-                return True
+            ip = ipaddress.ip_address(info[4][0].split("%")[0])
         except ValueError:
-            continue
+            return True
+        if not ip.is_global:
+            return True
     return False
+
+
+class BlockedURL(ValueError):
+    pass
+
+
+def check_public_url(url: str) -> None:
+    p = urlparse(url)
+    if p.scheme not in ("http", "https") or not p.hostname:
+        raise BlockedURL("http/https 주소만 가능합니다")
+    if _host_is_private(p.hostname):
+        raise BlockedURL("내부망·로컬 주소는 가져올 수 없습니다")
+
+
+async def safe_get(client: httpx.AsyncClient, url: str, max_bytes: int, max_redirects: int = 5) -> httpx.Response:
+    """리다이렉트를 직접 따라가며 단계마다 공인 주소인지 다시 검사하고, max_bytes 를 넘으면 중단 (SSRF·메모리 보호).
+    client 는 follow_redirects=False 여야 함. 반환 응답의 .content 에 본문이 담김."""
+    for _ in range(max_redirects + 1):
+        check_public_url(url)
+        async with client.stream("GET", url) as r:
+            if r.is_redirect and r.headers.get("location"):
+                url = urljoin(url, r.headers["location"])
+                continue
+            r.raise_for_status()
+            if int(r.headers.get("content-length") or 0) > max_bytes:
+                raise ValueError(f"파일이 너무 큽니다 (>{max_bytes // 1048576}MB)")
+            buf = bytearray()
+            async for chunk in r.aiter_bytes(65536):
+                buf += chunk
+                if len(buf) > max_bytes:
+                    raise ValueError(f"파일이 너무 큽니다 (>{max_bytes // 1048576}MB)")
+            r._content = bytes(buf)
+            return r
+    raise BlockedURL("리다이렉트가 너무 많습니다")
 
 
 def check_robots_allowed(page_url: str) -> bool | None:
@@ -75,17 +109,16 @@ async def fetch_page_image_candidates(
     if parsed.hostname and _host_is_private(parsed.hostname):
         return [], None, False
 
-    robots_ok = check_robots_allowed(page_url)
+    robots_ok = await __import__("asyncio").to_thread(check_robots_allowed, page_url)  # urllib 동기 호출 → 스레드
     if robots_ok is False:
         return [], False, False
 
     async with httpx.AsyncClient(
         headers={"User-Agent": USER_AGENT},
-        follow_redirects=True,
+        follow_redirects=False,
         timeout=timeout_s,
     ) as client:
-        r = await client.get(page_url)
-        r.raise_for_status()
+        r = await safe_get(client, page_url, 5 * 1024 * 1024)
         text = r.text
 
     collector = _ImageURLCollector()

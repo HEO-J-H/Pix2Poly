@@ -22,7 +22,7 @@ from app.schemas import (
 from app.services.jobs import JobRecord, job_store
 from app.services.mesh_worker import build_mesh_for_image_job
 from app.services.storage import OUTPUT_ROOT, UPLOAD_ROOT, save_job_files
-from app.services.url_ingest import USER_AGENT, fetch_page_image_candidates
+from app.services.url_ingest import safe_get, USER_AGENT, fetch_page_image_candidates
 from app.services.video_pipeline import build_video_job
 
 app = FastAPI(
@@ -33,11 +33,27 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    # 아무 웹사이트나 이 PC 의 API 를 호출하지 못하게 — 로컬 화면과 공개 웹 버전만
+    allow_origins=["http://127.0.0.1:8000", "http://localhost:8000", "https://heo-j-h.github.io"],
+    allow_origin_regex=r"http://(127\.0\.0\.1|localhost):\d+",
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+MAX_IMAGE_BYTES = 50 * 1024 * 1024   # 장당 50MB
+MAX_FILES = 200
+
+
+async def _read_limited(uf: UploadFile) -> bytes:
+    """업로드를 조금씩 읽어 장당 상한을 넘으면 413 (한 번에 메모리로 올리지 않음)."""
+    buf = bytearray()
+    while chunk := await uf.read(1024 * 1024):
+        buf += chunk
+        if len(buf) > MAX_IMAGE_BYTES:
+            raise HTTPException(status_code=413, detail=f"{uf.filename}: 파일이 너무 큽니다 (장당 50MB 까지)")
+    return bytes(buf)
 
 
 @app.get("/health")
@@ -71,7 +87,7 @@ async def create_single_image_job(
     notes: Optional[str] = Form(None),
 ) -> JobResponse:
     rec = await job_store.create(JobType.single_image, detail={})
-    raw = await file.read()
+    raw = await _read_limited(file)
     upload_paths = save_job_files(rec.job_id, [(file.filename, raw)])
     await job_store.set_status(
         rec.job_id,
@@ -96,7 +112,9 @@ async def create_multi_image_job(
     min_images: int = Form(2),
     notes: Optional[str] = Form(None),
 ) -> JobResponse:
-    if len(files) < min_images:
+    if len(files) > MAX_FILES:
+        raise HTTPException(status_code=413, detail=f"사진은 한 번에 {MAX_FILES}장까지")
+    if len(files) < max(2, min_images):
         raise HTTPException(
             status_code=400,
             detail=f"At least {min_images} images required, got {len(files)}",
@@ -104,7 +122,7 @@ async def create_multi_image_job(
     rec = await job_store.create(JobType.multi_image, detail={})
     pairs: List[Tuple[Optional[str], bytes]] = []
     for uf in files:
-        pairs.append((uf.filename, await uf.read()))
+        pairs.append((uf.filename, await _read_limited(uf)))
     upload_paths = save_job_files(rec.job_id, pairs)
     await job_store.set_status(
         rec.job_id,
@@ -200,15 +218,15 @@ async def create_url_images_job(
     failed_urls: List[str] = []
     async with httpx.AsyncClient(
         headers={"User-Agent": USER_AGENT},
-        follow_redirects=True,
+        follow_redirects=False,
         timeout=30.0,
     ) as client:
         for url in body.selected_urls[:10]:  # max 10 images
             try:
-                r = await client.get(url)
-                r.raise_for_status()
+                r = await safe_get(client, url, MAX_IMAGE_BYTES)
                 ct = r.headers.get("content-type", "")
                 if not ct.startswith("image/"):
+                    failed_urls.append(url)
                     continue
                 ext = ct.split("/")[-1].split(";")[0].strip() or "jpg"
                 fname = url.split("/")[-1].split("?")[0] or f"image.{ext}"

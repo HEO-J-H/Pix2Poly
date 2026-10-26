@@ -43,9 +43,8 @@ def _sobel(gray: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         gx = cv2.Sobel(g8, cv2.CV_32F, 1, 0, ksize=3)
         gy = cv2.Sobel(g8, cv2.CV_32F, 0, 1, ksize=3)
         # Normalise to [-1, 1]
-        mx = max(np.abs(gx).max(), 1e-6)
-        my = max(np.abs(gy).max(), 1e-6)
-        return gx / mx, gy / my
+        m = max(np.abs(gx).max(), np.abs(gy).max(), 1e-6)
+        return gx / m, gy / m
     except ImportError:
         pass
 
@@ -60,9 +59,8 @@ def _sobel(gray: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         for dj in range(3):
             gx += kx[di, dj] * pad[di : di + h, dj : dj + w]
             gy += ky[di, dj] * pad[di : di + h, dj : dj + w]
-    mx = max(np.abs(gx).max(), 1e-6)
-    my = max(np.abs(gy).max(), 1e-6)
-    return gx / mx, gy / my
+    m = max(np.abs(gx).max(), np.abs(gy).max(), 1e-6)  # X·Y 같은 값으로 나눠야 기울기 비율이 유지됨
+    return gx / m, gy / m
 
 
 def _box_blur(arr: np.ndarray, radius: int) -> np.ndarray:
@@ -93,7 +91,7 @@ def _box_blur(arr: np.ndarray, radius: int) -> np.ndarray:
 def _generate_normal_map(gray: np.ndarray, strength: float = 2.0) -> np.ndarray:
     """
     gray float32 HxW → normal map uint8 HxWx3.
-    Convention: R=+X, G=+Y, B=+Z.  Tangent-space (purple-ish base).
+    Convention: OpenGL / glTF — R=+X, G=+Y(up), B=+Z. (Unreal/DirectX: invert G)  Tangent-space (purple-ish base).
     """
     gx, gy = _sobel(gray)
     gx = gx * strength
@@ -101,7 +99,7 @@ def _generate_normal_map(gray: np.ndarray, strength: float = 2.0) -> np.ndarray:
     gz = np.ones_like(gx)
     length = np.sqrt(gx ** 2 + gy ** 2 + gz ** 2) + 1e-8
     nx = -gx / length
-    ny = -gy / length
+    ny = gy / length  # OpenGL(+Y 위) 규약 — glTF·Blender·Unity 기본. gy 는 이미지 아래 방향 기울기라 부호가 반대 (Unreal 은 G 반전)
     nz = gz / length
     # Map [-1,1] → [0,255]
     normal = np.stack(

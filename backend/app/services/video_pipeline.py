@@ -16,6 +16,8 @@ Environment variables:
 """
 from __future__ import annotations
 
+import asyncio
+
 import os
 import shutil
 import subprocess
@@ -69,11 +71,20 @@ def ffmpeg_available() -> bool:
 async def _download_video(url: str, dest: Path) -> None:
     """Stream-download a video URL to dest, enforcing size limit."""
     max_bytes = _MAX_MB * 1024 * 1024
+    from app.services.url_ingest import check_public_url
     async with httpx.AsyncClient(
         headers={"User-Agent": USER_AGENT},
-        follow_redirects=True,
+        follow_redirects=False,
         timeout=httpx.Timeout(30.0, read=120.0),
     ) as client:
+        for _ in range(6):  # 리다이렉트마다 공인 주소인지 다시 검사 (내부망 접근 차단)
+            check_public_url(url)
+            head = await client.head(url)
+            if head.is_redirect and head.headers.get("location"):
+                url = str(head.next_request.url) if head.next_request else head.headers["location"]
+                continue
+            break
+        check_public_url(url)
         async with client.stream("GET", url) as r:
             r.raise_for_status()
             # Content-Length check
@@ -158,7 +169,7 @@ async def build_video_job(job_id: UUID) -> None:
                 "and add to PATH, or set PIX2POLY_FFMPEG_PATH."
             )
         frames_dir = video_dir / "frames"
-        frames = _extract_frames(video_path, frames_dir)
+        frames = await asyncio.to_thread(_extract_frames, video_path, frames_dir)
 
         await job_store.set_status(
             job_id, JobStatus.running,
@@ -169,14 +180,14 @@ async def build_video_job(job_id: UUID) -> None:
 
         # 3. 3D reconstruction
         if colmap_available() and len(frames) >= 5:
-            obj_abs, glb_abs = run_colmap_pipeline(frames_dir, out_dir, sequential=True)
+            obj_abs, glb_abs = await asyncio.to_thread(run_colmap_pipeline, frames_dir, out_dir, sequential=True)
             method = "video_colmap_sfm"
             note = f"Video → {len(frames)} frames → COLMAP SfM+MVS → Poisson mesh."
             ok_msg = f"Mesh ready from video (COLMAP, {len(frames)} frames)."
         else:
             # Fallback: heightfield from middle frame
             mid = frames[len(frames) // 2]
-            obj_abs, glb_abs = mesh_from_image_file(mid, out_dir, grid=200, height_scale=0.45)
+            obj_abs, glb_abs = await asyncio.to_thread(mesh_from_image_file, mid, out_dir, grid=200, height_scale=0.45)
             method = "video_single_frame_heightfield"
             note = (
                 f"Video → {len(frames)} frames extracted; COLMAP unavailable or too few frames. "
@@ -191,7 +202,7 @@ async def build_video_job(job_id: UUID) -> None:
         pbr_detail: dict = {}
         try:
             rep_frame = frames[0]
-            pbr_paths = generate_pbr_maps(rep_frame, out_dir)
+            pbr_paths = await asyncio.to_thread(generate_pbr_maps, rep_frame, out_dir)
             pbr_detail = {
                 k: str(v.relative_to(backend_root)).replace("\\", "/")
                 for k, v in pbr_paths.items()

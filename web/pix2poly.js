@@ -43,7 +43,8 @@ export function sobel(gray, w, h) {
     gx[y * w + x] = vx; gy[y * w + x] = vy;
     mx = Math.max(mx, Math.abs(vx)); my = Math.max(my, Math.abs(vy));
   }
-  for (let i = 0; i < w * h; i++) { gx[i] /= mx; gy[i] /= my; }
+  const m = Math.max(mx, my, 1e-6);  // X·Y 같은 값으로 나눠 기울기 비율 유지
+  for (let i = 0; i < w * h; i++) { gx[i] /= m; gy[i] /= m; }
   return [gx, gy];
 }
 
@@ -71,7 +72,7 @@ export function pbrMaps(rgb, w, h, normalStrength = 2.0) {
   const normal = new Float32Array(n * 3);
   for (let i = 0; i < n; i++) {
     const x = gx[i] * normalStrength, y = gy[i] * normalStrength, len = Math.sqrt(x * x + y * y + 1) + 1e-8;
-    normal[i * 3] = (-x / len + 1) / 2; normal[i * 3 + 1] = (-y / len + 1) / 2; normal[i * 3 + 2] = (1 / len + 1) / 2;
+    normal[i * 3] = (-x / len + 1) / 2; normal[i * 3 + 1] = (y / len + 1) / 2;  /* OpenGL +Y (glTF·Blender·Unity) */ normal[i * 3 + 2] = (1 / len + 1) / 2;
   }
   const b4 = boxBlur(gray, w, h, 4), rough = new Float32Array(n);
   let dmax = 0;

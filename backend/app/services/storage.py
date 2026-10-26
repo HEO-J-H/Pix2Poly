@@ -38,7 +38,7 @@ def resolve_under_uploads(rel: str) -> Path:
     """Resolve relative path (e.g. uploads/uuid/file.png); must stay under uploads/."""
     p = (_BACKEND_ROOT / rel.replace("\\", "/")).resolve()
     upl = UPLOAD_ROOT.resolve()
-    if not str(p).startswith(str(upl)):
+    if not p.is_relative_to(upl):
         raise ValueError("Path must be under uploads/")
     return p
 
