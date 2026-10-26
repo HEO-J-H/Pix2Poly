@@ -1,4 +1,4 @@
-﻿# Pix2Poly - 공식 COLMAP(사진측량, BSD) 릴리스를 내려받아 colmap\ 에 설치
+﻿# Pix2Poly - 공식 COLMAP(사진측량, BSD) → colmap\, OpenMVS(텍스처, AGPL) → openmvs\ 설치
 # NVIDIA GPU 가 있으면 CUDA판(정밀 복원), 없으면 일반판(대략적인 형태). 출처: github.com/colmap/colmap/releases
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -19,6 +19,17 @@ try {
     Move-Item $bat.DirectoryName 'colmap'
     Remove-Item -Recurse -Force 'colmap-tmp', 'colmap-download.zip' -ErrorAction SilentlyContinue
     & .\colmap\COLMAP.bat -h | Select-Object -First 2
+    # OpenMVS (AGPL, 별도 실행 파일로만 호출) — 복원 메시에 사진 색(텍스처) 입히기
+    $mvsUrl = 'https://github.com/cdcseacave/openMVS/releases/download/v2.4.0/OpenMVS_Windows_x64.zip'
+    Write-Host "OpenMVS 2.4.0 내려받는 중... (약 21MB)  $mvsUrl"
+    Invoke-WebRequest -Uri $mvsUrl -OutFile 'openmvs-download.zip'
+    if (Test-Path 'openmvs-tmp') { Remove-Item -Recurse -Force 'openmvs-tmp' }
+    Expand-Archive -Force 'openmvs-download.zip' 'openmvs-tmp'
+    $tm = Get-ChildItem -Recurse -Filter 'TextureMesh.exe' 'openmvs-tmp' | Select-Object -First 1
+    if (-not $tm) { throw '압축 안에서 TextureMesh.exe 를 찾지 못했습니다.' }
+    if (Test-Path 'openmvs') { Remove-Item -Recurse -Force 'openmvs' }
+    Move-Item $tm.DirectoryName 'openmvs'
+    Remove-Item -Recurse -Force 'openmvs-tmp', 'openmvs-download.zip' -ErrorAction SilentlyContinue
     Write-Host ''
     Write-Host "설치 완료. run.bat 으로 Pix2Poly 를 실행하고 '여러 장'에 같은 물체 사진을 5장 이상 넣으세요."
 } catch {

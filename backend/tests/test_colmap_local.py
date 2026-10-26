@@ -25,3 +25,18 @@ def test_gpu_follows_build(monkeypatch):
     assert cr._use_gpu() == 1
     monkeypatch.setenv("PIX2POLY_COLMAP_GPU", "0")
     assert cr._use_gpu() == 0
+
+
+def test_black_share_ignores_empty_atlas(tmp_path):
+    import numpy as np
+    from PIL import Image
+    a = np.zeros((10, 10, 3), dtype=np.uint8)
+    a[:, :5] = (255, 127, 39)   # OpenMVS 빈칸(주황) — 계산에서 제외
+    a[:, 5:8] = (120, 200, 90)  # 색 있음
+    Image.fromarray(a).save(tmp_path / "t.png")  # 나머지 2열은 검정
+    assert abs(cr._black_share(tmp_path / "t.png") - 0.4) < 1e-6
+
+
+def test_texture_skipped_without_openmvs(tmp_path, monkeypatch):
+    monkeypatch.setattr(cr, "MVS_DIR", tmp_path / "none")
+    assert cr.texture_mesh(tmp_path, tmp_path / "m.ply", tmp_path / "out") is None

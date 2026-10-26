@@ -469,6 +469,7 @@
       <div class="thumb-grid" id="single-preview-wrap">
         <img id="single-preview" hidden alt="미리보기" style="width:100%;height:auto;max-height:140px;object-fit:contain;margin-top:.4rem;" />
       </div>
+      <label class="bgopt" style="display:flex;gap:.5rem;align-items:center;min-height:44px;margin:0;cursor:pointer"><input type="checkbox" id="single-nobg" style="width:20px;height:20px" >배경 지우기 <small style="color:var(--muted)">(물체만 남김 · 이 PC 에서 처리)</small></label>
       <div class="step"><i>2</i>만들기</div>
       <div>
         <button class="btn" id="btn-single" style="width:100%">3D 만들기</button>
@@ -485,6 +486,7 @@
       <div class="thumb-grid" id="multi-preview"></div>
       <details class="hint"><summary style="cursor:pointer;min-height:36px;display:flex;align-items:center">잘 나오게 찍는 법</summary>
         옆 사진과 60% 이상 겹치게 · 물체는 그대로 두고 사람이 돌기 · 높이도 바꿔 가며 · 흔들린 사진 빼기 · 반짝이·투명·무늬 없는 표면은 어려움</details>
+      <label class="bgopt" style="display:flex;gap:.5rem;align-items:center;min-height:44px;margin:0;cursor:pointer"><input type="checkbox" id="multi-nobg" style="width:20px;height:20px" >배경 지우기 <small style="color:var(--muted)">(물체만 남김 · 이 PC 에서 처리)</small></label>
       <div class="step"><i>2</i>만들기 <small style="font-weight:400;color:var(--muted)">(수 분)</small></div>
       <div>
         <button class="btn" id="btn-multi" style="width:100%">하나의 3D 로 만들기</button>
@@ -849,11 +851,14 @@
     try {
       var c = await fetchJson(base() + "/v1/capabilities");
       if (!c.colmap) { el.className = "cap warn"; el.innerHTML = "COLMAP 미설치 — <code>scripts\\install-colmap.bat</code> 실행 후 다시 열어 주세요. (지금은 첫 사진으로 부조 3D)"; }
-      else if (c.colmap_gpu) { el.className = "cap ok"; el.textContent = "✓ COLMAP GPU판 — 정밀 복원 가능 (" + c.min_colmap_images + "장 이상)"; }
+      else if (c.colmap_gpu) { el.className = "cap ok"; el.textContent = "✓ COLMAP GPU판 — 정밀 복원 가능 (" + c.min_colmap_images + "장 이상)" + (c.openmvs ? " · ✓ 사진 색 입히기(OpenMVS)" : " · 색 입히기는 install-colmap.bat 재실행 시 추가"); }
       else { el.className = "cap warn"; el.textContent = "COLMAP 일반판(GPU 없음) — 대략적인 형태만. NVIDIA GPU 가 있으면 install-colmap.bat 을 다시 실행"; }
     } catch (e) { el.className = "cap"; el.textContent = "서버 연결 후 표시됩니다"; }
   }
   checkCaps();
+  fetchJson(base() + "/v1/capabilities").then(function (c) {  // 배경 제거 미설치면 옵션 숨김
+    if (!c.remove_bg) document.querySelectorAll(".bgopt").forEach(function (e) { e.hidden = true; });
+  }).catch(function () {});
   document.getElementById("btn-health").onclick = function () { saveBase(); checkHealth(); checkCaps(); };
   apiBaseEl.addEventListener("change", saveBase);
 
@@ -875,6 +880,7 @@
     try {
       var fd = new FormData();
       fd.append("file", f);
+      if (document.getElementById("single-nobg").checked) fd.append("remove_bg", "true");
       var data = await fetchJson(base() + "/v1/jobs/single-image", { method: "POST", body: fd });
       data = enrichForDisplay(data);
       showOut(data);
@@ -909,6 +915,7 @@
     try {
       var fd = new FormData();
       for (var i = 0; i < files.length; i++) fd.append("files", files[i]);
+      if (document.getElementById("multi-nobg").checked) fd.append("remove_bg", "true");
       var data = await fetchJson(base() + "/v1/jobs/multi-image", { method: "POST", body: fd });
       data = enrichForDisplay(data);
       showOut(data);

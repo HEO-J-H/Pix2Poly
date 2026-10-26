@@ -89,6 +89,7 @@ def run_colmap_sfm(
     image_dir: Path,
     work_dir: Path,
     sequential: bool = False,
+    mask_dir: Path | None = None,
 ) -> Path:
     """
     Run COLMAP SfM + MVS on a directory of images.
@@ -110,6 +111,7 @@ def run_colmap_sfm(
         "--database_path", str(db_path),
         "--image_path", str(image_dir),
         "--ImageReader.single_camera", "1",
+        *(["--ImageReader.mask_path", str(mask_dir)] if mask_dir else []),
         "--FeatureExtraction.use_gpu", str(gpu),
     ], work_dir)
 
@@ -263,10 +265,71 @@ def _ply_vertex_count(path: Path) -> int:
     return 0
 
 
+MVS_DIR = REPO_ROOT / "openmvs"  # scripts/install-colmap.bat 이 OpenMVS(AGPL)를 여기에 — 별도 실행 파일로만 호출
+
+
+def openmvs_available() -> bool:
+    return (MVS_DIR / "TextureMesh.exe").is_file() and (MVS_DIR / "InterfaceCOLMAP.exe").is_file()
+
+
+TEXTURE_FACES = (30000, 25000, 40000)  # 잘게 쪼갠 메시는 색이 노이즈처럼 입혀지고 OpenMVS 가 종종 비정상 종료 → 줄여서 시도
+MAX_BLACK_SHARE = 0.25                  # 텍스처의 검은(색 못 찾은) 부분이 이보다 많으면 정점 색 메시를 대신 사용
+
+
+def _black_share(tex: Path) -> float:
+    import numpy as np
+    from PIL import Image
+    a = np.asarray(Image.open(tex).convert("RGB")).astype(int)
+    empty = (abs(a[..., 0] - 255) < 20) & (abs(a[..., 1] - 127) < 30) & (a[..., 2] < 60)  # OpenMVS 빈칸(주황)
+    used = ~empty
+    return float(((a.sum(2) < 30) & used).sum() / max(1, used.sum()))
+
+
+def texture_mesh(dense_dir: Path, mesh_ply: Path, out_dir: Path) -> tuple[Path, Path] | None:
+    """COLMAP 정밀 복원 결과(왜곡 보정된 사진·카메라)로 메시에 사진 색을 입힘 (OpenMVS TextureMesh).
+    성공·품질 통과면 (obj, glb), 아니면 None (정점 색 메시 유지)."""
+    if not openmvs_available():
+        return None
+    import trimesh
+    work = dense_dir.parent / "mvs"
+    work.mkdir(parents=True, exist_ok=True)
+    try:
+        _run([str(MVS_DIR / "InterfaceCOLMAP.exe"), "-i", str(dense_dir), "-o", str(work / "scene.mvs"),
+              "--image-folder", str(dense_dir / "images"), "-w", str(work)], work)
+        for f in work.glob("depth*.dmap"):  # 깊이맵을 쓰면 가림 판정이 어긋나 검게 칠해지는 면이 많음
+            f.unlink()
+        src = trimesh.load(str(mesh_ply), process=False)
+    except (RuntimeError, OSError, ValueError, subprocess.SubprocessError):
+        return None
+    for n in TEXTURE_FACES:
+        try:
+            small = work / f"mesh{n}.ply"
+            (src.simplify_quadric_decimation(face_count=n) if len(src.faces) > n else src).export(str(small))
+            for f in work.glob("textured*"):
+                f.unlink()
+            _run([str(MVS_DIR / "TextureMesh.exe"), str(work / "scene.mvs"), "-m", str(small),
+                  "-o", str(work / "textured.obj"), "--export-type", "obj", "-w", str(work)], work)
+            obj = work / "textured.obj"
+            tex = next(work.glob("textured*_map_Kd.*"), None)
+            if not obj.is_file() or not tex or _black_share(tex) > MAX_BLACK_SHARE:
+                continue
+            out_dir.mkdir(parents=True, exist_ok=True)
+            for f in work.glob("textured*"):
+                if f.suffix.lower() in (".obj", ".mtl", ".png", ".jpg", ".jpeg"):
+                    shutil.copy2(f, out_dir / f.name)
+            glb = out_dir / "model.glb"
+            trimesh.load(str(obj), force="mesh").export(str(glb))
+            return out_dir / obj.name, glb
+        except (RuntimeError, OSError, ValueError, subprocess.SubprocessError, ImportError):
+            continue
+    return None
+
+
 def run_colmap_pipeline(
     image_dir: Path,
     out_dir: Path,
     sequential: bool = False,
+    remove_bg: bool = False,
 ) -> tuple[Path, Path]:
     """
     End-to-end: images → COLMAP SfM+MVS → Poisson mesh → OBJ/GLB.
@@ -275,13 +338,23 @@ def run_colmap_pipeline(
     work_dir = out_dir / "_colmap_work"
     work_dir.mkdir(parents=True, exist_ok=True)
     try:
-        fused_ply = run_colmap_sfm(image_dir, work_dir, sequential=sequential)
+        mask_dir = None
+        if remove_bg:  # 물체에서만 특징점을 찾게 — 배경이 복잡하거나 회전대 위 촬영에 효과
+            from app.services import bg_remove
+            if bg_remove.available() and bg_remove.write_masks(image_dir, work_dir / "masks"):
+                mask_dir = work_dir / "masks"
+        fused_ply = run_colmap_sfm(image_dir, work_dir, sequential=sequential, mask_dir=mask_dir)
         n = _ply_vertex_count(fused_ply)
         if n < MIN_POINTS:
             raise RuntimeError(
                 f"복원된 점이 {n}개뿐이라 형태를 만들 수 없습니다. 사진을 더 겹치게(옆 사진과 60% 이상) 찍거나, "
                 "NVIDIA GPU 가 있으면 scripts/install-colmap.bat 으로 GPU판을 설치하세요(정밀 복원).")
         obj_abs, glb_abs = ply_to_mesh(fused_ply, out_dir)
+        meshed = fused_ply.with_name("meshed-poisson.ply")
+        if fused_ply.name == "fused.ply" and meshed.is_file():  # 정밀(GPU) 복원일 때만 — 사진 색 입히기
+            textured = texture_mesh(fused_ply.parent, meshed, out_dir)
+            if textured:
+                obj_abs, glb_abs = textured
     finally:
         # Clean up large intermediate files to save disk
         for pattern in ["*.bin", "*.dat"]:

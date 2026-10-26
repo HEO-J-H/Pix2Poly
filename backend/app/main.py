@@ -67,7 +67,10 @@ async def capabilities() -> Dict[str, object]:
     from app.services.colmap_runner import colmap_available, colmap_has_cuda
     from app.services.mesh_worker import MIN_COLMAP_IMAGES
     has = colmap_available()
-    return {"colmap": has, "colmap_gpu": has and colmap_has_cuda(), "min_colmap_images": MIN_COLMAP_IMAGES}
+    from app.services import bg_remove
+    from app.services.colmap_runner import openmvs_available
+    return {"colmap": has, "colmap_gpu": has and colmap_has_cuda(), "min_colmap_images": MIN_COLMAP_IMAGES,
+            "openmvs": openmvs_available(), "remove_bg": bg_remove.available()}
 
 
 def _to_response(rec: JobRecord) -> JobResponse:
@@ -85,6 +88,7 @@ async def create_single_image_job(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     notes: Optional[str] = Form(None),
+    remove_bg: bool = Form(False),
 ) -> JobResponse:
     rec = await job_store.create(JobType.single_image, detail={})
     raw = await _read_limited(file)
@@ -97,6 +101,7 @@ async def create_single_image_job(
             "filename": file.filename,
             "content_type": file.content_type,
             "notes": notes,
+            "remove_bg": remove_bg,
             "upload_paths": upload_paths,
             "pipeline": "single-image → heightfield mesh → outputs/model.obj + model.glb",
         },
@@ -111,6 +116,7 @@ async def create_multi_image_job(
     files: List[UploadFile] = File(...),
     min_images: int = Form(2),
     notes: Optional[str] = Form(None),
+    remove_bg: bool = Form(False),
 ) -> JobResponse:
     if len(files) > MAX_FILES:
         raise HTTPException(status_code=413, detail=f"사진은 한 번에 {MAX_FILES}장까지")
@@ -132,6 +138,7 @@ async def create_multi_image_job(
             "count": len(files),
             "filenames": [f.filename for f in files],
             "notes": notes,
+            "remove_bg": remove_bg,
             "upload_paths": upload_paths,
             "pipeline": "multi-image → first image heightfield → outputs/model.obj + model.glb",
         },

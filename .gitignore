@@ -36,3 +36,7 @@ colmap/
 colmap.zip
 third_party/
 Image/
+
+openmvs/
+openmvs-download.zip
+colmap-download.zip

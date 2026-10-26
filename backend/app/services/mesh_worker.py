@@ -41,6 +41,12 @@ async def build_mesh_for_image_job(job_id: UUID) -> None:
 
         out_dir = ensure_output_dir(job_id)
         backend = mesh_backend()
+        if (rec.detail or {}).get("remove_bg") and rec.type != JobType.multi_image:
+            from app.services import bg_remove
+            if bg_remove.available():  # 1장: 배경 지우고 그 사진으로 메시·PBR (배경은 높이 0)
+                await job_store.set_status(job_id, JobStatus.running, "배경 지우는 중…")
+                cut = await asyncio.to_thread(bg_remove.cutout, img_path, out_dir / "cutout.png")
+                img_path = await asyncio.to_thread(bg_remove.flatten_on_black, cut, out_dir / "input_nobg.png")
 
         # 여러 각도 사진 → COLMAP 사진측량 (이 PC 에서만 실행, 외부 서버 전송 없음)
         from app.services.colmap_runner import colmap_available, colmap_has_cuda, run_colmap_pipeline
@@ -54,7 +60,8 @@ async def build_mesh_for_image_job(job_id: UUID) -> None:
             await job_store.set_status(job_id, JobStatus.running,
                                        f"사진 {len(paths)}장으로 3D 복원 중 ({'정밀·GPU' if dense else '대략·CPU'}) — 수 분 걸립니다")
             img_dir = UPLOAD_ROOT / str(job_id)
-            obj_abs, glb_abs = await asyncio.to_thread(run_colmap_pipeline, img_dir, out_dir)
+            obj_abs, glb_abs = await asyncio.to_thread(run_colmap_pipeline, img_dir, out_dir,
+                                                       remove_bg=bool((rec.detail or {}).get("remove_bg")))
             method = "colmap_dense_poisson" if dense else "colmap_sparse_poisson"
             note = ("COLMAP SfM + MVS (GPU) + Poisson — 사진측량 결과." if dense else
                     "CUDA 없는 COLMAP: 희소 점으로 만든 대략적인 형태입니다. NVIDIA GPU 가 있으면 install-colmap.bat 으로 GPU판 설치.")
