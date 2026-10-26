@@ -21,4 +21,4 @@
 - [x] (agent) [p-a8529c833e|사이트·UX] img2threejs 가이드 문서 블록 수정: docs/agent-guides/img2threejs.md 파일의 검색 블록을 현재 구현된 엔진 목록과 일치하도록 수정하고, 해당 섹션에 `available()` 함수와 GET /v1/engines 엔드포인트 설명을 추가한다.
 - [ ] (agent:보류) [p-4bbef4f094|콘텐츠] 엔진 API 구현 및 테스트 추가: backend/app/services/engines.py에 `available() -> (bool, str)` 구현, FastAPI 라우터에 GET /v1/engines 추가, backend/tests/test_core.py에 정상/오류 케이스 테스트 작성 후 PR #1 생성·자동 머지 — [4] tests=False security=[] — 리뷰 생략
 - [x] (agent) [p-8c03954852|콘텐츠] Trellis C++ GPU 추론 설계 가이드 작성: docs/agent-guides/trellis_integration.md 작성: 라이선스(MIT/Apache-2.0), GPU 요구사항, 파이프라인 인터페이스(없으면 건너뛰기), 예상 성능 효과 명시 후 PR #4 재개 — 가이드 작성 완료
-- [ ] (agent) [guide:trellis_integration] 1단계: backend/app/trellis_cpp.py available()/run() 과 가짜 subprocess 테스트
+- [ ] (agent:보류) [guide:trellis_integration] 1단계: backend/app/trellis_cpp.py available()/run() 과 가짜 subprocess 테스트 — [4] tests=True security=['위험 함수 사용: subprocess'] — 리뷰 생략

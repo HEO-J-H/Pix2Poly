@@ -34,3 +34,4 @@
 - https://github.com/pwilkin/trellis.cpp/wiki · https://huggingface.co/LocalAI-io/TRELLIS.2-4B-GGUF · https://huggingface.co/ilintar/trellis2-gguf · https://github.com/microsoft/TRELLIS
 
 ## 진행 기록·배운 점
+- 2026-10-26 [보류] 1단계: backend/app/trellis_cpp.py available()/run() 과 가짜 subpr: 테스트 실패 — 24 passed, 1 warning in 1.20s 보안: ['위험 함수 사용: subprocess']
