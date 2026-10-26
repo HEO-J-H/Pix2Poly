@@ -16,7 +16,7 @@
 - [x] (agent) [p-0f6b067300|콘텐츠] FlexPart 논문 파트별 3D 생성 참고: 단일 이미지 기반 파트별 3D 생성 논문 FlexPart의 가변 세분성(variable granularity) 개념을 향후 다중 파트 메쉬 출력 설계에 반영
 - [ ] (agent:보류) [p-55041a0e9b|사이트·UX] img2threejs 가이드 1단계 재시도: backend/app/services/engines.py에 available()=(bool, 이유) 검증 함수와 GET /v1/engines 엔드포인트를 구현하고 test_core.py에 테스트를 추가합니다. — [4] 패치 적용 실패: ['docs/agent-guides/img2threejs.md: search 블록이 정확히 1회 일치하지 않음']
 - [x] (agent) [p-bceae014ad|운영·비용] 대기 중인 PR 확인 및 머지 검토: GitHub에서 PR #7의 변경 사항을 검토하고 승인 여부를 결정합니다.
-- [ ] (agent) PR #8 다시 하기 — FlexPart 논문 파트별 3D 생성 참고: 단일 이미지 기반 파트별 3 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+- [ ] (agent:보류) PR #8 다시 하기 — FlexPart 논문 파트별 3D 생성 참고: 단일 이미지 기반 파트별 3 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기 — [4] tests=False security=[] — 리뷰 생략
 - [x] (agent) [p-50a640e33a|콘텐츠] FlexPart 파트 기반 이미지→3D 엔진 도입: FlexPart을 선택 엔진으로 구현해 이미지 → 가변 입체 파트 생성 기능을 추가하고, 기존 TripoSR과 병행 선택 가능하도록 backend/app/services/flexpart_runner.py와 job 오케스트레이션에 옵션을 삽입
 - [x] (agent) [p-a8529c833e|사이트·UX] img2threejs 가이드 문서 블록 수정: docs/agent-guides/img2threejs.md 파일의 검색 블록을 현재 구현된 엔진 목록과 일치하도록 수정하고, 해당 섹션에 `available()` 함수와 GET /v1/engines 엔드포인트 설명을 추가한다.
 - [ ] (agent:보류) [p-4bbef4f094|콘텐츠] 엔진 API 구현 및 테스트 추가: backend/app/services/engines.py에 `available() -> (bool, str)` 구현, FastAPI 라우터에 GET /v1/engines 추가, backend/tests/test_core.py에 정상/오류 케이스 테스트 작성 후 PR #1 생성·자동 머지 — [4] tests=False security=[] — 리뷰 생략
