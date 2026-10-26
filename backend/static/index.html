@@ -379,6 +379,48 @@
     .row { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
     .mt { margin-top: .5rem; }
     .hint { font-size: .75rem; color: var(--muted); margin-top: .35rem; }
+    /* ── 휴먼 인터페이스 정리 (웹 버전과 같은 원칙): 밝은/어두운 테마, 44px 터치 영역, 단계 표시, 고급 기능은 접기 ── */
+    :root {
+      --bg:#f5f5f7; --surface:#fff; --surface2:#f0f0f3; --border:rgba(0,0,0,.1); --text:#1d1d1f; --muted:#6e6e73;
+      --accent:#0a66ff; --accent2:#1f9d55; --ok:#1f9d55; --warn:#b25000; --err:#d70015; --radius:12px; --viewer:#1c1d21;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#000; --surface:#1c1c1e; --surface2:#2c2c2e; --border:rgba(255,255,255,.12); --text:#f5f5f7; --muted:#a1a1a6;
+              --accent:#4c8dff; --ok:#34c759; --warn:#ff9f0a; --err:#ff453a; --viewer:#111214; }
+    }
+    body { font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+    .topbar { padding: .7rem 1.25rem; }
+    .topbar h1 { font-size: 1.25rem; color: var(--text); letter-spacing:-.01em; }
+    .panel-left { width: 360px; }
+    .mode-tabs { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; margin:.8rem 1rem; padding:3px; background:var(--border); border:0; border-radius:12px; }
+    .mode-tab { min-height:40px; border:0; border-radius:10px; background:none; color:var(--text); font-size:.85rem; font-weight:600; padding:.3rem; }
+    .mode-tab:hover { background:rgba(127,127,127,.12); color:var(--text); }
+    .mode-tab.active { background:var(--surface); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.15); }
+    .panel-section { padding: 1rem 1.1rem; }
+    .panel-section-title { font-size:1.05rem; font-weight:700; letter-spacing:-.01em; text-transform:none; color:var(--text); margin-bottom:.25rem; }
+    .lead { font-size:.85rem; color:var(--muted); margin-bottom:.6rem; }
+    .step { display:flex; gap:.55rem; align-items:center; margin:.9rem 0 .45rem; font-weight:700; font-size:.92rem; }
+    .step i { font-style:normal; display:grid; place-items:center; width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff; font-size:.75rem; flex:none; }
+    label { font-size:.85rem; }
+    input[type="text"], input[type="url"], textarea, select { min-height:44px; font-size:.95rem; border-radius:10px; padding:.5rem .75rem; }
+    input[type="file"] { min-height:96px; padding:1.9rem .75rem; border:2px dashed var(--border); border-radius:12px; background:var(--surface); cursor:pointer; font-size:.85rem; }
+    input[type="file"]:hover { border-color:var(--accent); background:rgba(10,102,255,.06); }
+    .btn { min-height:44px; padding:0 1rem; border-radius:12px; font-size:.95rem; font-weight:600; }
+    .btn.small { min-height:36px; font-size:.82rem; }
+    :focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+    #viewer-canvas { background: var(--viewer); }
+    .viewer-hint, .viewer-toolbar { font-size:.8rem; }
+    .tex-tab { min-height:32px; font-size:.78rem; border-radius:8px; }
+    .cap { margin-top:.6rem; padding:.6rem .75rem; border-radius:10px; font-size:.82rem; background:var(--surface2); }
+    .cap.ok { color:var(--ok); } .cap.warn { color:var(--warn); }
+    details.adv { border-top:1px solid var(--border); }
+    details.adv > summary { cursor:pointer; min-height:44px; display:flex; align-items:center; padding:0 1.1rem; font-weight:600; color:var(--muted); list-style:none; }
+    details.adv > summary::before { content:"›"; margin-right:.5rem; transition:transform .15s; } details.adv[open] > summary::before { transform:rotate(90deg); }
+    details.adv > summary::-webkit-details-marker { display:none; }
+    .conn { display:flex; gap:.4rem; align-items:center; }
+    @media (max-width: 900px) { .panel-left { width: 300px; } }
+    @media (max-width: 640px) { .mode-tabs { grid-template-columns:repeat(2,1fr); } }
+    @media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } }
   </style>
 
   <script type="importmap">
@@ -396,11 +438,12 @@
 <div class="topbar">
   <h1>Pix2Poly</h1>
   <span id="health-badge" class="badge">연결 확인 중…</span>
-  <span class="badge">로컬</span>
+  <span class="badge">내 PC</span>
   <div class="spacer"></div>
-  <input id="api-base" type="text" placeholder="http://127.0.0.1:8000"
-         style="width:200px;padding:.3rem .6rem;font-size:.8rem;" autocomplete="off" />
-  <button class="btn secondary small" id="btn-health">연결</button>
+  <details class="conn"><summary class="ghost" style="min-height:36px;display:flex;align-items:center;">연결 설정</summary>
+    <input id="api-base" type="text" placeholder="http://127.0.0.1:8000" style="width:200px;min-height:36px;" autocomplete="off" />
+    <button class="btn secondary small" id="btn-health">연결</button>
+  </details>
 </div>
 
 <!-- ── Workspace ───────────────────────────────────────── -->
@@ -411,76 +454,83 @@
 
     <!-- Mode tabs -->
     <div class="mode-tabs">
-      <button class="mode-tab active" data-mode="single">단일 이미지</button>
-      <button class="mode-tab" data-mode="multi">다중 이미지</button>
-      <button class="mode-tab" data-mode="url">URL 이미지</button>
-      <button class="mode-tab" data-mode="video">영상 URL</button>
-      <button class="mode-tab" data-mode="img2threejs">img2threejs</button>
+      <button class="mode-tab active" data-mode="single">1장</button>
+      <button class="mode-tab" data-mode="multi">여러 장</button>
+      <button class="mode-tab" data-mode="url">사이트</button>
+      <button class="mode-tab" data-mode="video">영상</button>
     </div>
 
     <!-- ── Single image ── -->
     <div class="input-pane active panel-section" id="pane-single">
-      <div class="panel-section-title">단일 이미지 → 3D</div>
-      <label>이미지 파일</label>
-      <input type="file" id="single-file" accept="image/*" />
+      <div class="panel-section-title">사진 1장 → 3D</div>
+      <p class="lead">부조(높이맵) 메시 + PBR 텍스처. GPU(TripoSR) 설정 시 입체 메시.</p>
+      <div class="step"><i>1</i>사진 고르기</div>
+      <input type="file" id="single-file" accept="image/*" aria-label="사진 고르기" />
       <div class="thumb-grid" id="single-preview-wrap">
         <img id="single-preview" hidden alt="미리보기" style="width:100%;height:auto;max-height:140px;object-fit:contain;margin-top:.4rem;" />
       </div>
-      <div class="hint mt">heightfield (CPU) 또는 TripoSR(GPU) 메시를 생성합니다.</div>
-      <div class="mt">
-        <button class="btn" id="btn-single" style="width:100%">3D 생성</button>
+      <div class="step"><i>2</i>만들기</div>
+      <div>
+        <button class="btn" id="btn-single" style="width:100%">3D 만들기</button>
       </div>
     </div>
 
     <!-- ── Multi image ── -->
     <div class="input-pane panel-section" id="pane-multi">
-      <div class="panel-section-title">다중 이미지 → 3D (SfM)</div>
-      <label>이미지 파일 (2개 이상)</label>
-      <input type="file" id="multi-files" accept="image/*" multiple />
+      <div class="panel-section-title">여러 각도 사진 → 하나의 3D</div>
+      <p class="lead">물체 주위를 돌며 찍은 사진으로 사진측량(COLMAP). 이 PC 안에서만 계산합니다.</p>
+      <div id="cap-colmap" class="cap">설치 상태 확인 중…</div>
+      <div class="step"><i>1</i>사진 고르기 <small style="font-weight:400;color:var(--muted)">(5장 이상, 권장 15~40장)</small></div>
+      <input type="file" id="multi-files" accept="image/*" multiple aria-label="여러 각도 사진 고르기" />
       <div class="thumb-grid" id="multi-preview"></div>
-      <div class="hint mt">3장 이상 + <code>PIX2POLY_MESH_BACKEND=colmap</code> 시 COLMAP SfM 사용.</div>
-      <div class="mt">
-        <button class="btn" id="btn-multi" style="width:100%">3D 생성</button>
+      <details class="hint"><summary style="cursor:pointer;min-height:36px;display:flex;align-items:center">잘 나오게 찍는 법</summary>
+        옆 사진과 60% 이상 겹치게 · 물체는 그대로 두고 사람이 돌기 · 높이도 바꿔 가며 · 흔들린 사진 빼기 · 반짝이·투명·무늬 없는 표면은 어려움</details>
+      <div class="step"><i>2</i>만들기 <small style="font-weight:400;color:var(--muted)">(수 분)</small></div>
+      <div>
+        <button class="btn" id="btn-multi" style="width:100%">하나의 3D 로 만들기</button>
       </div>
     </div>
 
     <!-- ── URL images ── -->
     <div class="input-pane panel-section" id="pane-url">
-      <div class="panel-section-title">URL 이미지 → 3D</div>
-      <label>페이지 URL</label>
-      <input type="url" id="url-page" placeholder="https://example.com/product" />
-      <div class="mt row">
-        <button class="btn secondary small" id="btn-url-ingest">이미지 후보 가져오기</button>
+      <div class="panel-section-title">사이트 이미지 → 3D</div>
+      <p class="lead">페이지 주소를 넣으면 그 페이지의 이미지를 모아 보여 줍니다. 고른 이미지로 3D 를 만듭니다.</p>
+      <div class="step"><i>1</i>페이지 주소</div>
+      <input type="url" id="url-page" placeholder="https://example.com/product" aria-label="페이지 주소" />
+      <div class="mt">
+        <button class="btn secondary" id="btn-url-ingest" style="width:100%">이미지 가져오기</button>
       </div>
       <div id="url-candidates-wrap" style="display:none;margin-top:.6rem;">
-        <div class="panel-section-title" style="margin-bottom:.3rem;">후보 이미지 선택</div>
+        <div class="step"><i>2</i>쓸 이미지 고르기</div>
         <div class="candidate-grid" id="url-candidate-grid"></div>
         <div class="mt row">
           <button class="btn small" id="btn-select-all">전체 선택</button>
           <button class="btn secondary small" id="btn-select-none">선택 해제</button>
         </div>
         <div class="mt">
-          <button class="btn ok-btn" id="btn-url-3d" style="width:100%">선택 이미지로 3D 생성</button>
+          <button class="btn" id="btn-url-3d" style="width:100%">고른 이미지로 3D 만들기</button>
         </div>
       </div>
     </div>
 
     <!-- ── Video URL ── -->
     <div class="input-pane panel-section" id="pane-video">
-      <div class="panel-section-title">영상 URL → 3D</div>
-      <label>영상 직접 URL (.mp4 등)</label>
+      <div class="panel-section-title">영상 → 3D</div>
+      <p class="lead">물체를 돌며 찍은 영상 주소(.mp4 직접 링크). 장면을 뽑아 사진측량합니다.</p>
+      <label>영상 주소</label>
       <input type="url" id="video-url" placeholder="https://example.com/video.mp4" />
       <div class="hint mt">
         ffmpeg로 프레임 추출 후 COLMAP 또는 heightfield 폴백.<br>
         최대 <strong>500MB</strong> / <strong>60프레임</strong>.
       </div>
       <div class="mt">
-        <button class="btn" id="btn-video" style="width:100%">3D 생성</button>
+        <button class="btn" id="btn-video" style="width:100%">3D 만들기</button>
       </div>
     </div>
 
+    <details class="adv"><summary>고급 (img2threejs · 작업 조회)</summary>
     <!-- ── img2threejs Spec ── -->
-    <div class="input-pane panel-section" id="pane-img2threejs">
+    <div class="panel-section" id="pane-img2threejs">
       <div class="panel-section-title">img2threejs 스펙 → Three.js 코드</div>
       <label>spec.json 파일</label>
       <input type="file" id="img2threejs-file" accept=".json,application/json" />
@@ -508,6 +558,8 @@
       </div>
       <div class="recent-ids" id="recent-wrap"></div>
     </div>
+
+    </details>
 
   </div><!-- /panel-left -->
 
@@ -565,10 +617,9 @@
     </div>
 
     <!-- Last response JSON -->
-    <div class="panel-section" style="flex:1;">
-      <div class="panel-section-title">마지막 응답</div>
-      <pre id="output" class="output-pre">아직 요청이 없습니다.</pre>
-    </div>
+    <details class="adv"><summary>자세한 응답 (개발용)</summary>
+      <div class="panel-section"><pre id="output" class="output-pre">아직 요청이 없습니다.</pre></div>
+    </details>
 
   </div><!-- /panel-right -->
 
@@ -667,7 +718,7 @@
 
     if (typeof obj === "string") {
       outEl.textContent = obj;
-      import("./viewer3d.js").then(function (m) { m.hideViewer(); }).catch(function () {});
+      import("./viewer3d.js?v=4").then(function (m) { m.hideViewer(); }).catch(function () {});
       return;
     }
     outEl.textContent = JSON.stringify(obj, null, 2);
@@ -715,7 +766,7 @@
     }
 
     // Update 3D viewer
-    import("./viewer3d.js").then(function (m) {
+    import("./viewer3d.js?v=4").then(function (m) {
       window._apiBase = base();
       m.updateViewerFromJob(obj);
     }).catch(function () {});
@@ -733,7 +784,7 @@
       texPreview.className = "show";
       texHint.style.display = "none";
       // sync 3D viewer 2D panel
-      import("./viewer3d.js").then(function (m) {
+      import("./viewer3d.js?v=4").then(function (m) {
         if (m.showTexture) m.showTexture(mapName);
       }).catch(function () {});
     } else {
@@ -793,7 +844,17 @@
       healthBadge.className = "badge err";
     }
   }
-  document.getElementById("btn-health").onclick = function () { saveBase(); checkHealth(); };
+  async function checkCaps() {
+    var el = document.getElementById("cap-colmap");
+    try {
+      var c = await fetchJson(base() + "/v1/capabilities");
+      if (!c.colmap) { el.className = "cap warn"; el.innerHTML = "COLMAP 미설치 — <code>scripts\\install-colmap.bat</code> 실행 후 다시 열어 주세요. (지금은 첫 사진으로 부조 3D)"; }
+      else if (c.colmap_gpu) { el.className = "cap ok"; el.textContent = "✓ COLMAP GPU판 — 정밀 복원 가능 (" + c.min_colmap_images + "장 이상)"; }
+      else { el.className = "cap warn"; el.textContent = "COLMAP 일반판(GPU 없음) — 대략적인 형태만. NVIDIA GPU 가 있으면 install-colmap.bat 을 다시 실행"; }
+    } catch (e) { el.className = "cap"; el.textContent = "서버 연결 후 표시됩니다"; }
+  }
+  checkCaps();
+  document.getElementById("btn-health").onclick = function () { saveBase(); checkHealth(); checkCaps(); };
   apiBaseEl.addEventListener("change", saveBase);
 
   // ─── Single image upload ─────────────────────────────────────────────────

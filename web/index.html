@@ -69,6 +69,10 @@ code{background:var(--accent-soft);padding:1px 6px;border-radius:6px;font-size:1
 .consent{display:block;margin-top:10px;font-size:13px;color:var(--muted)}
 footer{margin-top:28px;font-size:13px;color:var(--muted)}
 footer a,.note a,.choice a{color:var(--accent)}
+input[type=url]{flex:1;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font:15px inherit;background:var(--surface);color:var(--text)}
+#urlForm button.primary{flex:none}
+.seg{flex-wrap:wrap}
+@media (max-width:560px){.seg{width:100%}.seg button{flex:1;padding:0 8px;font-size:14px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -87,6 +91,7 @@ footer a,.note a,.choice a{color:var(--accent)}
     <div class="seg" role="tablist" aria-label="만들기 방식">
       <button role="tab" id="tabOne" aria-selected="true" data-mode="one">사진 1장 → 부조 3D</button>
       <button role="tab" id="tabMulti" aria-selected="false" data-mode="multi">여러 각도 → 하나의 3D</button>
+      <button role="tab" id="tabUrl" aria-selected="false" data-mode="url">사이트 이미지</button>
     </div>
   </header>
   <div class="grid">
@@ -122,6 +127,28 @@ footer a,.note a,.choice a{color:var(--accent)}
           <button id="dlZip" disabled hidden>전체 ZIP</button>
         </div>
       </div>
+    </section>
+
+    <section class="card" data-mode-panel="url" role="tabpanel" aria-labelledby="tabUrl" hidden>
+      <h2>사이트 이미지로 3D</h2>
+      <p class="lead">웹에서 본 이미지를 가져와 <b>사진 1장 → 부조 3D</b>로 만듭니다.</p>
+      <div class="step"><i>1</i>이미지 주소 넣기</div>
+      <form id="urlForm" class="row" style="margin-top:0">
+        <input id="urlIn" type="url" inputmode="url" placeholder="https://… (이미지 주소 또는 페이지 주소)" aria-label="이미지 또는 페이지 주소" required>
+        <button class="primary" type="submit" id="urlGo">가져오기</button>
+      </form>
+      <div id="urlStatus" class="status" aria-live="polite"></div>
+      <div id="urlPick" class="queue" aria-label="페이지에서 찾은 이미지"></div>
+      <div class="step"><i>2</i>또는 다른 탭에서 이미지를 끌어다 놓기</div>
+      <div id="urlDrop" class="drop" tabindex="0" aria-label="다른 사이트 이미지 끌어다 놓기">
+        <div>사이트의 이미지를 여기로 끌어다 놓거나,<br>이미지에서 <b>오른쪽 클릭 → 이미지 복사</b> 후 <b>Ctrl+V</b></div>
+      </div>
+      <details>
+        <summary>안 될 때</summary>
+        <p class="note" style="margin-top:0">브라우저 보안(CORS) 때문에 일부 사이트는 직접 가져올 수 없습니다. 이럴 땐 ① 이미지 복사 후 붙여넣기, ② 이미지를 저장해서 <b>사진 1장</b> 탭에 넣기,
+          ③ <a href="https://github.com/HEO-J-H/Pix2Poly#로컬-전용-실행-권장">내 PC 버전</a>의 <b>URL 이미지</b> 탭(페이지 주소만 넣으면 이미지를 모아 줌)을 쓰세요.
+          외부 중계 서버는 쓰지 않습니다.</p>
+      </details>
     </section>
 
     <section class="card mv" data-mode-panel="multi" role="tabpanel" aria-labelledby="tabMulti" hidden>
@@ -189,10 +216,10 @@ const $ = (id) => document.getElementById(id);
 function setMode(m) {
   for (const t of document.querySelectorAll(".seg [data-mode]")) t.setAttribute("aria-selected", String(t.dataset.mode === m));
   for (const p of document.querySelectorAll("[data-mode-panel]")) p.hidden = p.dataset.modePanel !== m;
-  history.replaceState(null, "", m === "multi" ? "#multi" : location.pathname + location.search);
+  history.replaceState(null, "", m === "one" ? location.pathname + location.search : "#" + m);
 }
 for (const t of document.querySelectorAll(".seg [data-mode]")) t.onclick = () => setMode(t.dataset.mode);
-setMode(location.hash === "#multi" ? "multi" : "one");
+setMode(["#multi", "#url"].includes(location.hash) ? location.hash.slice(1) : "one");
 let items = [], cur = -1;   // 여러 장: [{name, img, url, result}]
 let img = null, result = null;
 
@@ -382,6 +409,61 @@ $("mvGo").onclick = async () => {
     $("mvGo").disabled = !(mvFiles.length >= 2 && $("mvConsent").checked);
   }
 };
+
+// ── 사이트 이미지: 주소(이미지·페이지) 가져오기, 다른 탭에서 끌어다 놓기 — 외부 중계 서버 없이 브라우저가 직접
+async function fetchImage(u) {
+  const r = await fetch(u, { mode: "cors" });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const b = await r.blob();
+  if (!b.type.startsWith("image/")) return { blob: b };
+  return { file: new File([b], decodeURIComponent(u.split("/").pop().split("?")[0] || "image"), { type: b.type }) };
+}
+async function takeImages(files, from) {
+  await load(files);
+  setMode("one");
+  $("status").textContent = `${from} 이미지 ${files.length}장을 가져왔습니다 — [3D 만들기]를 누르세요`;
+}
+function blocked(e) {
+  $("urlStatus").classList.add("err");
+  $("urlStatus").textContent = `가져오지 못했습니다 (${e.message || e}). 이 사이트가 외부 접근을 막은 것 같아요 — 아래 '안 될 때'를 보세요.`;
+}
+$("urlForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const u = $("urlIn").value.trim();
+  $("urlStatus").classList.remove("err"); $("urlStatus").textContent = "가져오는 중…"; $("urlPick").innerHTML = "";
+  try {
+    const got = await fetchImage(u);
+    if (got.file) return takeImages([got.file], "사이트");
+    // 페이지 주소: 허용된 사이트면 <img>를 모아 고르게
+    const doc = new DOMParser().parseFromString(await got.blob.text(), "text/html");
+    const urls = [...new Set([...doc.querySelectorAll("img[src], meta[property='og:image']")]
+      .map((el) => new URL(el.getAttribute("src") || el.getAttribute("content"), u).href))].slice(0, 24);
+    if (!urls.length) throw new Error("페이지에서 이미지를 찾지 못함");
+    $("urlStatus").textContent = `이미지 ${urls.length}개를 찾았습니다 — 쓸 이미지를 누르세요`;
+    for (const iu of urls) {
+      const b = document.createElement("button");
+      b.type = "button"; b.title = iu; b.setAttribute("aria-label", "이 이미지로 만들기");
+      b.innerHTML = `<img src="${iu}" alt="" loading="lazy">`;
+      b.onclick = async () => { try { const g = await fetchImage(iu); if (g.file) takeImages([g.file], "사이트"); else throw new Error("이미지가 아님"); } catch (er) { blocked(er); } };
+      $("urlPick").append(b);
+    }
+  } catch (er) { blocked(er); }
+};
+$("urlDrop").ondragover = (e) => { e.preventDefault(); $("urlDrop").classList.add("on"); };
+$("urlDrop").ondragleave = () => $("urlDrop").classList.remove("on");
+$("urlDrop").ondrop = async (e) => {
+  e.preventDefault(); $("urlDrop").classList.remove("on");
+  const files = [...e.dataTransfer.files].filter((f) => f.type.startsWith("image/"));
+  if (files.length) return takeImages(files, "끌어온");
+  const u = (e.dataTransfer.getData("text/uri-list") || e.dataTransfer.getData("text/plain")).split("\n")[0].trim();
+  if (!u) return;
+  $("urlIn").value = u; $("urlForm").requestSubmit();
+};
+window.addEventListener("paste", (e) => {   // 사이트 이미지 탭에서 붙여넣은 이미지는 바로 1장 탭으로
+  if (document.querySelector("[data-mode-panel=url]").hidden) return;
+  const files = [...e.clipboardData.files].filter((f) => f.type.startsWith("image/"));
+  if (files.length) { e.stopImmediatePropagation(); takeImages(files, "붙여넣은"); }
+}, true);
 
 $("dlZip").onclick = async () => {   // 이미지마다 폴더: model.glb · model.obj · model.mtl · PBR 5장
   $("dlZip").disabled = true; $("status").textContent = "ZIP 만드는 중…";

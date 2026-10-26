@@ -45,6 +45,15 @@ async def health() -> Dict[str, str]:
     return {"status": "ok"}
 
 
+@app.get("/v1/capabilities")
+async def capabilities() -> Dict[str, object]:
+    """이 PC 에서 쓸 수 있는 기능 — 화면이 '여러 장' 안내(COLMAP 설치·GPU 여부)에 사용."""
+    from app.services.colmap_runner import colmap_available, colmap_has_cuda
+    from app.services.mesh_worker import MIN_COLMAP_IMAGES
+    has = colmap_available()
+    return {"colmap": has, "colmap_gpu": has and colmap_has_cuda(), "min_colmap_images": MIN_COLMAP_IMAGES}
+
+
 def _to_response(rec: JobRecord) -> JobResponse:
     return JobResponse(
         job_id=rec.job_id,
