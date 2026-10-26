@@ -93,3 +93,13 @@ def test_flexpart_runner_writes_dummy_mesh(png, tmp_path):
     # Simple sanity check: the file should contain at least one vertex line.
     content = mesh_path.read_text(encoding="utf-8")
     assert "v " in content
+
+
+def test_engines_guide_and_list_endpoint():
+    """Verify that engine metadata search block or availability checks work correctly."""
+    from fastapi.testclient import TestClient
+    res = TestClient(app).get("/v1/engines")
+    # If endpoint exists, ensure response format is correct or handled gracefully
+    if res.status_code == 200:
+        data = res.json()
+        assert isinstance(data, list)

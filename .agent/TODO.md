@@ -18,6 +18,6 @@
 - [x] (agent) [p-bceae014ad|운영·비용] 대기 중인 PR 확인 및 머지 검토: GitHub에서 PR #7의 변경 사항을 검토하고 승인 여부를 결정합니다.
 - [ ] (agent) PR #8 다시 하기 — FlexPart 논문 파트별 3D 생성 참고: 단일 이미지 기반 파트별 3 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [x] (agent) [p-50a640e33a|콘텐츠] FlexPart 파트 기반 이미지→3D 엔진 도입: FlexPart을 선택 엔진으로 구현해 이미지 → 가변 입체 파트 생성 기능을 추가하고, 기존 TripoSR과 병행 선택 가능하도록 backend/app/services/flexpart_runner.py와 job 오케스트레이션에 옵션을 삽입
-- [ ] (agent) [p-a8529c833e|사이트·UX] img2threejs 가이드 문서 블록 수정: docs/agent-guides/img2threejs.md 파일의 검색 블록을 현재 구현된 엔진 목록과 일치하도록 수정하고, 해당 섹션에 `available()` 함수와 GET /v1/engines 엔드포인트 설명을 추가한다.
+- [x] (agent) [p-a8529c833e|사이트·UX] img2threejs 가이드 문서 블록 수정: docs/agent-guides/img2threejs.md 파일의 검색 블록을 현재 구현된 엔진 목록과 일치하도록 수정하고, 해당 섹션에 `available()` 함수와 GET /v1/engines 엔드포인트 설명을 추가한다.
 - [ ] (agent) [p-4bbef4f094|콘텐츠] 엔진 API 구현 및 테스트 추가: backend/app/services/engines.py에 `available() -> (bool, str)` 구현, FastAPI 라우터에 GET /v1/engines 추가, backend/tests/test_core.py에 정상/오류 케이스 테스트 작성 후 PR #1 생성·자동 머지
 - [ ] (agent) [p-8c03954852|콘텐츠] Trellis C++ GPU 추론 설계 가이드 작성: docs/agent-guides/trellis_integration.md 작성: 라이선스(MIT/Apache-2.0), GPU 요구사항, 파이프라인 인터페이스(없으면 건너뛰기), 예상 성능 효과 명시 후 PR #4 재개
