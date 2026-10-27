@@ -70,7 +70,20 @@ async def capabilities() -> Dict[str, object]:
     from app.services import bg_remove
     from app.services.colmap_runner import openmvs_available
     return {"colmap": has, "colmap_gpu": has and colmap_has_cuda(), "min_colmap_images": MIN_COLMAP_IMAGES,
-            "openmvs": openmvs_available(), "remove_bg": bg_remove.available()}
+            "openmvs": openmvs_available(), "remove_bg": bg_remove.available(), "noface3d": False}
+
+
+@app.get("/v1/engines")
+async def list_engines() -> List[Dict[str, object]]:
+    """사용 가능한 3D/미세 기하학 파이프라인 엔진 목록 제공."""
+    from app.services.colmap_runner import colmap_available
+    from app.services import bg_remove
+    return [
+        {"name": "heightfield", "available": True, "description": "단일 이미지 높이맵 기반 기본 CPU 메시/PBR 파이프라인"},
+        {"name": "colmap", "available": colmap_available(), "description": "다중 이미지/영상 SfM+MVS 재구성"},
+        {"name": "noface3d", "available": False, "description": "NOFACE3D 미세 세부 형상 보완 선택 엔진 (외부 워커 연동 검토)"},
+        {"name": "remove_bg", "available": bg_remove.available(), "description": "rembg 기반 배경 제거"}
+    ]
 
 
 def _to_response(rec: JobRecord) -> JobResponse:
