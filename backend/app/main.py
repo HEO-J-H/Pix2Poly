@@ -61,6 +61,41 @@ async def health() -> Dict[str, str]:
     return {"status": "ok"}
 
 
+@app.get("/v1/engines")
+async def list_engines() -> List[Dict[str, object]]:
+    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D 포함)를 반환."""
+    from app.services.colmap_runner import colmap_available, colmap_has_cuda, openmvs_available
+    from app.services import bg_remove
+    return [
+        {
+            "id": "heightfield",
+            "name": "Heightfield CPU Mesh",
+            "available": True,
+            "description": "단일 이미지 기반 빠른 높이맵 메시 생성 (기본)",
+        },
+        {
+            "id": "noface3d",
+            "name": "NOFACE3D Detail Refinement",
+            "available": True,
+            "description": "미세 세부 형상 보완 알고리즘 (선택 엔진/외부 워커)",
+        },
+        {
+            "id": "colmap",
+            "name": "COLMAP SfM+MVS",
+            "available": colmap_available(),
+            "gpu": colmap_has_cuda(),
+            "openmvs": openmvs_available(),
+            "description": "여러 장의 사진/영상을 통한 다중시점 3D 재구성",
+        },
+        {
+            "id": "bg_remove",
+            "name": "Background Removal",
+            "available": bg_remove.available(),
+            "description": "AI 기반 배경 분리",
+        },
+    ]
+
+
 @app.get("/v1/capabilities")
 async def capabilities() -> Dict[str, object]:
     """이 PC 에서 쓸 수 있는 기능 — 화면이 '여러 장' 안내(COLMAP 설치·GPU 여부)에 사용."""
@@ -70,7 +105,7 @@ async def capabilities() -> Dict[str, object]:
     from app.services import bg_remove
     from app.services.colmap_runner import openmvs_available
     return {"colmap": has, "colmap_gpu": has and colmap_has_cuda(), "min_colmap_images": MIN_COLMAP_IMAGES,
-            "openmvs": openmvs_available(), "remove_bg": bg_remove.available()}
+            "openmvs": openmvs_available(), "remove_bg": bg_remove.available(), "noface3d": True}
 
 
 def _to_response(rec: JobRecord) -> JobResponse:
