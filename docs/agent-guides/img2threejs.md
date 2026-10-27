@@ -52,3 +52,4 @@
 - 2026-10-22 [완료] 4단계 (PR #1 대체): README.md 사용법 절 + backend/static/index.html : 작은 변경 단위와 명확한 역할 분담은 안전하고 빠른 개발을 보장합니다.
 - 2026-10-23 [보류] 1단계 (PR #1 대체): backend/app/services/engines.py 엔진 목록(availa: 서비스 파일과 테스트 코드를 철저히 분리하고, 서비스 모듈 내에서 외부 API 테스트 객체를 임의로 참조하지 말 것.
 - 2026-10-25 [보류] 1단계 (PR #1 대체): backend/app/services/engines.py 엔진 목록(availa: 테스트 실패 — E File "/home/runner/work/3dflowhub/3dflowhub/_targets/pix2poly/backend/tests/test_core.py", line 54 / E === / E ^^ / E SyntaxError: invalid syntax / ERROR backend/tests/tes
+- 2026-10-27 [보류] 2단계 (PR #1 대체): backend/app/services/img2threejs_runner.py b: 서비스 구현 파일과 테스트 코드는 반드시 분리하여 각각 올바른 디렉터리(src/services vs tests/)에 작성해야 한다.
