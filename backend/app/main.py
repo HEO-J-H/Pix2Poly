@@ -76,8 +76,8 @@ async def list_engines() -> List[Dict[str, object]]:
         {
             "id": "noface3d",
             "name": "NOFACE3D Detail Refinement",
-            "available": True,
-            "description": "미세 세부 형상 보완 알고리즘 (선택 엔진/외부 워커)",
+            "available": False,  # 연구 단계 — 코드가 연결되지 않았으므로 '사용 가능'으로 표시하지 않음
+            "description": "미세 세부 형상 보완 (논문 검토 단계, 아직 구현 안 됨)",
         },
         {
             "id": "colmap",
