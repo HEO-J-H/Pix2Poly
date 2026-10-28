@@ -111,7 +111,6 @@ def run_colmap_sfm(
         "--database_path", str(db_path),
         "--image_path", str(image_dir),
         "--ImageReader.single_camera", "1",
-        *(["--ImageReader.mask_path", str(mask_dir)] if mask_dir else []),
         "--FeatureExtraction.use_gpu", str(gpu),
     ], work_dir)
 
@@ -172,6 +171,9 @@ def run_colmap_sfm(
         "--workspace_format", "COLMAP",
         "--input_type", "geometric",
         "--output_path", str(fused_ply),
+        # 배경 마스크는 여기서만 — 위치 맞추기(SfM)엔 책상·방 같은 배경이 단서가 되므로 전체 사진을 쓰고,
+        # 점을 합칠 때만 물체 부분을 남김 (마스크로 SfM 을 하면 작은 물체 사진은 위치를 못 맞춤)
+        *(["--StereoFusion.mask_path", str(mask_dir)] if mask_dir else []),
     ], work_dir)
 
     return fused_ply
@@ -335,6 +337,7 @@ def run_colmap_pipeline(
     End-to-end: images → COLMAP SfM+MVS → Poisson mesh → OBJ/GLB.
     Returns (obj_path, glb_path).
     """
+    image_dir, out_dir = Path(image_dir).resolve(), Path(out_dir).resolve()  # COLMAP 은 작업 폴더에서 실행 → 상대 경로 금지
     work_dir = out_dir / "_colmap_work"
     work_dir.mkdir(parents=True, exist_ok=True)
     try:
