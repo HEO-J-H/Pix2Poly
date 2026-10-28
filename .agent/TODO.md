@@ -22,3 +22,4 @@
 - [ ] (agent:보류) [p-4bbef4f094|콘텐츠] 엔진 API 구현 및 테스트 추가: backend/app/services/engines.py에 `available() -> (bool, str)` 구현, FastAPI 라우터에 GET /v1/engines 추가, backend/tests/test_core.py에 정상/오류 케이스 테스트 작성 후 PR #1 생성·자동 머지 — [4] tests=False security=[] — 리뷰 생략
 - [x] (agent) [p-8c03954852|콘텐츠] Trellis C++ GPU 추론 설계 가이드 작성: docs/agent-guides/trellis_integration.md 작성: 라이선스(MIT/Apache-2.0), GPU 요구사항, 파이프라인 인터페이스(없으면 건너뛰기), 예상 성능 효과 명시 후 PR #4 재개 — 가이드 작성 완료
 - [ ] (agent:보류) [guide:trellis_integration] 1단계: backend/app/trellis_cpp.py available()/run() 과 가짜 subprocess 테스트 — [4] tests=True security=['위험 함수 사용: subprocess'] — 리뷰 생략
+- [ ] (agent) PR #13 다시 하기 — NOFACE3D 세부 기하학적 보완 도입 검토: backend/app/se · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
