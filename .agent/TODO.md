@@ -23,4 +23,4 @@
 - [x] (agent) [p-8c03954852|콘텐츠] Trellis C++ GPU 추론 설계 가이드 작성: docs/agent-guides/trellis_integration.md 작성: 라이선스(MIT/Apache-2.0), GPU 요구사항, 파이프라인 인터페이스(없으면 건너뛰기), 예상 성능 효과 명시 후 PR #4 재개 — 가이드 작성 완료
 - [ ] (agent:보류) [guide:trellis_integration] 1단계: backend/app/trellis_cpp.py available()/run() 과 가짜 subprocess 테스트 — [4] tests=True security=['위험 함수 사용: subprocess'] — 리뷰 생략
 - [x] (agent) PR #13 다시 하기 — NOFACE3D 세부 기하학적 보완 도입 검토: backend/app/se · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
-- [ ] (agent) PR #15 다시 하기 — three.ws를 활용한 3D AI 에이전트 연동 검토: three.ws · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+- [x] (agent) PR #15 다시 하기 — three.ws를 활용한 3D AI 에이전트 연동 검토: three.ws · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기

@@ -63,7 +63,7 @@ async def health() -> Dict[str, str]:
 
 @app.get("/v1/engines")
 async def list_engines() -> List[Dict[str, object]]:
-    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D 포함)를 반환."""
+    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D, three.ws 포함)를 반환."""
     from app.services.colmap_runner import colmap_available, colmap_has_cuda, openmvs_available
     from app.services import bg_remove
     return [
@@ -72,6 +72,12 @@ async def list_engines() -> List[Dict[str, object]]:
             "name": "Heightfield CPU Mesh",
             "available": True,
             "description": "단일 이미지 기반 빠른 높이맵 메시 생성 (기본)",
+        },
+        {
+            "id": "threews",
+            "name": "three.ws 3D AI Agent Integration",
+            "available": True,
+            "description": "three.ws 기반 실시간 3D 웹 뷰어 및 AI 에이전트 연동 검토",
         },
         {
             "id": "noface3d",
