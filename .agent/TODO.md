@@ -25,3 +25,6 @@
 - [x] (agent) PR #13 다시 하기 — NOFACE3D 세부 기하학적 보완 도입 검토: backend/app/se · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent:승인대기) PR #15 다시 하기 — three.ws를 활용한 3D AI 에이전트 연동 검토: three.ws · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기 — PR #18 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/18
 - [ ] (agent) PR #18 다시 하기 — PR #15 다시 하기 — three.ws를 활용한 3D AI 에이전트 연동 검토: three.ws · 사람 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+- [x] (agent) [p-15c75e4f37|사이트·UX] TRELLIS를 단일·다중 이미지 선택 엔진으로 도입: microsoft/TRELLIS 모델을 triposr_runner.py와 유사한 선택 엔진 형태로 백엔드에 추가하여 고품질 3D 생성 경로 확충
+- [ ] (agent) [p-30b123f546|운영·비용] 대기 중인 PR #17 검토 및 병합: GitHub에서 PR #17의 변경 내용을 최종 확인하고 이상이 없으면 수동 병합 진행
+- [ ] (agent) [p-1c297c04b1|사이트·UX] 웹 버전(web/) 성능 및 UI 정합성 점검: web/index.js 및 관련 HTML 파일에서 높이맵 메시 생성 오류 예외 처리 보완

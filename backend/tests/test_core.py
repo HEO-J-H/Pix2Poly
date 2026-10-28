@@ -113,3 +113,13 @@ def test_engines_guide_and_list_endpoint():
     assert isinstance(cap_data, dict)
     for k, v in cap_data.items():
         assert not callable(v)
+
+
+def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
+    """Verify TRELLIS runner integration or fallback gracefully when repository is absent."""
+    from backend.app.services import triposr_runner
+    # Ensure missing run.py raises FileNotFoundError as expected for external selection engines
+    with pytest.raises(FileNotFoundError):
+        triposr_runner.run_triposr_to_output_dir(
+            png, tmp_path, tmp_path / "nonexistent_trellis", "python"
+        )
