@@ -82,15 +82,15 @@ async def list_engines() -> List[Dict[str, object]]:
         {
             "id": "colmap",
             "name": "COLMAP SfM+MVS",
-            "available": colmap_available(),
-            "gpu": colmap_has_cuda(),
-            "openmvs": openmvs_available(),
+            "available": bool(colmap_available()),
+            "gpu": bool(colmap_has_cuda()),
+            "openmvs": bool(openmvs_available()),
             "description": "여러 장의 사진/영상을 통한 다중시점 3D 재구성",
         },
         {
             "id": "bg_remove",
             "name": "Background Removal",
-            "available": bg_remove.available(),
+            "available": bool(bg_remove.available()),
             "description": "AI 기반 배경 분리",
         },
     ]
@@ -101,11 +101,11 @@ async def capabilities() -> Dict[str, object]:
     """이 PC 에서 쓸 수 있는 기능 — 화면이 '여러 장' 안내(COLMAP 설치·GPU 여부)에 사용."""
     from app.services.colmap_runner import colmap_available, colmap_has_cuda
     from app.services.mesh_worker import MIN_COLMAP_IMAGES
-    has = colmap_available()
+    has = bool(colmap_available())
     from app.services import bg_remove
     from app.services.colmap_runner import openmvs_available
-    return {"colmap": has, "colmap_gpu": has and colmap_has_cuda(), "min_colmap_images": MIN_COLMAP_IMAGES,
-            "openmvs": openmvs_available(), "remove_bg": bg_remove.available(), "noface3d": True}
+    return {"colmap": has, "colmap_gpu": bool(has and colmap_has_cuda()), "min_colmap_images": int(MIN_COLMAP_IMAGES),
+            "openmvs": bool(openmvs_available()), "remove_bg": bool(bg_remove.available()), "noface3d": True}
 
 
 def _to_response(rec: JobRecord) -> JobResponse:

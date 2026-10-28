@@ -105,3 +105,11 @@ def test_engines_guide_and_list_endpoint():
     engine_ids = [e.get("id") for e in data]
     assert "noface3d" in engine_ids
     assert "heightfield" in engine_ids
+
+    # Also test /v1/capabilities for serialization correctness (no functions/callables)
+    res_cap = TestClient(app).get("/v1/capabilities")
+    assert res_cap.status_code == 200
+    cap_data = res_cap.json()
+    assert isinstance(cap_data, dict)
+    for k, v in cap_data.items():
+        assert not callable(v)
