@@ -105,3 +105,4 @@ def test_engines_guide_and_list_endpoint():
     engine_ids = [e.get("id") for e in data]
     assert "noface3d" in engine_ids
     assert "heightfield" in engine_ids
+    assert "three_ws_agent" in engine_ids

@@ -63,7 +63,7 @@ async def health() -> Dict[str, str]:
 
 @app.get("/v1/engines")
 async def list_engines() -> List[Dict[str, object]]:
-    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D 포함)를 반환."""
+    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D 및 three.ws 웹 에이전트 연동 포함)를 반환."""
     from app.services.colmap_runner import colmap_available, colmap_has_cuda, openmvs_available
     from app.services import bg_remove
     return [
@@ -78,6 +78,12 @@ async def list_engines() -> List[Dict[str, object]]:
             "name": "NOFACE3D Detail Refinement",
             "available": True,
             "description": "미세 세부 형상 보완 알고리즘 (선택 엔진/외부 워커)",
+        },
+        {
+            "id": "three_ws_agent",
+            "name": "three.ws Interactive AI Agent Embed",
+            "available": True,
+            "description": "three.ws 기반 GLB 아바타 웹 뷰어 및 실시간 대화형 AI 에이전트 임베드 연동 연구",
         },
         {
             "id": "colmap",
