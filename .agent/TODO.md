@@ -23,3 +23,5 @@
 - [x] (agent) [p-8c03954852|콘텐츠] Trellis C++ GPU 추론 설계 가이드 작성: docs/agent-guides/trellis_integration.md 작성: 라이선스(MIT/Apache-2.0), GPU 요구사항, 파이프라인 인터페이스(없으면 건너뛰기), 예상 성능 효과 명시 후 PR #4 재개 — 가이드 작성 완료
 - [ ] (agent:보류) [guide:trellis_integration] 1단계: backend/app/trellis_cpp.py available()/run() 과 가짜 subprocess 테스트 — [4] tests=True security=['위험 함수 사용: subprocess'] — 리뷰 생략
 - [ ] (agent) PR #13 다시 하기 — NOFACE3D 세부 기하학적 보완 도입 검토: backend/app/se · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+- [x] (agent) [p-597bf4c093|콘텐츠] three.ws를 활용한 3D AI 에이전트 연동 검토: three.ws 저장소를 참고하여 Pix2Poly로 생성한 GLB 아바타에 간단한 대화형 에이전트/웹 뷰어 임베드 기능 연구
+- [ ] (agent) [p-695a76dd4b|운영·비용] 대기 중인 PR #1 검토 및 보완: backend/app/services/img2threejs_runner.py와 관련 테스트 코드를 보완하여 PR #1의 리뷰 요구사항을 충족
