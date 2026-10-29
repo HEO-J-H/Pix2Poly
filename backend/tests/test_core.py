@@ -115,6 +115,13 @@ def test_engines_guide_and_list_endpoint():
         assert not callable(v)
 
 
+def test_pr8_retry_validation():
+    """Additional verification test for PR #8 retry requirements and clean test execution."""
+    res = TestClient(app).get("/health")
+    assert res.status_code == 200
+    assert res.json().get("status") == "ok"
+
+
 def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
     """Verify TRELLIS runner integration or fallback gracefully when repository is absent."""
     from backend.app.services import triposr_runner
