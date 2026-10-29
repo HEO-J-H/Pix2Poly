@@ -131,8 +131,13 @@ def test_pr17_merged_verification():
 
 
 def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
-    """Verify TRELLIS runner integration or fallback gracefully when repository is absent."""
+    """Verify TRELLIS runner integration / engines list includes trellis and fallback gracefully."""
     from backend.app.services import triposr_runner
+    res = TestClient(app).get("/v1/engines")
+    assert res.status_code == 200
+    engines = res.json()
+    assert any(e.get("id") == "trellis" for e in engines)
+
     # Ensure missing run.py raises FileNotFoundError as expected for external selection engines
     with pytest.raises(FileNotFoundError):
         triposr_runner.run_triposr_to_output_dir(

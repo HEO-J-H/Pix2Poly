@@ -74,6 +74,12 @@ async def list_engines() -> List[Dict[str, object]]:
             "description": "단일 이미지 기반 빠른 높이맵 메시 생성 (기본)",
         },
         {
+            "id": "trellis",
+            "name": "Microsoft TRELLIS (CVPR 2025)",
+            "available": False,  # 외부 옵션 모델 (MIT 라이선스, 선택 엔진) — 저장소 경로 설정 필요
+            "description": "다중 각도 사진 기반 고품질 3D 자산 생성 (MIT, 선택 엔진)",
+        },
+        {
             "id": "noface3d",
             "name": "NOFACE3D Detail Refinement",
             "available": False,  # 연구 단계 — 코드가 연결되지 않았으므로 '사용 가능'으로 표시하지 않음
@@ -105,7 +111,7 @@ async def capabilities() -> Dict[str, object]:
     from app.services import bg_remove
     from app.services.colmap_runner import openmvs_available
     return {"colmap": has, "colmap_gpu": bool(has and colmap_has_cuda()), "min_colmap_images": int(MIN_COLMAP_IMAGES),
-            "openmvs": bool(openmvs_available()), "remove_bg": bool(bg_remove.available()), "noface3d": False}  # 연구 단계 — 구현 전까지 사용 불가
+            "openmvs": bool(openmvs_available()), "remove_bg": bool(bg_remove.available()), "noface3d": False, "trellis": False}  # 연구 단계 및 선택 엔진
 
 
 def _to_response(rec: JobRecord) -> JobResponse:
