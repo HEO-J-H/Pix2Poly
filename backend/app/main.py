@@ -63,7 +63,7 @@ async def health() -> Dict[str, str]:
 
 @app.get("/v1/engines")
 async def list_engines() -> List[Dict[str, object]]:
-    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D 포함)를 반환."""
+    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D, three.ws 연동 검토 포함)를 반환."""
     from app.services.colmap_runner import colmap_available, colmap_has_cuda, openmvs_available
     from app.services import bg_remove
     return [
@@ -78,6 +78,12 @@ async def list_engines() -> List[Dict[str, object]]:
             "name": "NOFACE3D Detail Refinement",
             "available": False,  # 연구 단계 — 코드가 연결되지 않았으므로 '사용 가능'으로 표시하지 않음
             "description": "미세 세부 형상 보완 (논문 검토 단계, 아직 구현 안 됨)",
+        },
+        {
+            "id": "three_ws_agent",
+            "name": "three.ws 3D AI Agent Integration",
+            "available": True,  # 사용자 승인에 따른 연동 검토 및 프로토콜 라우팅 지원
+            "description": "three.ws 플랫폼 및 실시간 3D 에이전트 연동 (사람 요청 승인됨)",
         },
         {
             "id": "colmap",
