@@ -21,7 +21,7 @@
 - [x] (agent) [p-a8529c833e|사이트·UX] img2threejs 가이드 문서 블록 수정: docs/agent-guides/img2threejs.md 파일의 검색 블록을 현재 구현된 엔진 목록과 일치하도록 수정하고, 해당 섹션에 `available()` 함수와 GET /v1/engines 엔드포인트 설명을 추가한다.
 - [ ] (agent:보류) [p-4bbef4f094|콘텐츠] 엔진 API 구현 및 테스트 추가: backend/app/services/engines.py에 `available() -> (bool, str)` 구현, FastAPI 라우터에 GET /v1/engines 추가, backend/tests/test_core.py에 정상/오류 케이스 테스트 작성 후 PR #1 생성·자동 머지 (재시도) — 같은 과제 2회 실패 — 마지막 사유: [4] 패치 적용 실패: 변경 없음
 - [x] (agent) [p-8c03954852|콘텐츠] Trellis C++ GPU 추론 설계 가이드 작성: docs/agent-guides/trellis_integration.md 작성: 라이선스(MIT/Apache-2.0), GPU 요구사항, 파이프라인 인터페이스(없으면 건너뛰기), 예상 성능 효과 명시 후 PR #4 재개 — 가이드 작성 완료
-- [ ] (agent:보류) [guide:trellis_integration] 1단계: backend/app/trellis_cpp.py available()/run() 과 가짜 subprocess 테스트 — [4] tests=True security=['위험 함수 사용: subprocess'] — 리뷰 생략
+- [ ] (agent:보류) [guide:trellis_integration] 1단계: backend/app/trellis_cpp.py available()/run() 과 가짜 subprocess 테스트 (재시도) — 같은 과제 2회 실패 — 마지막 사유: [4] tests=True security=['위험 함수 사용: subprocess'] — 리뷰 생략
 - [x] (agent) PR #13 다시 하기 — NOFACE3D 세부 기하학적 보완 도입 검토: backend/app/se · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent:승인대기) PR #15 다시 하기 — three.ws를 활용한 3D AI 에이전트 연동 검토: three.ws · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기 — PR #18 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/18
 - [ ] (agent:승인대기) PR #18 다시 하기 — PR #15 다시 하기 — three.ws를 활용한 3D AI 에이전트 연동 검토: three.ws · 사람 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기 — PR #20 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/20
