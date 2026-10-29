@@ -105,7 +105,7 @@ async def capabilities() -> Dict[str, object]:
     from app.services import bg_remove
     from app.services.colmap_runner import openmvs_available
     return {"colmap": has, "colmap_gpu": bool(has and colmap_has_cuda()), "min_colmap_images": int(MIN_COLMAP_IMAGES),
-            "openmvs": bool(openmvs_available()), "remove_bg": bool(bg_remove.available()), "noface3d": True}
+            "openmvs": bool(openmvs_available()), "remove_bg": bool(bg_remove.available()), "noface3d": False}  # 연구 단계 — 구현 전까지 사용 불가
 
 
 def _to_response(rec: JobRecord) -> JobResponse:
