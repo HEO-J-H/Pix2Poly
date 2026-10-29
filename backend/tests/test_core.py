@@ -122,6 +122,14 @@ def test_pr8_retry_validation():
     assert res.json().get("status") == "ok"
 
 
+def test_pr17_merged_verification():
+    """PR #17 수동 병합 검증 테스트."""
+    res = TestClient(app).get("/v1/engines")
+    assert res.status_code == 200
+    engines = res.json()
+    assert any(e.get("id") == "heightfield" for e in engines)
+
+
 def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
     """Verify TRELLIS runner integration or fallback gracefully when repository is absent."""
     from backend.app.services import triposr_runner
