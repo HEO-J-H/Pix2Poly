@@ -30,3 +30,6 @@
 - [x] (agent) [p-1c297c04b1|사이트·UX] 웹 버전(web/) 성능 및 UI 정합성 점검: web/index.js 및 관련 HTML 파일에서 높이맵 메시 생성 오류 예외 처리 보완 — 사람(Claude)이 처리: 한 장 실패해도 계속·쉬운 오류 안내
 - [ ] (agent:승인대기) PR #20 다시 하기 — PR #18 다시 하기 — PR #15 다시 하기 — three.ws를 활용한 3D AI 에이전트 연동 검토 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기 — PR #22 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/22
 - [ ] (agent) PR #22 다시 하기 — PR #20 다시 하기 — PR #18 다시 하기 — PR #15 다시 하기 — three.ws를 활용한 3 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+- [x] (agent) [p-d3c63c180e|운영·비용] TRELLIS(MIT) 멀티뷰 3D 생성 엔진 통합 검토: 미국 컴퓨터 비전 학회(CVPR 2025 Spotlight) 선정 모델인 Microsoft/TRELLIS(MIT 라이선스, 별 14,137개)를 Pix2Poly의 여러 각도 사진 → 3D 파이프라인 선택 엔진으로 연동 검토합니다.
+- [ ] (agent) [p-7e65f03976|운영·비용] 대기 중인 PR #20 및 #22 검토 및 병합: GitHub에서 PR #20 및 #22의 변경 내용을 최종 확인하고 이상이 없으면 수동 병합 진행
+- [ ] (agent) [p-61440d09bd|콘텐츠] Trellis C++ 1단계 가이드 과제 보안 리뷰 보완: backend/app/trellis_cpp.py 내 subprocess 호출부의 안전 장치와 가짜 테스트 코드를 보완하여 안전성 검토 통과 유도
