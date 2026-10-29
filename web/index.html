@@ -309,19 +309,39 @@ function build(im) {
 }
 $("go").onclick = async () => {
   $("go").disabled = true;
-  const t0 = performance.now();
+  const t0 = performance.now(), failed = [];
+  $("status").classList.remove("err");
   for (let k = 0; k < items.length; k++) {
     $("status").textContent = `만드는 중… ${k + 1}/${items.length}`;
     await new Promise((r) => setTimeout(r, 30));   // 화면이 멈추지 않게 한 장씩
-    items[k].result = build(items[k].img);
+    try {
+      items[k].result = build(items[k].img);
+    } catch (e) {   // 한 장이 실패해도 나머지는 계속 (외부 이미지 보안 제한·메모리 부족 등)
+      items[k].result = null;
+      failed.push(`${items[k].name}: ${friendlyBuildError(e)}`);
+    }
   }
-  select(cur < 0 ? 0 : cur);
-  const n = items[cur].result.n;
-  $("status").textContent = `완료 ${items.length}장 · 장당 정점 ${(n * n).toLocaleString()}개 · ${Math.round(performance.now() - t0)}ms`
-    + (items.length > 1 ? " · 썸네일을 눌러 하나씩 보기" : "");
+  const okIdx = items.findIndex((it) => it.result);
   $("go").disabled = false;
+  if (okIdx < 0) {
+    $("status").classList.add("err");
+    $("status").textContent = "만들지 못했습니다 — " + failed.join(" / ");
+    return;
+  }
+  select(items[cur]?.result ? cur : okIdx);
+  const n = items[cur].result.n;
+  $("status").textContent = `완료 ${items.length - failed.length}장 · 장당 정점 ${(n * n).toLocaleString()}개 · ${Math.round(performance.now() - t0)}ms`
+    + (items.length > 1 ? " · 썸네일을 눌러 하나씩 보기" : "") + (failed.length ? ` · 실패 ${failed.length}장: ${failed.join(" / ")}` : "");
+  if (failed.length) $("status").classList.add("err");
   $("dlZip").hidden = items.length < 2; $("dlZip").disabled = false;
 };
+
+function friendlyBuildError(e) {
+  const m = String((e && e.message) || e);
+  if (/tainted|cross-origin|SecurityError/i.test(m)) return "다른 사이트 이미지라 브라우저가 읽기를 막았습니다 (이미지를 저장해서 다시 넣어 주세요)";
+  if (/memory|allocation|RangeError/i.test(m)) return "메모리가 부족합니다 (세부 조정에서 메시 해상도를 낮춰 보세요)";
+  return "이미지를 처리하지 못했습니다 (" + m.slice(0, 80) + ")";
+}
 
 function texOf(c, srgb) {
   const t = new THREE.CanvasTexture(c);
