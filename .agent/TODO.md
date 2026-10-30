@@ -31,3 +31,6 @@
 - [ ] (agent:승인대기) PR #20 다시 하기 — PR #18 다시 하기 — PR #15 다시 하기 — three.ws를 활용한 3D AI 에이전트 연동 검토 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기 — PR #22 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/22
 - [ ] (agent:승인대기) PR #22 다시 하기 — PR #20 다시 하기 — PR #18 다시 하기 — PR #15 다시 하기 — three.ws를 활용한 3 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기 — PR #25 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/25
 - [ ] (agent:보류) [p-61440d09bd|콘텐츠] Trellis C++ 1단계 가이드 과제 보안 리뷰 보완: backend/app/trellis_cpp.py 내 subprocess 호출부의 안전 장치와 가짜 테스트 코드를 보완하여 안전성 검토 통과 유도 (재시도) — 같은 과제 2회 실패 — 마지막 사유: [4] tests=True security=['위험 함수 사용: shell=True'] — 리뷰 생략
+
+- [x] (agent) backend/app/services/mesh_from_image.py에 입력 이미지 유효성 검증 함수 validate_image_input(image_bytes: bytes) -> bool를 구현하고 backend/tests/test_core.py에 정상/오류 케이스 테스트 추가
+- [ ] (agent) backend/app/services/pbr_generator.py에 PBR 맵 생성 실패 시 기본값 fallback 텍스처를 반환하는 ensure_pbr_maps() 함수를 구현하고 테스트 추가
