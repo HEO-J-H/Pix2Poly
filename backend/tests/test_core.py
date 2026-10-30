@@ -138,3 +138,31 @@ def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
         triposr_runner.run_triposr_to_output_dir(
             png, tmp_path, tmp_path / "nonexistent_trellis", "python"
         )
+
+
+def test_validate_image_input_various_cases(png, tmp_path):
+    from backend.app.services.mesh_from_image import validate_image_input
+    # Valid file path
+    img = validate_image_input(png)
+    assert img is not None
+
+    # Valid bytes
+    b = png.read_bytes()
+    img2 = validate_image_input(b)
+    assert img2 is not None
+
+    # Non-existent file
+    with pytest.raises(ValueError, match="does not exist"):
+        validate_image_input(tmp_path / "nonexistent.png")
+
+    # Empty bytes
+    with pytest.raises(ValueError, match="empty"):
+        validate_image_input(b"")
+
+    # Invalid type
+    with pytest.raises(ValueError, match="Path or bytes"):
+        validate_image_input(12345)  # type: ignore
+
+    # Corrupted / non-image bytes
+    with pytest.raises(ValueError, match="Failed to validate"):
+        validate_image_input(b"not an image at all")
