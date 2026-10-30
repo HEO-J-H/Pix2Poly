@@ -64,15 +64,28 @@ def mesh_from_image_file(
     height_scale: float = 0.45,
 ):
     """
-    Read image from disk, build mesh, write model.obj and model.glb under output_dir.
+    Read image from disk, validate inputs, build mesh, write model.obj and model.glb under output_dir.
     Returns paths to obj and glb (absolute).
     """
+    if not image_path or not Path(image_path).is_file():
+        raise FileNotFoundError(f"Image path does not exist or is not a file: {image_path}")
+
+    if grid < 2:
+        raise ValueError("Grid size must be at least 2")
+
     output_dir.mkdir(parents=True, exist_ok=True)
-    img_rgb = Image.open(image_path).convert("RGB").resize(
-        (grid, grid), Image.Resampling.LANCZOS
-    )
-    gray = np.asarray(img_rgb.convert("L"), dtype=np.float64) / 255.0
-    rgb_arr = np.asarray(img_rgb, dtype=np.uint8)
+    try:
+        with Image.open(image_path) as img:
+            img_rgb = img.convert("RGB").resize(
+                (grid, grid), Image.Resampling.LANCZOS
+            )
+            gray = np.asarray(img_rgb.convert("L"), dtype=np.float64) / 255.0
+            rgb_arr = np.asarray(img_rgb, dtype=np.uint8)
+    except Exception as e:
+        if isinstance(e, (FileNotFoundError, ValueError)):
+            raise
+        raise ValueError(f"Failed to load or process image file: {e}") from e
+
     mesh = heightfield_mesh(gray, height_scale=height_scale, rgb_arr=rgb_arr)
 
     obj_path = output_dir / "model.obj"

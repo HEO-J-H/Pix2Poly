@@ -33,6 +33,19 @@ def test_mesh_from_image_writes_obj_and_glb(png, tmp_path):
     assert paths and all(__import__("pathlib").Path(p).exists() for p in paths)
 
 
+def test_mesh_from_image_validation_errors(tmp_path):
+    from pathlib import Path
+    # Test non-existent image path
+    with pytest.raises(FileNotFoundError):
+        mesh_from_image_file(Path("non_existent_image_12345.png"), tmp_path / "out", grid=32)
+
+    # Test invalid grid size
+    dummy_img = tmp_path / "dummy.png"
+    dummy_img.write_bytes(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x001s\xafC\x00\x00\x00\x0aIDATx\x9cc``\x00\x00\x00\x02\x00\x01H\xaf\xa4q\x00\x00\x00\x00IEND\xaeB`\x82")
+    with pytest.raises(ValueError, match="Grid size must be at least 2"):
+        mesh_from_image_file(dummy_img, tmp_path / "out", grid=1)
+
+
 def test_pbr_maps_all_written_and_valid(png, tmp_path):
     from PIL import Image
     maps = generate_pbr_maps(png, tmp_path)
