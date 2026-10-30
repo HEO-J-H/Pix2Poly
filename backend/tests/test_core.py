@@ -123,11 +123,12 @@ def test_pr8_retry_validation():
 
 
 def test_pr17_merged_verification():
-    """PR #17 수동 병합 검증 테스트."""
+    """PR #17 및 three.ws 통합 수동 병합 검증 테스트."""
     res = TestClient(app).get("/v1/engines")
     assert res.status_code == 200
     engines = res.json()
     assert any(e.get("id") == "heightfield" for e in engines)
+    assert any(e.get("id") == "threews" for e in engines)
 
 
 def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
