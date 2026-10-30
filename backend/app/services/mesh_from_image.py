@@ -57,6 +57,40 @@ def heightfield_mesh(
     return mesh
 
 
+def validate_image_input(image_input: Path | bytes) -> Image.Image:
+    """Validate image size, format, and load PIL Image; raises ValueError on invalid input."""
+    try:
+        if isinstance(image_input, Path):
+            if not image_input.is_file():
+                raise ValueError(f"Image file does not exist: {image_input}")
+            with open(image_input, "rb") as f:
+                data = f.read()
+        elif isinstance(image_input, bytes):
+            data = image_input
+        else:
+            raise ValueError("image_input must be a Path or bytes")
+
+        if not data:
+            raise ValueError("Image input buffer is empty")
+
+        if len(data) > 50 * 1024 * 1024:  # 50MB limit
+            raise ValueError("Image file is too large (>50MB)")
+
+        import io
+        img = Image.open(io.BytesIO(data))
+        img.verify()
+
+        # Reopen after verify() closes the stream
+        img = Image.open(io.BytesIO(data))
+        if img.width < 2 or img.height < 2:
+            raise ValueError(f"Image dimensions too small: {img.width}x{img.height}")
+        return img
+    except Exception as e:
+        if isinstance(e, ValueError):
+            raise
+        raise ValueError(f"Failed to validate or parse image input: {e}") from e
+
+
 def mesh_from_image_file(
     image_path: Path,
     output_dir: Path,
@@ -68,7 +102,8 @@ def mesh_from_image_file(
     Returns paths to obj and glb (absolute).
     """
     output_dir.mkdir(parents=True, exist_ok=True)
-    img_rgb = Image.open(image_path).convert("RGB").resize(
+    img = validate_image_input(image_path)
+    img_rgb = img.convert("RGB").resize(
         (grid, grid), Image.Resampling.LANCZOS
     )
     gray = np.asarray(img_rgb.convert("L"), dtype=np.float64) / 255.0
