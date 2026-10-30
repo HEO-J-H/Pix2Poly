@@ -63,7 +63,7 @@ async def health() -> Dict[str, str]:
 
 @app.get("/v1/engines")
 async def list_engines() -> List[Dict[str, object]]:
-    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D 포함)를 반환 (PR #17 병합됨)."""
+    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D, three.ws 통합 포함)를 반환."""
     from app.services.colmap_runner import colmap_available, colmap_has_cuda, openmvs_available
     from app.services import bg_remove
     return [
@@ -92,6 +92,12 @@ async def list_engines() -> List[Dict[str, object]]:
             "name": "Background Removal",
             "available": bool(bg_remove.available()),
             "description": "AI 기반 배경 분리",
+        },
+        {
+            "id": "threews",
+            "name": "three.ws Viewer & Preview",
+            "available": True,
+            "description": "브라우저 기반 실시간 3D 뷰어 및 WebGL 인터랙션 (three.ws 활용)",
         },
     ]
 
