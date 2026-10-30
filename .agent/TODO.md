@@ -30,4 +30,4 @@
 - [x] (agent) [p-1c297c04b1|사이트·UX] 웹 버전(web/) 성능 및 UI 정합성 점검: web/index.js 및 관련 HTML 파일에서 높이맵 메시 생성 오류 예외 처리 보완 — 사람(Claude)이 처리: 한 장 실패해도 계속·쉬운 오류 안내
 - [ ] (agent:승인대기) PR #20 다시 하기 — PR #18 다시 하기 — PR #15 다시 하기 — three.ws를 활용한 3D AI 에이전트 연동 검토 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기 — PR #22 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/22
 - [ ] (agent:승인대기) PR #22 다시 하기 — PR #20 다시 하기 — PR #18 다시 하기 — PR #15 다시 하기 — three.ws를 활용한 3 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기 — PR #25 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/25
-- [ ] (agent:보류) [p-61440d09bd|콘텐츠] Trellis C++ 1단계 가이드 과제 보안 리뷰 보완: backend/app/trellis_cpp.py 내 subprocess 호출부의 안전 장치와 가짜 테스트 코드를 보완하여 안전성 검토 통과 유도 — 같은 과제 2회 실패 — 마지막 사유: [4] tests=True security=['위험 함수 사용: shell=True'] — 리뷰 생략
+- [ ] (agent:보류) [p-61440d09bd|콘텐츠] Trellis C++ 1단계 가이드 과제 보안 리뷰 보완: backend/app/trellis_cpp.py 내 subprocess 호출부의 안전 장치와 가짜 테스트 코드를 보완하여 안전성 검토 통과 유도 (재시도) — 같은 과제 2회 실패 — 마지막 사유: [4] tests=True security=['위험 함수 사용: shell=True'] — 리뷰 생략
