@@ -33,6 +33,25 @@ def test_mesh_from_image_writes_obj_and_glb(png, tmp_path):
     assert paths and all(__import__("pathlib").Path(p).exists() for p in paths)
 
 
+def test_validate_image_input(png):
+    from backend.app.services.mesh_from_image import validate_image_input
+    # Valid PNG bytes
+    valid_bytes = png.read_bytes()
+    assert validate_image_input(valid_bytes) is True
+
+    # Invalid bytes
+    assert validate_image_input(b"not an image") is False
+    assert validate_image_input(b"") is False
+
+
+def test_mesh_from_image_invalid_file_raises(tmp_path):
+    from backend.app.services.mesh_from_image import mesh_from_image_file
+    bad_file = tmp_path / "bad.png"
+    bad_file.write_bytes(b"corrupted data")
+    with pytest.raises(ValueError, match="Invalid image input"):
+        mesh_from_image_file(bad_file, tmp_path / "out_bad")
+
+
 def test_pbr_maps_all_written_and_valid(png, tmp_path):
     from PIL import Image
     maps = generate_pbr_maps(png, tmp_path)

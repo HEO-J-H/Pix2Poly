@@ -57,6 +57,19 @@ def heightfield_mesh(
     return mesh
 
 
+def validate_image_input(image_bytes: bytes) -> bool:
+    """Validate whether input bytes represent a valid openable image."""
+    if not image_bytes or not isinstance(image_bytes, bytes):
+        return False
+    try:
+        import io
+        with Image.open(io.BytesIO(image_bytes)) as img:
+            img.verify()
+        return True
+    except Exception:
+        return False
+
+
 def mesh_from_image_file(
     image_path: Path,
     output_dir: Path,
@@ -64,10 +77,14 @@ def mesh_from_image_file(
     height_scale: float = 0.45,
 ):
     """
-    Read image from disk, build mesh, write model.obj and model.glb under output_dir.
+    Read image from disk, validate bytes, build mesh, write model.obj and model.glb under output_dir.
     Returns paths to obj and glb (absolute).
     """
     output_dir.mkdir(parents=True, exist_ok=True)
+    image_bytes = image_path.read_bytes()
+    if not validate_image_input(image_bytes):
+        raise ValueError("Invalid image input or corrupted image file")
+
     img_rgb = Image.open(image_path).convert("RGB").resize(
         (grid, grid), Image.Resampling.LANCZOS
     )
