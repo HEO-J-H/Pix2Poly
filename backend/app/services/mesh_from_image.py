@@ -57,6 +57,21 @@ def heightfield_mesh(
     return mesh
 
 
+def validate_image_input(image_path: Path, min_size: int = 2) -> None:
+    """Validate that the image file exists, is non-empty, and meets resolution requirements."""
+    if not image_path.exists() or image_path.stat().st_size == 0:
+        raise ValueError("Image file is empty or does not exist")
+    try:
+        with Image.open(image_path) as img:
+            w, h = img.size
+            if w < min_size or h < min_size:
+                raise ValueError(f"Image resolution too low: {w}x{h} (minimum {min_size}x{min_size} required)")
+    except Exception as e:
+        if isinstance(e, ValueError):
+            raise
+        raise ValueError(f"Invalid or unreadable image file: {e}")
+
+
 def mesh_from_image_file(
     image_path: Path,
     output_dir: Path,
@@ -64,9 +79,10 @@ def mesh_from_image_file(
     height_scale: float = 0.45,
 ):
     """
-    Read image from disk, build mesh, write model.obj and model.glb under output_dir.
+    Read image from disk, validate input, build mesh, write model.obj and model.glb under output_dir.
     Returns paths to obj and glb (absolute).
     """
+    validate_image_input(image_path)
     output_dir.mkdir(parents=True, exist_ok=True)
     img_rgb = Image.open(image_path).convert("RGB").resize(
         (grid, grid), Image.Resampling.LANCZOS

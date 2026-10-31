@@ -138,3 +138,30 @@ def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
         triposr_runner.run_triposr_to_output_dir(
             png, tmp_path, tmp_path / "nonexistent_trellis", "python"
         )
+
+
+def test_validate_image_input_empty_and_low_res(tmp_path):
+    from backend.app.services.mesh_from_image import validate_image_input, mesh_from_image_file
+    from PIL import Image
+
+    # 1. Non-existent file
+    missing = tmp_path / "nonexistent.png"
+    with pytest.raises(ValueError, match="empty or does not exist"):
+        validate_image_input(missing)
+
+    # 2. Empty file
+    empty = tmp_path / "empty.png"
+    empty.write_bytes(b"")
+    with pytest.raises(ValueError, match="empty or does not exist"):
+        validate_image_input(empty)
+
+    # 3. Low resolution image (1x1)
+    low_res = tmp_path / "low.png"
+    img = Image.new("RGB", (1, 1), color="red")
+    img.save(low_res)
+    with pytest.raises(ValueError, match="resolution too low"):
+        validate_image_input(low_res)
+
+    # 4. Integration test through mesh_from_image_file with low-res image
+    with pytest.raises(ValueError, match="resolution too low"):
+        mesh_from_image_file(low_res, tmp_path / "out_low")
