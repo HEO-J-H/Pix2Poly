@@ -57,6 +57,33 @@ def heightfield_mesh(
     return mesh
 
 
+def validate_image_input(image_bytes: bytes) -> None:
+    """
+    Validate image bytes for format and minimum resolution.
+    Raises ValueError if empty, unreadable, or resolution is too low.
+    """
+    if not image_bytes:
+        raise ValueError("Empty image input")
+    try:
+        from io import BytesIO
+        img = Image.open(BytesIO(image_bytes))
+        img.verify()
+    except Exception as e:
+        raise ValueError(f"Invalid image format: {e}") from e
+
+    # Re-open after verify() closes/corrupts stream state for some formats
+    try:
+        from io import BytesIO
+        img = Image.open(BytesIO(image_bytes))
+        width, height = img.size
+        if width < 2 or height < 2:
+            raise ValueError(f"Resolution too low ({width}x{height}); minimum 2x2 required")
+    except ValueError:
+        raise
+    except Exception as e:
+        raise ValueError(f"Could not read image dimensions: {e}") from e
+
+
 def mesh_from_image_file(
     image_path: Path,
     output_dir: Path,
@@ -64,9 +91,14 @@ def mesh_from_image_file(
     height_scale: float = 0.45,
 ):
     """
-    Read image from disk, build mesh, write model.obj and model.glb under output_dir.
+    Read image from disk, validate, build mesh, write model.obj and model.glb under output_dir.
     Returns paths to obj and glb (absolute).
     """
+    if not image_path.exists():
+        raise ValueError(f"Image path does not exist: {image_path}")
+    image_bytes = image_path.read_bytes()
+    validate_image_input(image_bytes)
+
     output_dir.mkdir(parents=True, exist_ok=True)
     img_rgb = Image.open(image_path).convert("RGB").resize(
         (grid, grid), Image.Resampling.LANCZOS
