@@ -138,3 +138,31 @@ def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
         triposr_runner.run_triposr_to_output_dir(
             png, tmp_path, tmp_path / "nonexistent_trellis", "python"
         )
+
+
+def test_validate_image_input(png):
+    """Test validate_image_input with valid and invalid cases."""
+    from backend.app.services.mesh_from_image import validate_image_input
+
+    # 1. Valid PNG fixture bytes
+    png_bytes = png.read_bytes()
+    w, h, fmt = validate_image_input(png_bytes)
+    assert w > 0 and h > 0
+    assert fmt == "PNG"
+
+    # 2. Empty bytes
+    with pytest.raises(ValueError, match="empty"):
+        validate_image_input(b"")
+
+    # 3. Corrupted / non-image bytes
+    with pytest.raises(ValueError, match="Invalid image file"):
+        validate_image_input(b"not an image at all")
+
+    # 4. Too small dimensions (create a 1x1 image in memory)
+    import io
+    from PIL import Image
+    tiny_img = Image.new("RGB", (1, 1), color="red")
+    buf = io.BytesIO()
+    tiny_img.save(buf, format="PNG")
+    with pytest.raises(ValueError, match="too small"):
+        validate_image_input(buf.getvalue())
