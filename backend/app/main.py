@@ -65,7 +65,7 @@ async def health() -> Dict[str, str]:
 async def list_engines() -> List[Dict[str, object]]:
     """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D 포함)를 반환 (PR #17 병합됨)."""
     from app.services.colmap_runner import colmap_available, colmap_has_cuda, openmvs_available
-    from app.services import bg_remove
+    from app.services import bg_remove, trellis_cpp
     return [
         {
             "id": "heightfield",
@@ -86,6 +86,12 @@ async def list_engines() -> List[Dict[str, object]]:
             "gpu": bool(colmap_has_cuda()),
             "openmvs": bool(openmvs_available()),
             "description": "여러 장의 사진/영상을 통한 다중시점 3D 재구성",
+        },
+        {
+            "id": "trellis_cpp",
+            "name": "trellis.cpp (TRELLIS.2, local GPU)",
+            "available": trellis_cpp.available()[0],
+            "description": trellis_cpp.available()[1],
         },
         {
             "id": "bg_remove",
