@@ -165,3 +165,18 @@ def test_validate_image_input_empty_and_low_res(tmp_path):
     # 4. Integration test through mesh_from_image_file with low-res image
     with pytest.raises(ValueError, match="resolution too low"):
         mesh_from_image_file(low_res, tmp_path / "out_low")
+
+
+def test_generate_heightfield_mesh_color_normalization(tmp_path):
+    from backend.app.services.mesh_from_image import generate_heightfield_mesh
+    from PIL import Image
+
+    # Test RGBA image normalization with transparency
+    rgba_path = tmp_path / "test_rgba.png"
+    img_rgba = Image.new("RGBA", (16, 16), color=(255, 0, 0, 128))
+    img_rgba.save(rgba_path)
+
+    out_dir = tmp_path / "out_rgba"
+    obj_path, glb_path = generate_heightfield_mesh(rgba_path, out_dir, grid=10)
+    assert obj_path.is_file()
+    assert glb_path.is_file()
