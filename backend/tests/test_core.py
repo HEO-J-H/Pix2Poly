@@ -165,3 +165,31 @@ def test_validate_image_input_empty_and_low_res(tmp_path):
     # 4. Integration test through mesh_from_image_file with low-res image
     with pytest.raises(ValueError, match="resolution too low"):
         mesh_from_image_file(low_res, tmp_path / "out_low")
+
+
+def test_ensure_rgb_mode_and_channel_conversion(tmp_path):
+    from backend.app.services.mesh_from_image import ensure_rgb_mode, mesh_from_image_file
+    from PIL import Image
+
+    # 1. RGBA mode normalization
+    rgba_img = Image.new("RGBA", (10, 10), color=(255, 0, 0, 128))
+    conv_rgba = ensure_rgb_mode(rgba_img)
+    assert conv_rgba.mode == "RGB"
+    assert conv_rgba.size == (10, 10)
+
+    # 2. Grayscale (L) mode normalization
+    l_img = Image.new("L", (10, 10), color=100)
+    conv_l = ensure_rgb_mode(l_img)
+    assert conv_l.mode == "RGB"
+
+    # 3. Already RGB
+    rgb_img = Image.new("RGB", (10, 10), color=(0, 255, 0))
+    conv_rgb = ensure_rgb_mode(rgb_img)
+    assert conv_rgb.mode == "RGB"
+
+    # 4. Integration test with RGBA input file via mesh_from_image_file
+    rgba_path = tmp_path / "test_rgba.png"
+    rgba_img.save(rgba_path)
+    out_obj, out_glb = mesh_from_image_file(rgba_path, tmp_path / "out_rgba", grid=16)
+    assert out_obj.exists()
+    assert out_glb.exists()

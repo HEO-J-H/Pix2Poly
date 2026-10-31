@@ -72,6 +72,23 @@ def validate_image_input(image_path: Path, min_size: int = 2) -> None:
         raise ValueError(f"Invalid or unreadable image file: {e}")
 
 
+def ensure_rgb_mode(img: Image.Image) -> Image.Image:
+    """Normalize input PIL Image to RGB mode, handling RGBA transparency or grayscale safely."""
+    if img.mode == "RGB":
+        return img
+    if img.mode == "RGBA":
+        # Composite RGBA over a black background to handle transparency
+        background = Image.new("RGB", img.size, (0, 0, 0))
+        background.paste(img, mask=img.split()[3])
+        return background
+    if img.mode == "L":
+        return img.convert("RGB")
+    try:
+        return img.convert("RGB")
+    except Exception as e:
+        raise ValueError(f"Failed to convert image mode {img.mode} to RGB: {e}")
+
+
 def mesh_from_image_file(
     image_path: Path,
     output_dir: Path,
@@ -84,9 +101,9 @@ def mesh_from_image_file(
     """
     validate_image_input(image_path)
     output_dir.mkdir(parents=True, exist_ok=True)
-    img_rgb = Image.open(image_path).convert("RGB").resize(
-        (grid, grid), Image.Resampling.LANCZOS
-    )
+    with Image.open(image_path) as raw_img:
+        normalized_img = ensure_rgb_mode(raw_img)
+        img_rgb = normalized_img.resize((grid, grid), Image.Resampling.LANCZOS)
     gray = np.asarray(img_rgb.convert("L"), dtype=np.float64) / 255.0
     rgb_arr = np.asarray(img_rgb, dtype=np.uint8)
     mesh = heightfield_mesh(gray, height_scale=height_scale, rgb_arr=rgb_arr)
