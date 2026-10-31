@@ -57,6 +57,41 @@ def heightfield_mesh(
     return mesh
 
 
+def validate_image_input(image_bytes: bytes) -> tuple[int, int, str]:
+    """
+    이미지 바이트의 포맷 및 크기를 사전 검증합니다.
+    지원 포맷: JPEG, PNG, WEBP 등 PIL이 열 수 있는 포맷.
+    최소 2x2 이상, 최대 8192x8192 이하의 크기 제한을 검증합니다.
+    (width, height, format) 튜플을 반환하며, 유효하지 않은 경우 ValueError를 발생시킵니다.
+    """
+    if not image_bytes:
+        raise ValueError("Image bytes are empty")
+    
+    try:
+        import io
+        img = Image.open(io.BytesIO(image_bytes))
+        img.verify()
+    except Exception as e:
+        raise ValueError(f"Invalid image file or unsupported format: {e}")
+
+    # Re-open after verify (PIL requirement)
+    img = Image.open(io.BytesIO(image_bytes))
+    width, height = img.size
+    fmt = (img.format or "").upper()
+
+    supported_formats = {"JPEG", "PNG", "WEBP", "BMP"}
+    if fmt and fmt not in supported_formats:
+        raise ValueError(f"Unsupported image format: {fmt}")
+
+    if width < 2 or height < 2:
+        raise ValueError(f"Image dimensions too small ({width}x{height}). Minimum is 2x2.")
+
+    if width > 8192 or height > 8192:
+        raise ValueError(f"Image dimensions too large ({width}x{height}). Maximum is 8192x8192.")
+
+    return width, height, fmt
+
+
 def mesh_from_image_file(
     image_path: Path,
     output_dir: Path,
@@ -68,6 +103,9 @@ def mesh_from_image_file(
     Returns paths to obj and glb (absolute).
     """
     output_dir.mkdir(parents=True, exist_ok=True)
+    image_bytes = image_path.read_bytes()
+    validate_image_input(image_bytes)
+
     img_rgb = Image.open(image_path).convert("RGB").resize(
         (grid, grid), Image.Resampling.LANCZOS
     )
