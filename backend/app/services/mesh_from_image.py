@@ -63,6 +63,15 @@ def validate_image_input(image_path: Path, min_size: int = 2) -> None:
         raise ValueError("Image file is empty or does not exist")
     try:
         with Image.open(image_path) as img:
+            # Verify format support/validity
+            img.verify()
+    except Exception as e:
+        if isinstance(e, ValueError):
+            raise
+        raise ValueError(f"Invalid or unreadable image file format: {e}")
+
+    try:
+        with Image.open(image_path) as img:
             w, h = img.size
             if w < min_size or h < min_size:
                 raise ValueError(f"Image resolution too low: {w}x{h} (minimum {min_size}x{min_size} required)")
@@ -72,21 +81,28 @@ def validate_image_input(image_path: Path, min_size: int = 2) -> None:
         raise ValueError(f"Invalid or unreadable image file: {e}")
 
 
-def mesh_from_image_file(
+def generate_heightfield_mesh(
     image_path: Path,
     output_dir: Path,
     grid: int = 200,
     height_scale: float = 0.45,
 ):
     """
-    Read image from disk, validate input, build mesh, write model.obj and model.glb under output_dir.
-    Returns paths to obj and glb (absolute).
+    Read image from disk, validate input, normalize color mode (RGBA/RGB/L),
+    build mesh, write model.obj and model.glb under output_dir.
     """
     validate_image_input(image_path)
     output_dir.mkdir(parents=True, exist_ok=True)
-    img_rgb = Image.open(image_path).convert("RGB").resize(
-        (grid, grid), Image.Resampling.LANCZOS
-    )
+    with Image.open(image_path) as img:
+        # Normalize color mode: RGBA/LA -> composite/convert, or convert to RGB
+        if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+            base = Image.new("RGBA", img.size, (255, 255, 255, 255))
+            base.paste(img.convert("RGBA"), mask=img.convert("RGBA").split()[3])
+            img_rgb = base.convert("RGB")
+        else:
+            img_rgb = img.convert("RGB")
+
+    img_rgb = img_rgb.resize((grid, grid), Image.Resampling.LANCZOS)
     gray = np.asarray(img_rgb.convert("L"), dtype=np.float64) / 255.0
     rgb_arr = np.asarray(img_rgb, dtype=np.uint8)
     mesh = heightfield_mesh(gray, height_scale=height_scale, rgb_arr=rgb_arr)
@@ -96,3 +112,15 @@ def mesh_from_image_file(
     mesh.export(str(obj_path))
     mesh.export(str(glb_path))
     return obj_path, glb_path
+
+
+def mesh_from_image_file(
+    image_path: Path,
+    output_dir: Path,
+    grid: int = 200,
+    height_scale: float = 0.45,
+):
+    """
+    Backward-compatible alias for generate_heightfield_mesh.
+    """
+    return generate_heightfield_mesh(image_path, output_dir, grid=grid, height_scale=height_scale)
