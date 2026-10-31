@@ -57,6 +57,19 @@ def heightfield_mesh(
     return mesh
 
 
+def validate_image_input(image_path: Path) -> None:
+    """Validate image file exists, is non-empty, and can be opened as an image."""
+    if not image_path.exists():
+        raise FileNotFoundError(f"Image file not found: {image_path}")
+    if image_path.stat().st_size == 0:
+        raise ValueError(f"Image file is empty: {image_path}")
+    try:
+        with Image.open(image_path) as img:
+            img.verify()
+    except Exception as e:
+        raise ValueError(f"Invalid or corrupted image file: {image_path}") from e
+
+
 def mesh_from_image_file(
     image_path: Path,
     output_dir: Path,
@@ -67,6 +80,7 @@ def mesh_from_image_file(
     Read image from disk, build mesh, write model.obj and model.glb under output_dir.
     Returns paths to obj and glb (absolute).
     """
+    validate_image_input(image_path)
     output_dir.mkdir(parents=True, exist_ok=True)
     img_rgb = Image.open(image_path).convert("RGB").resize(
         (grid, grid), Image.Resampling.LANCZOS

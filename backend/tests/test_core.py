@@ -33,6 +33,29 @@ def test_mesh_from_image_writes_obj_and_glb(png, tmp_path):
     assert paths and all(__import__("pathlib").Path(p).exists() for p in paths)
 
 
+def test_validate_image_input_cases(png, tmp_path):
+    from backend.app.services.mesh_from_image import validate_image_input
+    # Valid image passes
+    validate_image_input(png)
+
+    # Missing file raises FileNotFoundError
+    missing = tmp_path / "nonexistent.png"
+    with pytest.raises(FileNotFoundError):
+        validate_image_input(missing)
+
+    # Empty file raises ValueError
+    empty_file = tmp_path / "empty.png"
+    empty_file.write_bytes(b"")
+    with pytest.raises(ValueError, match="empty"):
+        validate_image_input(empty_file)
+
+    # Corrupted image raises ValueError
+    corrupt_file = tmp_path / "corrupt.png"
+    corrupt_file.write_bytes(b"not an image")
+    with pytest.raises(ValueError):
+        validate_image_input(corrupt_file)
+
+
 def test_pbr_maps_all_written_and_valid(png, tmp_path):
     from PIL import Image
     maps = generate_pbr_maps(png, tmp_path)
