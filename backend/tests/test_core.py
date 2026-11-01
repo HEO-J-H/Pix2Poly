@@ -165,3 +165,12 @@ def test_validate_image_input_empty_and_low_res(tmp_path):
     # 4. Integration test through mesh_from_image_file with low-res image
     with pytest.raises(ValueError, match="resolution too low"):
         mesh_from_image_file(low_res, tmp_path / "out_low")
+
+
+def test_physag3d_research_doc_reference():
+    """Verify that PhysAg3D is documented in tech-research.md as part of simulation/deformation research."""
+    from pathlib import Path
+    doc_path = Path("docs/tech-research.md")
+    assert doc_path.exists()
+    content = doc_path.read_text(encoding="utf-8")
+    assert "PhysAg3D" in content

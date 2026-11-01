@@ -49,6 +49,11 @@
 - **TripoSR**: 피드포워드 메시, MIT, `PIX2POLY_MESH_BACKEND=triposr` 로 Pix2Poly와 연동 가능 — **`docs/gpu-worker.md`**
 - **InstantMesh**: 품질·속도 트레이드오프 다름; 현재 저장소는 **자동 러너 미포함**, 문서에 확장 가이드
 
+### 단일 이미지 3D 물리적 상호작용 및 변형 (PhysAg3D 접목 검토)
+
+- **PhysAg3D**: 단일 이미지에서 생성된 3D 메시/재구성에 물리적 상호작용(Physical Interaction) 및 변형(Deformation) 능력을 결합하는 구조.
+- **참고 문헌 / 활용**: 향후 애니메이션 및 물리 시뮬레이션 연계 파트에서 정적 메시 생성에 그치지 않고, 충돌·변형·외력 반응 등을 부여하는 고도화 과제로 참고.
+
 ## 7) MVP 순서 제안
 
 1. 단일 이미지 파이프라인
