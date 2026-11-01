@@ -30,10 +30,24 @@ class BlockedURL(ValueError):
     pass
 
 
+def validate_url_input(url: str | None) -> str:
+    """URL 입력 값의 존재 여부, 스키마(http/https), 그리고 호스트 존재 여부를 검사합니다."""
+    if not url or not isinstance(url, str):
+        raise ValueError("URL이 비어 있거나 올바르지 않습니다.")
+    stripped = url.strip()
+    if not stripped:
+        raise ValueError("URL이 비어 있습니다.")
+    p = urlparse(stripped)
+    if p.scheme not in ("http", "https"):
+        raise BlockedURL("http 또는 https 스키마만 허용됩니다.")
+    if not p.hostname:
+        raise BlockedURL("유효하지 않은 호스트 이름입니다.")
+    return stripped
+
+
 def check_public_url(url: str) -> None:
-    p = urlparse(url)
-    if p.scheme not in ("http", "https") or not p.hostname:
-        raise BlockedURL("http/https 주소만 가능합니다")
+    validated = validate_url_input(url)
+    p = urlparse(validated)
     if _host_is_private(p.hostname):
         raise BlockedURL("내부망·로컬 주소는 가져올 수 없습니다")
 

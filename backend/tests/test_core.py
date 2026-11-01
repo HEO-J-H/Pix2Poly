@@ -174,3 +174,21 @@ def test_physag3d_research_doc_reference():
     assert doc_path.exists()
     content = doc_path.read_text(encoding="utf-8")
     assert "PhysAg3D" in content
+
+
+def test_validate_url_input():
+    from backend.app.services.url_ingest import validate_url_input, BlockedURL
+
+    # 1. Valid URLs
+    assert validate_url_input("https://example.com/path") == "https://example.com/path"
+    assert validate_url_input("http://example.com") == "http://example.com"
+
+    # 2. Empty or invalid type inputs
+    for invalid in [None, "", "   ", 123]:
+        with pytest.raises((ValueError, TypeError)):
+            validate_url_input(invalid)  # type: ignore
+
+    # 3. Disallowed schemas
+    for bad_scheme in ["ftp://example.com", "file:///etc/passwd", "javascript:alert(1)", "example.com"]:
+        with pytest.raises((BlockedURL, ValueError)):
+            validate_url_input(bad_scheme)
