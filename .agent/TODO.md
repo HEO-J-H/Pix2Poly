@@ -35,3 +35,7 @@
 - [x] (agent) backend/app/services/mesh_from_image.py에 이미지 입력 검증 함수(validate_image_input)를 추가하고, 빈 파일 및 저해상도 케이스에 대한 단위 테스트를 backend/tests/test_core.py에 작성합니다.
 - [x] (agent) PR #31 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 크기 및 형식 유효성 검사 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [x] (agent) PR #30 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 입력 해상도 및 비어 있는 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+
+- [x] (agent) validate_url_input(): backend/app/services/url_ingest.py에 URL 입력 형식 및 스키마 검증 함수를 추가하고, 허용된 프로토콜(http/https)과 도메인 유효성 검사 테스트를 backend/tests/test_core.py에 작성합니다.
+- [ ] (agent) export_obj_mesh(): backend/app/services/mesh_from_image.py 또는 전용 익스포터에 생성된 높이맵 메시 데이터를 표준 OBJ 형식(v, vn, f)으로 안전하게 변환하는 함수를 추가하고 테스트를 작성합니다.
+- [ ] (agent) validate_video_duration(): backend/app/services/video_pipeline.py에 비디오 입력 파일의 최대 허용 길이 및 포맷 검증 함수를 추가하고 예외 처리 테스트를 backend/tests/test_core.py에 작성합니다.

@@ -48,6 +48,24 @@ def test_private_hosts_blocked():
     assert url_ingest._host_is_private("no-such-host.invalid")  # 조회 실패도 막음
 
 
+def test_validate_url_input_and_protocols():
+    from backend.app.services.url_ingest import validate_url_input, BlockedURL
+
+    # Valid URLs
+    assert validate_url_input("https://example.com/path?query=1") == "https://example.com/path?query=1"
+    assert validate_url_input("http://sub.domain.co.kr/") == "http://sub.domain.co.kr/"
+
+    # Invalid schemas or formats
+    with pytest.raises(BlockedURL):
+        validate_url_input("ftp://example.com/file")
+
+    with pytest.raises(BlockedURL):
+        validate_url_input("not-a-url")
+
+    with pytest.raises(BlockedURL):
+        validate_url_input("")
+
+
 def test_job_lookup_unknown_is_404():
     r = TestClient(app).get("/v1/jobs/00000000-0000-0000-0000-000000000000")
     assert r.status_code == 404

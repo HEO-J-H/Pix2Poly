@@ -30,10 +30,21 @@ class BlockedURL(ValueError):
     pass
 
 
+def validate_url_input(url: str) -> str:
+    """URL 입력 형식 및 스키마를 검증하고, 허용된 프로토콜(http/https)과 도메인 유효성을 검사합니다."""
+    if not url or not isinstance(url, str):
+        raise BlockedURL("URL이 비어 있거나 올바른 문자열이 아닙니다")
+    p = urlparse(url.strip())
+    if p.scheme not in ("http", "https"):
+        raise BlockedURL("http 또는 https 프로토콜만 허용됩니다")
+    if not p.netloc or not p.hostname:
+        raise BlockedURL("유효한 도메인이 포함된 URL이어야 합니다")
+    return url.strip()
+
+
 def check_public_url(url: str) -> None:
-    p = urlparse(url)
-    if p.scheme not in ("http", "https") or not p.hostname:
-        raise BlockedURL("http/https 주소만 가능합니다")
+    validated = validate_url_input(url)
+    p = urlparse(validated)
     if _host_is_private(p.hostname):
         raise BlockedURL("내부망·로컬 주소는 가져올 수 없습니다")
 
