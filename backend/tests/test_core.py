@@ -165,3 +165,34 @@ def test_validate_image_input_empty_and_low_res(tmp_path):
     # 4. Integration test through mesh_from_image_file with low-res image
     with pytest.raises(ValueError, match="resolution too low"):
         mesh_from_image_file(low_res, tmp_path / "out_low")
+
+
+def test_normalize_image_channels_and_grayscale_alpha(tmp_path):
+    from backend.app.services.mesh_from_image import normalize_image_channels, mesh_from_image_file
+    from PIL import Image
+
+    # Test RGBA image with transparency
+    rgba_path = tmp_path / "test_rgba.png"
+    img_rgba = Image.new("RGBA", (16, 16), color=(255, 0, 0, 128))
+    img_rgba.save(rgba_path)
+    
+    normalized = normalize_image_channels(Image.open(rgba_path))
+    assert normalized.mode == "RGB"
+    assert normalized.size == (16, 16)
+
+    # Test Grayscale image (L mode)
+    l_path = tmp_path / "test_gray.png"
+    img_l = Image.new("L", (16, 16), color=128)
+    img_l.save(l_path)
+    
+    normalized_l = normalize_image_channels(Image.open(l_path))
+    assert normalized_l.mode == "RGB"
+
+    # Integration test with mesh generation for grayscale and RGBA inputs
+    out_dir_l = tmp_path / "out_l"
+    obj_l, glb_l = mesh_from_image_file(l_path, out_dir_l, grid=16)
+    assert obj_l.exists() and glb_l.exists()
+
+    out_dir_rgba = tmp_path / "out_rgba"
+    obj_rgba, glb_rgba = mesh_from_image_file(rgba_path, out_dir_rgba, grid=16)
+    assert obj_rgba.exists() and glb_rgba.exists()
