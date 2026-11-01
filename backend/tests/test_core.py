@@ -174,3 +174,25 @@ def test_physag3d_research_doc_reference():
     assert doc_path.exists()
     content = doc_path.read_text(encoding="utf-8")
     assert "PhysAg3D" in content
+
+
+def test_validate_url_input_schema_and_protocols():
+    from backend.app.services.url_ingest import validate_url_input, BlockedURL
+    
+    # Valid URLs
+    validate_url_input("https://example.com/path?query=1")
+    validate_url_input("http://example.com")
+
+    # Invalid format / empty
+    with pytest.raises(BlockedURL, match="잘못된 URL 형식입니다"):
+        validate_url_input("")
+    with pytest.raises(BlockedURL, match="잘못된 URL 형식입니다"):
+        validate_url_input("   ")
+
+    # Unsupported or missing protocols
+    with pytest.raises(BlockedURL, match="지원하지 않거나 잘못된 프로토콜입니다"):
+        validate_url_input("ftp://example.com/file")
+    with pytest.raises(BlockedURL, match="지원하지 않거나 잘못된 프로토콜입니다"):
+        validate_url_input("file:///etc/passwd")
+    with pytest.raises(BlockedURL, match="잘못된 URL 형식입니다"):
+        validate_url_input("just-a-string-without-scheme")

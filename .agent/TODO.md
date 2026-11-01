@@ -36,3 +36,5 @@
 - [x] (agent) PR #31 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 크기 및 형식 유효성 검사 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [x] (agent) PR #30 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 입력 해상도 및 비어 있는 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [x] (agent) [p-241c9f44b6|수집] 단일 이미지 3D 파트에 PhysAg3D 접목 검토: 단일 이미지 3D 생성 모델에 물리적 상호작용 및 변형 능력을 결합하는 PhysAg3D 구조를 검토하고, 향후 애니메이션/시뮬레이션 연계 파트(docs/tech-research.md)에 참고 문헌으로 추가합니다.
+
+- [x] (agent) backend/app/services/url_ingest.py의 validate_url_input()에 스키마 및 허용 도메인 검증 로직을 보완하고, 잘못된 URL 형식과 미지원 프로토콜 예외 처리에 대한 pytest 단위 테스트를 backend/tests/test_core.py에 추가

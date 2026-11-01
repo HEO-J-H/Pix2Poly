@@ -30,12 +30,27 @@ class BlockedURL(ValueError):
     pass
 
 
-def check_public_url(url: str) -> None:
-    p = urlparse(url)
-    if p.scheme not in ("http", "https") or not p.hostname:
-        raise BlockedURL("http/https 주소만 가능합니다")
+def validate_url_input(url: str) -> None:
+    """URL의 스키마, 형식, 호스트 유효성을 검증합니다."""
+    if not isinstance(url, str) or not url.strip():
+        raise BlockedURL("잘못된 URL 형식입니다")
+    try:
+        p = urlparse(url.strip())
+    except Exception as e:
+        raise BlockedURL(f"잘못된 URL 형식입니다: {e}")
+    
+    if not p.scheme:
+        raise BlockedURL("잘못된 URL 형식입니다: 스키마가 없습니다")
+    if p.scheme not in ("http", "https"):
+        raise BlockedURL(f"지원하지 않거나 잘못된 프로토콜입니다 ('{p.scheme}'). http 또는 https만 지원됩니다.")
+    if not p.netloc or not p.hostname:
+        raise BlockedURL("잘못된 URL 형식입니다: 호스트명이 없습니다")
     if _host_is_private(p.hostname):
         raise BlockedURL("내부망·로컬 주소는 가져올 수 없습니다")
+
+
+def check_public_url(url: str) -> None:
+    validate_url_input(url)
 
 
 async def safe_get(client: httpx.AsyncClient, url: str, max_bytes: int, max_redirects: int = 5) -> httpx.Response:
@@ -113,6 +128,7 @@ async def fetch_page_image_candidates(
     if robots_ok is False:
         return [], False, False
 
+    validate_url_input(page_url)
     async with httpx.AsyncClient(
         headers={"User-Agent": USER_AGENT},
         follow_redirects=False,
