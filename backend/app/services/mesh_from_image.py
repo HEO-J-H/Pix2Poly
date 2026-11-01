@@ -57,6 +57,17 @@ def heightfield_mesh(
     return mesh
 
 
+def normalize_image_channels(img: Image.Image, background_color: tuple[int, int, int] = (255, 255, 255)) -> Image.Image:
+    """Normalize color profile and alpha channel of an image, blending transparency onto background_color."""
+    if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+        rgba = img.convert("RGBA")
+        bg = Image.new("RGBA", rgba.size, background_color + (255,))
+        img = Image.alpha_composite(bg, rgba).convert("RGB")
+    elif img.mode != "RGB":
+        img = img.convert("RGB")
+    return img
+
+
 def validate_image_input(image_path: Path, min_size: int = 2) -> None:
     """Validate that the image file exists, is non-empty, and meets resolution requirements."""
     if not image_path.exists() or image_path.stat().st_size == 0:
@@ -84,9 +95,10 @@ def mesh_from_image_file(
     """
     validate_image_input(image_path)
     output_dir.mkdir(parents=True, exist_ok=True)
-    img_rgb = Image.open(image_path).convert("RGB").resize(
-        (grid, grid), Image.Resampling.LANCZOS
-    )
+    with Image.open(image_path) as raw_img:
+        img_rgb = normalize_image_channels(raw_img).resize(
+            (grid, grid), Image.Resampling.LANCZOS
+        )
     gray = np.asarray(img_rgb.convert("L"), dtype=np.float64) / 255.0
     rgb_arr = np.asarray(img_rgb, dtype=np.uint8)
     mesh = heightfield_mesh(gray, height_scale=height_scale, rgb_arr=rgb_arr)

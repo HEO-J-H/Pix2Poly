@@ -140,6 +140,22 @@ def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
         )
 
 
+def test_normalize_image_channels(tmp_path):
+    from backend.app.services.mesh_from_image import normalize_image_channels
+    from PIL import Image
+
+    # Test RGBA with transparency blending
+    rgba_img = Image.new("RGBA", (10, 10), color=(255, 0, 0, 128))
+    norm_img = normalize_image_channels(rgba_img, background_color=(255, 255, 255))
+    assert norm_img.mode == "RGB"
+    assert norm_img.size == (10, 10)
+
+    # Test Grayscale conversion
+    l_img = Image.new("L", (10, 10), color=128)
+    norm_l = normalize_image_channels(l_img)
+    assert norm_l.mode == "RGB"
+
+
 def test_validate_image_input_empty_and_low_res(tmp_path):
     from backend.app.services.mesh_from_image import validate_image_input, mesh_from_image_file
     from PIL import Image
