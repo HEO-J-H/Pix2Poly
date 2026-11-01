@@ -57,10 +57,25 @@ def heightfield_mesh(
     return mesh
 
 
+def validate_image_color_mode(image_path: Path) -> str:
+    """Validate and normalize image color mode, checking for unsupported modes like CMYK."""
+    try:
+        with Image.open(image_path) as img:
+            mode = img.mode
+            if mode == "CMYK":
+                raise ValueError("CMYK color mode is not supported; please convert to RGB or grayscale.")
+            return mode
+    except Exception as e:
+        if isinstance(e, ValueError):
+            raise
+        raise ValueError(f"Invalid or unreadable image file: {e}")
+
+
 def validate_image_input(image_path: Path, min_size: int = 2) -> None:
-    """Validate that the image file exists, is non-empty, and meets resolution requirements."""
+    """Validate that the image file exists, is non-empty, meets resolution requirements, and has a supported color mode."""
     if not image_path.exists() or image_path.stat().st_size == 0:
         raise ValueError("Image file is empty or does not exist")
+    validate_image_color_mode(image_path)
     try:
         with Image.open(image_path) as img:
             w, h = img.size

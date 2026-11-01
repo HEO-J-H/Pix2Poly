@@ -165,3 +165,29 @@ def test_validate_image_input_empty_and_low_res(tmp_path):
     # 4. Integration test through mesh_from_image_file with low-res image
     with pytest.raises(ValueError, match="resolution too low"):
         mesh_from_image_file(low_res, tmp_path / "out_low")
+
+
+def test_validate_image_color_mode_exceptions(tmp_path):
+    from backend.app.services.mesh_from_image import validate_image_color_mode, validate_image_input
+    from PIL import Image
+
+    # 1. Grayscale mode ('L') - should pass color mode check
+    gray_img_path = tmp_path / "gray.png"
+    img_gray = Image.new("L", (10, 10), color=128)
+    img_gray.save(gray_img_path)
+    assert validate_image_color_mode(gray_img_path) == "L"
+
+    # 2. RGBA mode ('RGBA') - should pass color mode check
+    rgba_img_path = tmp_path / "rgba.png"
+    img_rgba = Image.new("RGBA", (10, 10), color=(255, 0, 0, 128))
+    img_rgba.save(rgba_img_path)
+    assert validate_image_color_mode(rgba_img_path) == "RGBA"
+
+    # 3. CMYK mode - should raise ValueError for unsupported color mode
+    cmyk_img_path = tmp_path / "cmyk.jpg"
+    img_cmyk = Image.new("CMYK", (10, 10), color=(0, 255, 255, 0))
+    img_cmyk.save(cmyk_img_path)
+    with pytest.raises(ValueError, match="CMYK color mode is not supported"):
+        validate_image_color_mode(cmyk_img_path)
+    with pytest.raises(ValueError, match="CMYK color mode is not supported"):
+        validate_image_input(cmyk_img_path)
