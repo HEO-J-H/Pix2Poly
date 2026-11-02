@@ -1,0 +1,177 @@
+[
+{
+"title": "사진 1장 → 부조 3D",
+"text": "- 정면에서 찍은 사진 1장을 넣으면 밝기를 높이로 바꾼 부조(浮彫) 메시와 PBR 텍스처 5종(Base Color·Normal·Roughness·Height·AO)을 만듭니다.\n- 사진은 브라우저 안에서만 처리되고 서버로 전송되지 않습니다.\n- 높이 세기·해상도 슬라이더로 결과를 조절하고, GLB 또는 OBJ 로 내려받습니다.",
+"src": "docs/user-guide.md"
+},
+{
+"title": "여러 각도 사진 → 하나의 3D",
+"text": "- 같은 물체를 돌아가며 찍은 사진 2~4장을 넣으면 공개 AI 데모(TRELLIS, MIT)가 색까지 입힌 GLB 를 만듭니다.\n- 이 기능만 사진이 Hugging Face 서버로 전송되며, 전송 전에 동의를 묻습니다. 무료 공유 GPU 라 대기·하루 사용량 제한이 있습니다.\n- 내 PC 에서만 처리하려면 로컬 실행 버전에서 사진 5장 이상(권장 15~40장, 옆 사진과 60% 이상 겹치게)으로 사진측량(COLMAP)을 씁니다.",
+"src": "docs/user-guide.md"
+},
+{
+"title": "잘 찍는 법",
+"text": "- 반짝이·투명·무늬 없는 단색 표면은 복원이 어렵습니다 (무광 처리·무늬 테이프가 도움).\n- 물체 둘레를 일정한 간격으로 돌며, 높이를 바꿔 한 바퀴 더 찍으면 위·아래가 잘 나옵니다.\n- 배경이 복잡하면 '배경 지우기'를 켭니다 (rembg, 이 PC 에서 처리).",
+"src": "docs/user-guide.md"
+},
+{
+"title": "결과 파일",
+"text": "- GLB: 텍스처까지 한 파일 — Blender·Unity·Unreal·웹(three.js)에서 바로 열립니다.\n- OBJ: 메시 + 재질(MTL) + 텍스처 이미지 — 오래된 프로그램과도 잘 맞습니다.",
+"src": "docs/user-guide.md"
+},
+{
+"title": "제한 사항",
+"text": "- 사진 1장 방식은 '앞에서 본 높이'만 만들므로 뒷면이 없습니다 (부조·간판·타일·벽면 장식에 적합).\n- 여러 각도 AI 방식은 공유 GPU 상황에 따라 실패하거나 오래 걸릴 수 있습니다 — 실패하면 이유를 보여 줍니다.",
+"src": "docs/user-guide.md"
+},
+{
+"title": "Pix2Poly",
+"text": "URL 기반 이미지 분석으로 최적화된 3D 오브젝트와 PBR 텍스처를 생성하는 웹 툴입니다.\n\n**👉 바로 써 보기 (설치 없음): https://heo-j-h.github.io/Pix2Poly/** — 사진 한 장으로 높이맵 3D 메시(GLB·OBJ)와 PBR 텍스처 5종을\n브라우저 안에서 만듭니다(이미지는 서버로 전송되지 않음).\n**여러 각도 사진 → 하나의 3D (AI)**: 한 제품을 2~4장 찍어 넣으면 공개 AI 데모(TRELLIS, MIT)로 색까지 입힌 GLB 를 만듭니다 —\n무료 공유 GPU 라 대기·하루 사용량 제한이 있고, 이 기능만 사진이 Hugging Face 서버로 전송됩니다(동의 후). 설계: `docs/agent-guides/multiview.md`. TripoSR(GPU)·영상 재구성(COLMAP) 같은 고급 기능은 아래 로컬 실행 버전에서 사용합니다.",
+"src": "README.md"
+},
+{
+"title": "여러 각도 사진 → 하나의 3D, 내 PC에서 (외부 전송 없음)",
+"text": "1. 이 저장소를 내려받아 압축 풀기 (Windows, Python 3.10+)\n2. `scripts\\install-colmap.bat` — 공식 [COLMAP](https://github.com/colmap/colmap/releases)(BSD) 설치. NVIDIA GPU 가 있으면 CUDA판(정밀 복원), 없으면 일반판(대략적인 형태)\n3. `run.bat` → 화면의 **여러 장**에 같은 물체를 돌며 찍은 사진 **5장 이상**(권장 15~40장, 옆 사진과 60% 이상 겹치게)\n\n사진 5장 이상 + COLMAP 이 있으면 자동으로 사진측량(SfM → MVS → Poisson 메시)을 쓰고, 복원된 점이 너무 적으면 결과 대신 이유를 알려 줍니다.\n\n- **색 입히기**: 설치 스크립트가 OpenMVS(AGPL, 별도 실행 파일로만 호출)도 받아 둡니다. 정밀 복원 뒤 사진 색을 텍스처로 입히고, 색을 못 찾은 부분이 25%를 넘으면 복원 점의 색(정점 색) 메시로 대신합니다.\n- **배경 지우기**(선택): 화면의 체크 하나 — rembg(MIT, isnet 모델)로 이 PC 에서 처리합니다. 1장은 물체만 남기고(배경 높이 0), 여러 장은 사진마다 마스크를 만들어 물체에서만 특징점을 찾습니다. 모델(약 170MB)은 처음 쓸 때 한 번 내려받습니다.",
+"src": "README.md"
+},
+{
+"title": "핵심 목표",
+"text": "- 단일 이미지 기반 3D 생성 (Single Image to 3D)\n- 다중 이미지 기반 3D 생성 (Multi-Image to 3D)\n- URL 기반 이미지 수집 + 분석 + 3D 생성\n- PBR 텍스처 세트 (BaseColor, Normal, Roughness, Metallic, AO 등)\n- 실시간 렌더링 친화적 메시 최적화 (리토폴로지, 베이크)",
+"src": "README.md"
+},
+{
+"title": "구조",
+"text": "- `backend/`: FastAPI 서버 (잡 생성·조회, URL 인제스트)\n- `scripts/`: **로컬 전용** 실행 스크립트 (Windows)\n- `docs/`: 기술 조사 및 시스템 설계 (`video-to-3d-references.md`, **`gpu-worker.md`**: TripoSR GPU 워커 연동)",
+"src": "README.md"
+},
+{
+"title": "로컬 전용 실행 (권장)",
+"text": "GitHub Pages 없이 **본인 PC에서만** 서버 + 테스트 UI를 띄우는 방식입니다.\n\n1. 저장소 클론 후 `C:\\Pix2Poly` (또는 원하는 경로)로 이동\n2. 아래 중 하나 실행:\n   - **프로젝트 루트에서 더블클릭:** `run.bat` (권장)\n   - **또는** `scripts\\start-local.bat`\n   - **PowerShell:** `cd` 를 저장소 루트로 맞춘 뒤 `.\\scripts\\start-local.ps1`  \n     (실행 정책 오류 시: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`)\n3. **`run.bat` / `start-local.bat` 실행 시 약 2초 뒤 브라우저가 자동으로 열립니다.** (안 열리면 직접 `http://127.0.0.1:8000/ui/` 접속)  \n   - API 문서: `http://127.0.0.1:8000/docs`\n4. 다른 포트: PowerShell에서 `$env:PORT=\"8080\"; .\\scripts\\start-local.ps1` / CMD에서 `set PORT=8080` 후 `start-local.bat`\n\n`index.html`을 파일로 직접 열면(`file://`) API 호출이 막힐 수 있으므로, **반드시 위 주소로 접속**하세요.",
+"src": "README.md"
+},
+{
+"title": "파일 저장 시 자동 재시작 (hot reload)",
+"text": "`run.bat` / `scripts\\start-local.*` 는 내부에서 **`backend/run_dev.py`** 를 실행합니다.\n\n- **uvicorn `--reload` + WatchFiles** 로 `backend/app/` 아래 소스가 바뀌면 서버가 다시 로드됩니다.\n- **`backend/static/`(HTML/CSS/JS)은 감시하지 않습니다.** 정적 파일은 저장 후 브라우저에서 새로고침하면 됩니다. `static`까지 감시하면 Windows에서 `index.html` 등이 반복 감지되어 **무한 재시작**에 빠질 수 있습니다.\n- 감시 확장자: `.py`, `.html`, `.htm`, `.css`, `.js`, `.json` (위 `app/` 경로 안에서만 적용)\n- `.venv`, `uploads/`, `outputs/`, **`static/`** 은 감시하지 않습니다.",
+"src": "README.md"
+},
+{
+"title": "(선택) nodemon으로 프로세스 전체 재시작",
+"text": "Node가 있다면 저장 시 **uvicorn 프로세스를 통째로 다시 띄우는** 방식입니다. (`run_dev.py`보다 무겁고, 보통은 `run_dev.py`만으로 충분합니다.)\n\n```bash\nnpm install\nnpm run dev:nodemon\n```\n\n`nodemon.json` 은 Windows 기준으로 `backend` 에서 venv의 `uvicorn` 을 실행합니다. macOS/Linux에서는 `backend/run_dev.py` 사용을 권장합니다.",
+"src": "README.md"
+},
+{
+"title": "수동 실행 (동일 동작)",
+"text": "```bash\ncd backend\npython -m venv .venv\n.venv\\Scripts\\activate\npip install -r requirements.txt\npython run_dev.py\n```\n\n- 업로드: `backend/uploads/<job_id>/`\n- **단일·다중 이미지 잡**: 백그라운드에서 **명도(heightfield) 기반 메시**를 생성해  \n  `backend/outputs/<job_id>/model.obj` · `model.glb` 로 저장합니다. 브라우저에서 `/outputs/...` 또는 UI의 다운로드 버튼으로 받을 수 있습니다.  \n  (이 방식은 AI 단일뷰 3D가 아니라 **즉시 동작하는 베이스라인**입니다.)  \n- **FBX**: 런타임에 FBX 인코더를 넣지 않았습니다. Blender/MeshLab 등에서 OBJ를 가져와 FBX로 내보내면 됩니다.",
+"src": "README.md"
+},
+{
+"title": "TripoSR GPU 워커 (선택)",
+"text": "기본은 CPU **heightfield** 입니다. **TripoSR**을 쓰려면 TripoSR을 별도 클론·설치한 뒤 환경 변수를 설정합니다. 자세한 절차·트러블슈팅은 **`docs/gpu-worker.md`** 를 보세요.\n\n- `PIX2POLY_MESH_BACKEND=triposr`\n- `PIX2POLY_TRIPOSR_REPO_PATH` = TripoSR 클론 경로\n- `PIX2POLY_TRIPOSR_PYTHON` = TripoSR용 `python.exe` (PyTorch+CUDA)\n- `PIX2POLY_TRIPOSR_DEVICE` = 선택 (`cuda:0` / `cpu`; `run.bat`은 기본 `cuda:0`)\n\nWindows에서 GPU용 PyTorch·`torchmcubes` 정렬: `scripts/setup-triposr-gpu-windows.bat`\n\n**InstantMesh** 는 레포마다 출력 경로가 달라 자동 복사 로직은 넣지 않았습니다. 동일 문서에 확장 방법을 적어 두었습니다.",
+"src": "README.md"
+},
+{
+"title": "img2threejs 연동 (선택 엔진)",
+"text": "Claude Code 등에서 `/img2threejs <이미지>` 로 생성한 `spec.json` 을 Pix2Poly 에 업로드하여 Three.js 코드(`createObjectModel.ts`)를 생성할 수 있습니다.\n\n1. 로컬 환경변수 설정: `IMG2THREEJS_HOME=<img2threejs 레포 경로>`\n2. API / UI에서 `POST /v1/jobs/img2threejs-spec` 로 `spec.json` 업로드",
+"src": "README.md"
+},
+{
+"title": "API",
+"text": "| Method | Path | 설명 |\n|--------|------|------|\n| POST | `/v1/jobs/single-image` | 단일 이미지 잡 |\n| POST | `/v1/jobs/multi-image` | 다중 이미지 잡 |\n| POST | `/v1/jobs/url` | URL에서 이미지 후보 수집 후 잡 |\n| POST | `/v1/jobs/video-url` | 영상 URL 잡 (프레임·3D 파이프라인은 워커 연동 예정) |\n| POST | `/v1/jobs/img2threejs-spec` | img2threejs 스펙(spec.json) 기반 Three.js 코드 생성 잡 |\n| GET | `/v1/engines` | 사용 가능한 엔진 목록 조회 |\n| GET | `/v1/jobs/{job_id}` | 잡 상태 조회 |",
+"src": "README.md"
+},
+{
+"title": "참고",
+"text": "- [AeroScan_TwinTex](https://github.com/HEO-J-H/AeroScan_TwinTex)\n- [TripoSR (arXiv)](https://arxiv.org/abs/2403.02151)\n- [InstantMesh (arXiv)](https://arxiv.org/abs/2404.07191)\n- [MVSplat](https://github.com/donydchen/mvsplat)",
+"src": "README.md"
+},
+{
+"title": "URL 수집 시 주의",
+"text": "`robots.txt` 준수, ToS·저작권 확인, rate limit 적용이 필요합니다. 자세한 내용은 `docs/system-design.md`를 참고하세요.",
+"src": "README.md"
+},
+{
+"title": "목표",
+"text": "웹 UI/API가 **이미지 소스**(업로드 또는 URL)를 받아, 백엔드 오케스트레이터가 **3D 생성·PBR·최적화** 작업을 큐에 넣고 결과(GLB + 텍스처)를 반환한다.",
+"src": "docs/system-design.md"
+},
+{
+"title": "논리 구성",
+"text": "```mermaid\nflowchart LR\n  Client[Web / Client]\n  API[FastAPI]\n  Queue[Job queue]\n  Ingest[URL ingest]\n  Vid[Video URL ingest]\n  S2D[Single-image 3D]\n  M2D[Multi-image 3D]\n  V2D[Video frames to 3D]\n  PBR[PBR estimation]\n  Mesh[Retopo / Bake]\n\n  Client --> API\n  API --> Queue\n  API --> Ingest\n  API --> Vid\n  Queue --> S2D\n  Queue --> M2D\n  Queue --> V2D\n  S2D --> PBR\n  M2D --> PBR\n  V2D --> PBR\n  PBR --> Mesh\n  Mesh --> Storage[(Artifacts)]\n  API --> Storage\n```",
+"src": "docs/system-design.md"
+},
+{
+"title": "영상 URL 잡 (설계)",
+"text": "1. API가 **영상 페이지 URL 또는 직접 미디어 URL**을 받아 잡 생성  \n2. 워커가 **다운로드(또는 스트림) → ffmpeg 프레임 추출**  \n3. **경로 A**: COLMAP SfM+MVS (클래식) / **경로 B**: 단안 영상 신경망 재구성(MonST3R, SLAM3R 등)  \n4. 결과 메시/GS → PBR·리토폴로지와 합류  \n\n참고 문헌·링크는 **`docs/video-to-3d-references.md`**.\n\n현재 저장소의 `backend`는 **API + 인메모리 잡 상태**까지 구현하고, 실제 TripoSR/InstantMesh/MVSplat 등은 **외부 워커 프로세스 또는 컨테이너**로 연결하는 것을 권장한다.",
+"src": "docs/system-design.md"
+},
+{
+"title": "잡 모델",
+"text": "- `job_id`: UUID\n- `status`: `queued` | `running` | `succeeded` | `failed`\n- `input`: 단일/다중 이미지 또는 URL에서 추출한 이미지 URL 목록\n- `output`: (향후) 아티팩트 경로, 로그",
+"src": "docs/system-design.md"
+},
+{
+"title": "URL 인제스트",
+"text": "1. `GET` 대상 페이지 (User-Agent 식별, 타임아웃, 크기 제한)\n2. `urllib.robotparser`로 해당 URL fetch 허용 여부 검사 (선택적 차단)\n3. HTML 파싱으로 이미지 URL 수집\n4. 중복 제거 후 후보 목록 반환 (실제 다운로드는 사용자 선택 또는 잡 단계에서)",
+"src": "docs/system-design.md"
+},
+{
+"title": "보안·컴플라이언스",
+"text": "- SSRF 방지: 스킴 `http`/`https`만, 사설 IP 차단(옵션)\n- 다운로드 크기·개수 상한\n- 로그에 민감 정보 최소화",
+"src": "docs/system-design.md"
+},
+{
+"title": "다음 단계",
+"text": "- Redis/RQ 또는 Celery로 큐 이관\n- 객체 스토리지(S3 등)에 GLB/텍스처 저장\n- GPU 워커 이미지 및 모델 버전 핀ning",
+"src": "docs/system-design.md"
+},
+{
+"title": "GPU 워커 연동 (TripoSR / InstantMesh)",
+"text": "Pix2Poly API 서버(`FastAPI`)는 **가벼운 CPU 메시(heightfield)** 또는 **외부 GPU 환경에서 돌아가는 TripoSR**을 선택할 수 있습니다. TripoSR/InstantMesh는 **PyTorch·CUDA·대용량 가중치**가 필요하므로, 보통 **별도 Python 가상환경 또는 Docker**에 설치합니다.",
+"src": "docs/gpu-worker.md"
+},
+{
+"title": "아키텍처",
+"text": "```\n[브라우저] → [Pix2Poly FastAPI] → 잡 큐(현재 인메모리) → mesh_worker\n                                              ↓\n                               PIX2POLY_MESH_BACKEND=triposr 일 때\n                                              ↓\n                     subprocess: TripoSR의 run.py (별도 venv의 python)\n                                              ↓\n                     outputs/<job_id>/model.obj, model.glb\n```",
+"src": "docs/gpu-worker.md"
+},
+{
+"title": "1) TripoSR (권장 첫 단계)",
+"text": "- **저장소**: https://github.com/VAST-AI-Research/TripoSR  \n- **논문**: https://arxiv.org/abs/2403.02151  \n- **요구사항**: NVIDIA GPU 권장(README 기준 단일 이미지 약 **6GB VRAM** 수준), PyTorch+CUDA, `pip install -r requirements.txt`",
+"src": "docs/gpu-worker.md"
+},
+{
+"title": "설치 (요약)",
+"text": "1. TripoSR을 **Pix2Poly 밖의 경로**에 클론 (예: `D:\\repos\\TripoSR`).\n2. 해당 폴더에서 **전용 venv** 생성 후 TripoSR 의존성 설치.\n3. `python run.py examples/chair.png --output-dir output/` 로 한 번 수동 실행해 동작 확인.",
+"src": "docs/gpu-worker.md"
+},
+{
+"title": "Pix2Poly와 연결",
+"text": "환경 변수(또는 시스템 환경 변수)를 설정합니다.\n\n| 변수 | 설명 |\n|------|------|\n| `PIX2POLY_MESH_BACKEND` | `triposr` 로 설정 |\n| `PIX2POLY_TRIPOSR_REPO_PATH` | TripoSR 클론 **절대 경로** ( `run.py` 가 있는 폴더) |\n| `PIX2POLY_TRIPOSR_PYTHON` | TripoSR venv의 `python.exe` **전체 경로** (기본값 `python`) |\n| `PIX2POLY_TRIPOSR_DEVICE` | 선택. TripoSR `run.py`에 그대로 전달 (예: `cuda:0`, `cpu`). 비우면 `--device` 인자를 붙이지 않음(TripoSR 기본값). `run.bat`/`apply-triposr-env.bat`는 기본으로 `cuda:0`을 넣으며, CUDA가 없으면 TripoSR이 CPU로 폴백함. |",
+"src": "docs/gpu-worker.md"
+},
+{
+"title": "Windows GPU setup (TripoSR)",
+"text": "1. **드라이버**: 최신 NVIDIA Game Ready / Studio 드라이버.\n2. **CUDA Toolkit**: PyTorch **cu124**와 맞추려면 **CUDA 12.4** 툴킷을 권장합니다(예: [CUDA 12.4 설치 파일](https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda_12.4.0_551.61_windows.exe)). 13.x만 있으면 `torchmcubes` CMake가 꼬일 수 있습니다. `torchmcubes` 빌드 시 **nvcc**가 필요하고, 빌드 스크립트는 **Ninja**를 써서 Visual Studio에 깔린 CUDA 13용 MSBuild 타깃과 **CUDA 12 nvcc**가 섞이지 않게 합니다.\n3. **Visual Studio 2022 Build Tools**: 워크로드 **Desktop development with C++** (이미 CPU용 `torchmcubes` 빌드에 썼다면 동일).\n4. **TripoSR venv를 GPU용으로 올리기** (저장소 루트에서):\n\n   ```bat\n   scripts\\setup-triposr-gpu-windows.bat\n   ```\n\n   이 스크립트는 `third_party\\TripoSR\\.venv`에 **PyTorch cu124** 휠, **CMake 3.27**, **torchmcubes** 빌드에 필요한 도구를 맞추고, `scripts\\patch_torch_cuda_nvtx.py`로 PyTorch `cuda.cmake`를 한 줄 패치합니다(외부 프로젝트에서 `find_package(Torch)` 시 **nvtx3**를 CUDA 툴킷 include에서 찾도록). TripoSR venv에서 **PyTorch를 다시 설치**하면 이 패치가 덮어씌워지므로, 그 후에는 같은 스크립트를 다시 실행하거나 `pip-install-torchmcubes-vcvars.bat`만 다시 돌리면 됩니다.\n\n5. **확인** (`third_party\\TripoSR`에서 venv 활성화 후):\n\n   ```bat\n   python -c \"import torch, torchmcubes; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else '')\"\n   ```\n\n6. **Pix2Poly 실행**: `run.bat` → `apply-triposr-env.bat`가 `PIX2POLY_TRIPOSR_DEVICE=cuda:0`을 설정합니다. CPU만 쓰려면 `set PIX2POLY_TRIPOSR_DEVICE=cpu` 후 서버 실행.\n\n**Windows PowerShell 예시**\n\n```powershell\n$env:PIX2POLY_MESH_BACKEND = \"triposr\"\n$env:PIX2POLY_TRIPOSR_REPO_PATH = \"D:\\repos\\TripoSR\"\n$env:PIX2POLY_TRIPOSR_PYTHON = \"D:\\repos\\TripoSR\\.venv\\Scripts\\python.exe\"\n$env:PIX2POLY_TRIPOSR_DEVICE = \"cuda:0\"\ncd C:\\Pix2Poly\\backend\n.\\.venv\\Scripts\\python.exe run_dev.py\n```\n\n이후 UI에서 단일 이미지 잡을 올리면, 백그라운드에서 `run.py` 가 호출되고 완료되면 `outputs/<job_id>/model.obj` 등이 생성됩니다.",
+"src": "docs/gpu-worker.md"
+},
+{
+"title": "트러블슈팅",
+"text": "- **torchmcubes / CUDA**: TripoSR README의 *Troubleshooting* 참고. Windows에서는 **CUDA 12.4 + cu124 PyTorch + Ninja** 조합을 권장합니다. `CUDA::nvToolsExt` / `nvtx3` CMake 오류가 나면 `scripts\\patch_torch_cuda_nvtx.py`가 적용됐는지, `CUDA_PATH`가 12.4를 가리키는지 확인하세요.\n- **타임아웃**: `triposr_runner.py` 의 `timeout_s` 는 필요 시 늘리기.\n- **경로에 공백**: 가능하면 짧은 경로 사용.\n\n---",
+"src": "docs/gpu-worker.md"
+},
+{
+"title": "2) InstantMesh",
+"text": "- **저장소**: https://github.com/TencentARC/InstantMesh  \n- **논문**: https://arxiv.org/abs/2404.07191  \n\n실행 커맨드·출력 폴더가 **버전/브랜치마다 다를 수 있어**, 현재 Pix2Poly 저장소에는 **자동 복사 로직을 넣지 않았습니다.** TripoSR과 동일하게 **서브프로세스 + 출력 디렉터리 고정** 패턴으로 `mesh_worker` 에 분기만 추가하면 됩니다.\n\n권장: TripoSR 연동이 안정화된 뒤, 사용 중인 InstantMesh 커밋에 맞춰 `instantmesh_runner.py` 를 포크하여 PR.\n\n---",
+"src": "docs/gpu-worker.md"
+},
+{
+"title": "3) Docker (선택)",
+"text": "프로덕션에서는 다음을 권장합니다.\n\n- **API 컨테이너**: Pix2Poly FastAPI만 (CPU 가능).\n- **워커 컨테이너**: CUDA 베이스 이미지 + TripoSR 설치, Redis/RQ로 잡 소비.\n\n이 저장소에는 샘플 `Dockerfile` 을 아직 포함하지 않았습니다. 필요 시 `docs/system-design.md` 와 함께 확장하면 됩니다.\n\n---",
+"src": "docs/gpu-worker.md"
+},
+{
+"title": "4) 학습·블로그·튜토리얼 (참고)",
+"text": "- TripoSR 공식 README (설치·VRAM·`--bake-texture`)\n- Papers With Code: TripoSR 페이지\n- COLMAP으로 영상→프레임→SfM 하는 워크플로 (기하 전처리와 병행 시): `docs/video-to-3d-references.md`",
+"src": "docs/gpu-worker.md"
+}
+]
