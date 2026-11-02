@@ -166,6 +166,28 @@ def _generate_ao_map(gray: np.ndarray) -> np.ndarray:
 # Public API
 # ---------------------------------------------------------------------------
 
+def validate_pbr_input(image_path: Path) -> None:
+    """
+    Validate input image for PBR generation.
+    Raises ValueError if the file does not exist, is empty, is corrupted/unreadable,
+    or has a resolution that is too low (below 16x16).
+    """
+    if not image_path or not image_path.exists() or image_path.stat().st_size == 0:
+        raise ValueError(f"PBR input image is empty or does not exist: {image_path}")
+
+    try:
+        with Image.open(image_path) as img:
+            img.verify()
+    except Exception as e:
+        raise ValueError(f"Invalid or corrupted PBR image file: {image_path} ({e})") from e
+
+    # Re-open to check dimensions (verify() closes or invalidates state)
+    with Image.open(image_path) as img:
+        w, h = img.size
+        if w < 16 or h < 16:
+            raise ValueError(f"PBR input image resolution too low ({w}x{h}). Minimum required is 16x16.")
+
+
 def generate_pbr_maps(
     image_path: Path,
     out_dir: Path,
@@ -177,6 +199,8 @@ def generate_pbr_maps(
     Returns dict with keys: albedo, normal, roughness, metallic, ao
     Values are absolute Paths to the written PNGs.
     """
+    validate_pbr_input(image_path)
+
     out_dir = out_dir / "pbr"
     out_dir.mkdir(parents=True, exist_ok=True)
 

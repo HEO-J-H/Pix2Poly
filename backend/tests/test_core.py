@@ -174,3 +174,30 @@ def test_physag3d_research_doc_reference():
     assert doc_path.exists()
     content = doc_path.read_text(encoding="utf-8")
     assert "PhysAg3D" in content
+
+
+def test_validate_pbr_input_errors(tmp_path):
+    from backend.app.services.pbr_generator import validate_pbr_input, generate_pbr_maps
+    from PIL import Image
+
+    # 1. Non-existent file
+    missing = tmp_path / "nonexistent_pbr.png"
+    with pytest.raises(ValueError, match="empty or does not exist"):
+        validate_pbr_input(missing)
+
+    # 2. Empty file
+    empty = tmp_path / "empty_pbr.png"
+    empty.write_bytes(b"")
+    with pytest.raises(ValueError, match="empty or does not exist"):
+        validate_pbr_input(empty)
+
+    # 3. Low resolution image (8x8)
+    low_res = tmp_path / "low_pbr.png"
+    img = Image.new("RGB", (8, 8), color="blue")
+    img.save(low_res)
+    with pytest.raises(ValueError, match="resolution too low"):
+        validate_pbr_input(low_res)
+
+    # 4. Integration test through generate_pbr_maps with low-res image
+    with pytest.raises(ValueError, match="resolution too low"):
+        generate_pbr_maps(low_res, tmp_path / "out_pbr_low")
