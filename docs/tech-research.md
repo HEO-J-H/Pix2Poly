@@ -64,6 +64,18 @@
   - `docs/` 및 가이드 문서들을 정기적으로 임베딩하여 로컬 벡터 DB에 인덱싱.
   - AI 관리자 및 백엔드 지식 베이스 검색(Retrieval)을 통해 사용자의 3D 모델링/파이프라인 관련 질문에 정확한 코드와 설정 가이드 제공.
   - 외부 네트워크 의존성 최소화를 위해 로컬 임베딩 모델(예: Sentence-Transformers) 병행 검토.
+  - **로컬 툴 가이드 검색기 구현 예시 (LangChain / ChromaDB)**:
+    ```python
+    from langchain.chains import RetrievalQA
+    from langchain_community.embeddings import HuggingFaceEmbeddings
+    from langchain_community.vectorstores import Chroma
+    from langchain_text_splitters import MarkdownHeaderTextSplitter
+
+    # 1. 문서 로딩 및 마크다운 헤더 기반 청킹
+    headers_to_split_on = [("#", "Header 1"), ("##", "Header 2"), ("###", "Header 3")]
+    splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on)
+    # docs/ 내 가이드 문서 파싱 및 임베딩 저장
+    ```
 
 ## 8) MVP 순서 제안
 
