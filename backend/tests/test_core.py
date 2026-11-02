@@ -167,6 +167,33 @@ def test_validate_image_input_empty_and_low_res(tmp_path):
         mesh_from_image_file(low_res, tmp_path / "out_low")
 
 
+def test_validate_pbr_input_and_generation_errors(tmp_path):
+    from backend.app.services.pbr_generator import validate_pbr_input, generate_pbr_maps
+    from PIL import Image
+
+    # 1. Non-existent file
+    missing = tmp_path / "missing_pbr.png"
+    with pytest.raises(ValueError, match="empty or does not exist"):
+        validate_pbr_input(missing)
+    with pytest.raises(ValueError, match="empty or does not exist"):
+        generate_pbr_maps(missing, tmp_path / "out")
+
+    # 2. Empty file
+    empty = tmp_path / "empty_pbr.png"
+    empty.write_bytes(b"")
+    with pytest.raises(ValueError, match="empty or does not exist"):
+        validate_pbr_input(empty)
+
+    # 3. Low resolution image (1x1)
+    low_res = tmp_path / "low_pbr.png"
+    img = Image.new("RGB", (1, 1), color="blue")
+    img.save(low_res)
+    with pytest.raises(ValueError, match="resolution too low"):
+        validate_pbr_input(low_res)
+    with pytest.raises(ValueError, match="resolution too low"):
+        generate_pbr_maps(low_res, tmp_path / "out")
+
+
 def test_physag3d_research_doc_reference():
     """Verify that PhysAg3D is documented in tech-research.md as part of simulation/deformation research."""
     from pathlib import Path
