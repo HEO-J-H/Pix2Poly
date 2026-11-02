@@ -177,12 +177,13 @@ def test_physag3d_research_doc_reference():
 
 
 def test_rag_opensource_research_doc_reference():
-    """Verify that GitHub RAG open-source utilization plan is documented in tech-research.md."""
+    """Verify that GitHub RAG open-source utilization plan and local RAG code example are documented in tech-research.md."""
     from pathlib import Path
     doc_path = Path("docs/tech-research.md")
     assert doc_path.exists()
     content = doc_path.read_text(encoding="utf-8")
     assert "깃허브 RAG 오픈소스 활용 방안" in content or "RAG" in content
+    assert "MarkdownHeaderTextSplitter" in content
 
 
 def test_validate_pbr_input_errors(tmp_path):
