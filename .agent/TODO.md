@@ -52,3 +52,4 @@
 - [ ] (agent) PR #29 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 포맷 및 크기 사전 검증 함 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #28 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 입력 유효성 검사 예외 처리 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #27 다시 하기 — backend/app/services/mesh_from_image.py의 validate_image_inpu · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+- [ ] (agent) PR #26 다시 하기 — backend/app/services/mesh_from_image.py에 입력 이미지 유효성 검증 함수 va · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
