@@ -41,3 +41,4 @@
 - [ ] (agent) backend/app/services/url_ingest.py의 fetch_image_from_url() 함수에 URL 형식 검증 및 타임아웃 예외 처리를 보강하고, 잘못된 URL 입력에 대한 단위 테스트 추가
 - [ ] (agent) PR #43 다시 하기 — backend/app/services/pbr_generator.py의 generate_pbr_maps() 함 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #42 다시 하기 — backend/app/services/url_ingest.py의 validate_url_input(): UR · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+- [ ] (agent) PR #41 다시 하기 — backend/app/services/url_ingest.py의 validate_url_input()에 스키 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
