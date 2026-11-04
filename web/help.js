@@ -48,7 +48,7 @@ dialog.help::backdrop{background:rgba(0,0,0,.4)}.help .hd{display:flex;gap:8px;p
   dlg.className = "help"; dlg.setAttribute("aria-label", "도움말 검색");
   dlg.innerHTML = `<div class="hd"><input type="search" placeholder="궁금한 것을 입력하세요" aria-label="도움말 검색어"><button type="button" class="link" aria-label="닫기">닫기</button></div>
 <div class="bd"><div class="chips">${SAMPLES.map(s => `<button type="button">${esc(s)}</button>`).join("")}</div><div class="res" aria-live="polite"></div>
-<p><small>README·설계 문서에서 찾은 내용입니다 (새로 지어내지 않음). 질문은 전송되지 않습니다.</small></p></div>`;
+<p><small>README·설계 문서에서 찾은 내용입니다 (새로 지어내지 않음). 질문은 전송되지 않습니다. · <a href="https://github.com/HEO-J-H/Pix2Poly/blob/main/docs/user-guide.md" target="_blank" rel="noopener" title="사진 1장·여러 각도·잘 찍는 법·결과 파일·제한 사항">📖 사용 안내 전체 보기</a></small></p></div>`;
   const head = document.querySelector("header");
   if (head) { btn.classList.add("inhead"); head.appendChild(btn); } else document.body.append(btn);  // 헤더 안에 — 탭을 가리지 않게
   document.body.append(dlg);
