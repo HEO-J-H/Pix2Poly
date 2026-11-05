@@ -349,8 +349,20 @@ function texOf(c, srgb) {
   t.flipY = true;
   return t;
 }
+// 바꿔 끼울 때 GPU 메모리 돌려주기 — 형상만 지우고 재질·PBR 텍스처 5장은 남아 슬라이더를 움직일 때마다 쌓이던 문제
+function freeMesh(obj) {
+  if (!obj) return;
+  scene.remove(obj);
+  obj.traverse((o) => {
+    o.geometry?.dispose();
+    for (const m of [].concat(o.material || [])) {
+      for (const v of Object.values(m)) if (v && v.isTexture) v.dispose();
+      m.dispose();
+    }
+  });
+}
 function show(m, cv) {
-  if (mesh) { scene.remove(mesh); mesh.geometry?.dispose(); }
+  freeMesh(mesh);
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.BufferAttribute(m.pos, 3));
   geo.setAttribute("uv", new THREE.BufferAttribute(m.uv, 2));
@@ -388,9 +400,12 @@ $("dlPbr").onclick = () => { for (const [k, c] of Object.entries(result.canvases
 let mvFiles = [];
 const mv = await import("./multiview.js").catch((e) => { $("mvStatus").textContent = "AI 기능을 불러오지 못했습니다: " + e.message; return null; });
 if (mv) { $("mvEngine").href = mv.ENGINE.url; $("mvEngine").title = mv.ENGINE.name; }
+let mvThumbs = [];
 function mvSet(files) {
+  mvThumbs.forEach((u) => URL.revokeObjectURL(u));  // 이전 미리보기 주소 정리
   mvFiles = [...files].filter((f) => f.type.startsWith("image/")).slice(0, 8);
-  $("mvQueue").innerHTML = mvFiles.map((f) => `<button type="button" title="${f.name}"><img src="${URL.createObjectURL(f)}" alt=""></button>`).join("");
+  mvThumbs = mvFiles.map((f) => URL.createObjectURL(f));
+  $("mvQueue").innerHTML = mvFiles.map((f) => `<button type="button" title="${f.name}"><img src="${mvThumbs[mvFiles.indexOf(f)]}" alt=""></button>`).join("");
   $("mvGo").disabled = !(mvFiles.length >= 2 && $("mvConsent").checked && mv);
   $("mvStatus").textContent = mvFiles.length < 2 ? "다른 각도 사진을 2장 이상 넣어 주세요" : `${mvFiles.length}장 준비됨`;
 }
@@ -413,9 +428,10 @@ $("mvGo").onclick = async () => {
   try {
     const r = await mv.generate(mvFiles, (t) => { $("mvStatus").textContent = t; });
     const blob = await (await fetch(r.glbUrl)).blob();
+    if ($("mvGlb").href.startsWith("blob:")) URL.revokeObjectURL($("mvGlb").href);  // 이전 결과 파일 주소 정리
     const url = URL.createObjectURL(blob);
     const gltf = await new GLTFLoader().loadAsync(url);
-    if (mesh) { scene.remove(mesh); }
+    freeMesh(mesh);
     mesh = gltf.scene; mesh.name = "Pix2Poly-multiview";
     const box = new THREE.Box3().setFromObject(mesh), size = box.getSize(new THREE.Vector3()).length() || 1;
     mesh.position.sub(box.getCenter(new THREE.Vector3())); mesh.scale.setScalar(2 / size);
