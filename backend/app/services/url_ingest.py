@@ -31,11 +31,33 @@ class BlockedURL(ValueError):
 
 
 def check_public_url(url: str) -> None:
-    p = urlparse(url)
+    if not url or not isinstance(url, str):
+        raise BlockedURL("유효하지 않은 URL 형식입니다")
+    try:
+        p = urlparse(url.strip())
+    except Exception as e:
+        raise BlockedURL(f"URL 파싱 오류: {e}")
     if p.scheme not in ("http", "https") or not p.hostname:
         raise BlockedURL("http/https 주소만 가능합니다")
     if _host_is_private(p.hostname):
         raise BlockedURL("내부망·로컬 주소는 가져올 수 없습니다")
+
+
+async def fetch_image_from_url(url: str, timeout_s: float = 10.0, max_bytes: int = 10 * 1024 * 1024) -> bytes:
+    """URL 형식 검증, 타임아웃 예외 처리 및 크기 제한을 적용하여 이미지 바이너리를 가져옵니다."""
+    check_public_url(url)
+    try:
+        async with httpx.AsyncClient(headers={"User-Agent": USER_AGENT}, follow_redirects=True, timeout=timeout_s) as client:
+            r = await safe_get(client, url, max_bytes=max_bytes)
+            return r.content
+    except httpx.TimeoutException as e:
+        raise TimeoutError(f"URL 요청 시간이 초과되었습니다 ({timeout_s}초): {e}")
+    except httpx.HTTPStatusError as e:
+        raise ValueError(f"HTTP 오류가 발생했습니다 ({e.response.status_code}): {e}")
+    except Exception as e:
+        if isinstance(e, (BlockedURL, ValueError, TimeoutError)):
+            raise
+        raise ValueError(f"URL에서 이미지를 가져오는 중 오류가 발생했습니다: {e}")
 
 
 async def safe_get(client: httpx.AsyncClient, url: str, max_bytes: int, max_redirects: int = 5) -> httpx.Response:
