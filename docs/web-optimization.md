@@ -13,14 +13,14 @@
 
 - 큰 사진은 `canvas` 에 512 로 그리는 순간 줄어들어 계산량이 사진 크기와 무관.
 - 느린 기기에서 멈추면: 메시 해상도(격자)를 낮추는 것이 가장 효과가 큼 (계산·GPU 메모리 모두 격자² 에 비례).
-- 메모리 부족 오류(`RangeError`, `allocation`)는 화면에 "메시 해상도를 낮춰 보세요"로 안내 (`friendly()`).
+- 메모리 부족 오류(`RangeError`, `allocation`)는 화면에 "메시 해상도를 낮춰 보세요"로 안내 (`friendlyBuildError()`).
 
 ## 메모리 관리 규칙
 1. **3D 를 바꿔 끼울 때는 `freeMesh()`** — `scene.remove` 만 하면 GPU 메모리가 남는다. 형상(geometry)·재질(material)·
    재질에 붙은 텍스처(map·normalMap·roughnessMap·metalnessMap·aoMap)를 모두 `dispose()`.
    (2026-11-05 수정 전: 형상만 지워 PBR 텍스처 5장(약 5MB GPU)이 다시 만들 때마다 쌓였고, 여러 각도 결과(GLB)는 아예 지우지 않았음)
 2. **`URL.createObjectURL` 은 쓰고 나면 `revokeObjectURL`** —
-   - 내려받기 링크: 클릭 2초 뒤 해제 (`download()`).
+   - 내려받기 링크: 클릭 2초 뒤 해제.
    - 여러 각도 미리보기 썸네일: 새 사진을 넣을 때 이전 주소 해제 (`mvSet()`).
    - 여러 각도 결과 GLB: 새 결과를 받을 때 이전 주소 해제.
    - 사진 1장 목록(`items[].url`)은 목록에 있는 동안 화면에 쓰이므로 유지.
