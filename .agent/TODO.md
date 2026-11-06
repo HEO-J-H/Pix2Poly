@@ -58,7 +58,7 @@
 - [x] (agent) [p-aee196c6f6|사이트·UX] 깃허브 RAG 오픈소스 활용 방안 문서화 및 반영: docs/tech-research.md에 RAG 오픈소스 활용 방안을 정리하고, 개발 문서 또는 가이드에 반영합니다.
 - [x] (agent) [p-68df466543|콘텐츠] GitHub RAG 오픈소스 활용 방안 검토 (docs/tech-research.md): 로컬 3D 파이프라인 문서 조회나 툴 가이드 검색 편의를 높이기 위해 가벼운 로컬 RAG(예: LangChain 기반 가이드 검색기) 적용 방안을 docs/tech-research.md에 정리합니다.
 - [ ] (agent:보류) [p-5128e32c54|사이트·UX] 로컬 파이프라인 TripoSR 오류 처리 단위 테스트 보강: backend/tests/test_triposr.py 파일에 TripoSR 실행 실패 시 대체 경로 또는 명확한 오류 반환 테스트를 추가합니다. — 같은 과제 2회 실패 — 마지막 사유: [4] 패치 적용 실패: 변경 없음
-- [ ] (agent) [p-e85a53212a|사이트·UX] 로컬 파이프라인 TripoSR 실행 안내서 문서화: docs/local-pipeline.md를 업데이트하여 TripoSR 실행 시 필요한 VRAM 권장 사양과 CUDA 설정 절차를 상세히 안내합니다.
+- [ ] (agent:보류) [p-e85a53212a|사이트·UX] 로컬 파이프라인 TripoSR 실행 안내서 문서화: docs/local-pipeline.md를 업데이트하여 TripoSR 실행 시 필요한 VRAM 권장 사양과 CUDA 설정 절차를 상세히 안내합니다. — [4] tests=False security=[] — 리뷰 생략
 - [ ] (agent) [p-fd14425469|사이트·UX] PR #47 검토 및 최종 머지 확인: GitHub에서 PR #47의 변경 사항과 테스트 결과를 확인하고 최종 머지합니다.
 - [ ] (agent) [p-654477845d|콘텐츠] RAG 활용 가이드 페이지 공개: docs/guide-search.md 파일을 새로 만들고, 기존 사이트 메뉴에 ‘도움말·검색’ 섹션을 추가해 해당 페이지를 연결한다. 간단한 사용 예시와 설치/실행 스크린샷을 포함한다.
 - [ ] (agent) [p-42e3c1f1b4|콘텐츠] RAG 통합 설계 가이드 작성: docs/agent-guides/rag-integration.md 에 라이선스 검토(MIT, Apache‑2.0), GPU/CPU 요구사항, 선택 가능한 라이브러리(LangChain, LlamaIndex)와 구현 흐름을 정리한다. 향후 PR 검토 시 이 가이드를 기준으로 사용한다.
