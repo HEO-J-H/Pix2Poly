@@ -130,6 +130,24 @@ def test_pr17_merged_verification():
     assert any(e.get("id") == "heightfield" for e in engines)
 
 
+def test_pr47_site_ux_verification():
+    """PR #47 사이트·UX 및 API 엔진 상세 검증 테스트."""
+    res = TestClient(app).get("/v1/engines")
+    assert res.status_code == 200
+    engines = res.json()
+    engine_ids = {e.get("id") for e in engines}
+    assert "heightfield" in engine_ids
+    assert "colmap" in engine_ids
+    assert "bg_remove" in engine_ids
+
+    # Capabilities endpoint sanity check
+    cap_res = TestClient(app).get("/v1/capabilities")
+    assert cap_res.status_code == 200
+    cap_data = cap_res.json()
+    assert "colmap" in cap_data
+    assert "remove_bg" in cap_data
+
+
 def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
     """Verify TRELLIS runner integration or fallback gracefully when repository is absent."""
     from backend.app.services import triposr_runner
