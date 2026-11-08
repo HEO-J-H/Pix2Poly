@@ -63,6 +63,6 @@
 - [x] (agent) [p-654477845d|콘텐츠] RAG 활용 가이드 페이지 공개: docs/guide-search.md 파일을 새로 만들고, 기존 사이트 메뉴에 ‘도움말·검색’ 섹션을 추가해 해당 페이지를 연결한다. 간단한 사용 예시와 설치/실행 스크린샷을 포함한다.
 - [ ] (agent:보류) [p-42e3c1f1b4|콘텐츠] RAG 통합 설계 가이드 작성: docs/agent-guides/rag-integration.md 에 라이선스 검토(MIT, Apache‑2.0), GPU/CPU 요구사항, 선택 가능한 라이브러리(LangChain, LlamaIndex)와 구현 흐름을 정리한다. 향후 PR 검토 시 이 가이드를 기준으로 사용한다. — [4] 패치 적용 실패: 변경 없음
 - [ ] (agent:보류) [p-cbde5d0d47|사이트·UX] 로컬 가이드 RAG 테스트 코드 보강: backend/tests/test_rag.py를 추가하여 로컬 가이드 검색 로직의 기본 기능을 검증합니다. — [4] 패치 적용 실패: 변경 없음
-- [ ] (agent) [p-8370bc2097|사이트·UX] PR #47 백엔드 PBR 및 URL 인게스트 검토: GitHub에서 PR #47의 테스트 통과 여부 및 변경된 URL 형식 검증/예외 처리 코드를 최종 확인하고 승인합니다.
+- [ ] (agent:승인대기) [p-8370bc2097|사이트·UX] PR #47 백엔드 PBR 및 URL 인게스트 검토: GitHub에서 PR #47의 테스트 통과 여부 및 변경된 URL 형식 검증/예외 처리 코드를 최종 확인하고 승인합니다. — PR #50 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/50
 - [ ] (agent) [p-43ea959527|사이트·UX] 경량 RAG 엔드포인트 프로토타입 구현: backend/app/services/rag_query.py 에 MIT‑licensed FAISS + sentence‑transformers 기반 검색 엔진을 구현하고, main.py 에 `/api/rag/query` 라우트를 추가한다. 기존 docs/ 폴더의 마크다운을 인덱싱하고, 간단한 질문에 답변하도록 한다. 테스트 파일 backend/tests
 - [ ] (agent) [p-c23b4c92f0|운영·비용] RAG 통합 관련 PR #47 진행 독촉: 프로젝트 오너에게 PR #47 검토를 요청하고, 필요 시 리뷰어를 지정해 빠른 승인을 유도한다. 동시에 PR #47이 승인되면 RAG 엔드포인트가 의존할 수 있는 URL 검증 로직을 최신화한다.
