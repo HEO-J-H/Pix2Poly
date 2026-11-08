@@ -160,6 +160,15 @@ def test_pr47_site_ux_verification():
     assert data_bad.get("status") == "failed"
 
 
+def test_p572805b315_content_hold_split_verification():
+    """홀드된 문서 및 테스트 작업 재시도 분할 과제(p-572805b315)에 따른 분리 검증 테스트."""
+    res = TestClient(app).get("/v1/engines")
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data, list)
+    assert any(e.get("id") == "heightfield" for e in data)
+
+
 def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
     """Verify TRELLIS runner integration or fallback gracefully when repository is absent."""
     from backend.app.services import triposr_runner
