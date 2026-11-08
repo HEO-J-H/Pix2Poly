@@ -257,3 +257,20 @@ def test_fetch_image_from_url_validation_and_timeouts():
     for internal_url in ["http://localhost/img.png", "http://127.0.0.1/img.png", "http://169.254.169.254/latest"]:
         with pytest.raises(BlockedURL):
             asyncio.run(fetch_image_from_url(internal_url))
+
+
+
+def test_triposr_failures_become_clear_errors(png, tmp_path):
+    """TripoSR 실행 실패·결과 없음은 원인을 알 수 있는 RuntimeError 로 (원시 예외가 화면에 나오지 않게)."""
+    import sys
+    from backend.app.services import triposr_runner
+    root = tmp_path / "triposr"
+    root.mkdir()
+    (root / "run.py").write_text("import sys; sys.exit(3)", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="종료 코드 3"):
+        triposr_runner.run_triposr_to_output_dir(png, tmp_path / "out1", root, sys.executable)
+    (root / "run.py").write_text("print('no mesh')", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="mesh.obj"):
+        triposr_runner.run_triposr_to_output_dir(png, tmp_path / "out2", root, sys.executable)
+    with pytest.raises(RuntimeError, match="파이썬을 찾지 못했습니다"):
+        triposr_runner.run_triposr_to_output_dir(png, tmp_path / "out3", root, str(tmp_path / "no-python.exe"))

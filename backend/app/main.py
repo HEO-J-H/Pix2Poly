@@ -280,7 +280,7 @@ async def create_url_images_job(
             try:
                 r = await safe_get(client, url, MAX_IMAGE_BYTES)
                 ct = r.headers.get("content-type", "").lower()
-                if not (ct.startswith("image/") or "application/octet-stream" in ct):
+                if not ct.startswith("image/"):  # octet-stream 등 정체 모를 파일은 이미지 처리로 보내지 않음
                     failed_urls.append(url)
                     continue
                 ext = ct.split("/")[-1].split(";")[0].strip() if "/" in ct else "jpg"
@@ -310,7 +310,7 @@ async def create_url_images_job(
             "failed_urls": failed_urls,
             "upload_paths": upload_paths,
             "notes": body.notes,
-            "pipeline": "url-images → secure download → heightfield mesh → OBJ/GLB + PBR",
+            "pipeline": "url-images → secure download → heightfield/TripoSR mesh → OBJ/GLB + PBR",
         },
     )
     background_tasks.add_task(build_mesh_for_image_job, rec.job_id)

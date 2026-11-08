@@ -47,7 +47,7 @@ async def fetch_image_from_url(url: str, timeout_s: float = 10.0, max_bytes: int
     """URL 형식 검증, 타임아웃 예외 처리 및 크기 제한을 적용하여 이미지 바이너리를 가져옵니다."""
     check_public_url(url)
     try:
-        async with httpx.AsyncClient(headers={"User-Agent": USER_AGENT}, follow_redirects=True, timeout=timeout_s) as client:
+        async with httpx.AsyncClient(headers={"User-Agent": USER_AGENT}, follow_redirects=False, timeout=timeout_s) as client:  # safe_get 이 리다이렉트를 단계마다 검사하며 직접 따라감
             r = await safe_get(client, url, max_bytes=max_bytes)
             return r.content
     except httpx.TimeoutException as e:

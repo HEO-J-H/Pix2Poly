@@ -47,12 +47,19 @@ def run_triposr_to_output_dir(
         ]
         if device:
             cmd.extend(["--device", device])
-        subprocess.run(
-            cmd,
-            cwd=str(triposr_root),
-            check=True,
-            timeout=timeout_s,
-        )
+        try:
+            subprocess.run(
+                cmd,
+                cwd=str(triposr_root),
+                check=True,
+                timeout=timeout_s,
+            )
+        except subprocess.TimeoutExpired as e:
+            raise RuntimeError(f"TripoSR 가 {timeout_s}초 안에 끝나지 않았습니다 — GPU 가 없거나 VRAM(약 6GB 권장)이 부족할 수 있습니다") from e
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"TripoSR 실행 실패 (종료 코드 {e.returncode}) — 워커 콘솔의 GPU/CUDA 로그를 확인하세요") from e
+        except OSError as e:
+            raise RuntimeError(f"TripoSR 를 실행할 파이썬을 찾지 못했습니다 ({python_exe}): {e}") from e
 
         sub = tmp_path / "0"
         src_obj = sub / "mesh.obj"
