@@ -131,7 +131,7 @@ def test_pr17_merged_verification():
 
 
 def test_pr47_site_ux_verification():
-    """PR #47 사이트·UX 및 API 엔진 상세 검증 테스트."""
+    """PR #47 사이트·UX 및 API 엔진 상세 검증 테스트 및 URL 인게스트 예외 처리 검증."""
     res = TestClient(app).get("/v1/engines")
     assert res.status_code == 200
     engines = res.json()
@@ -146,6 +146,18 @@ def test_pr47_site_ux_verification():
     cap_data = cap_res.json()
     assert "colmap" in cap_data
     assert "remove_bg" in cap_data
+
+    # Test URL images ingest format & validation exception handling (PR #47 review)
+    client = TestClient(app)
+    # Empty selection test
+    resp_empty = client.post("/v1/jobs/url-images", json={"selected_urls": []})
+    assert resp_empty.status_code == 400
+
+    # Unreachable or blocked URL test
+    resp_bad = client.post("/v1/jobs/url-images", json={"selected_urls": ["http://127.0.0.1/fake.png"]})
+    assert resp_bad.status_code == 200
+    data_bad = resp_bad.json()
+    assert data_bad.get("status") == "failed"
 
 
 def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):

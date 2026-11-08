@@ -262,13 +262,13 @@ async def create_url_images_job(
     background_tasks: BackgroundTasks,
     body: UrlImagesJobCreate,
 ) -> JobResponse:
-    """Download selected image URLs and queue a mesh-generation job."""
+    """Download selected image URLs and queue a mesh-generation job with robust exception/format handling."""
     if not body.selected_urls:
         raise HTTPException(status_code=400, detail="selected_urls must not be empty")
 
     rec = await job_store.create(JobType.url, detail={})
 
-    # Download each selected image
+    # Download each selected image with secure checks and fallback filename sanitization
     downloaded: List[Tuple[Optional[str], bytes]] = []
     failed_urls: List[str] = []
     async with httpx.AsyncClient(
@@ -279,12 +279,15 @@ async def create_url_images_job(
         for url in body.selected_urls[:10]:  # max 10 images
             try:
                 r = await safe_get(client, url, MAX_IMAGE_BYTES)
-                ct = r.headers.get("content-type", "")
-                if not ct.startswith("image/"):
+                ct = r.headers.get("content-type", "").lower()
+                if not (ct.startswith("image/") or "application/octet-stream" in ct):
                     failed_urls.append(url)
                     continue
-                ext = ct.split("/")[-1].split(";")[0].strip() or "jpg"
-                fname = url.split("/")[-1].split("?")[0] or f"image.{ext}"
+                ext = ct.split("/")[-1].split(";")[0].strip() if "/" in ct else "jpg"
+                if not ext or len(ext) > 5:
+                    ext = "jpg"
+                raw_fname = url.split("/")[-1].split("?")[0].strip()
+                fname = raw_fname if raw_fname and len(raw_fname) < 120 else f"image.{ext}"
                 downloaded.append((fname, r.content))
             except Exception:
                 failed_urls.append(url)
@@ -293,7 +296,7 @@ async def create_url_images_job(
         await job_store.set_status(
             rec.job_id,
             JobStatus.failed,
-            "No images could be downloaded from the provided URLs",
+            "No valid images could be downloaded or verified from the provided URLs",
         )
         return _to_response(rec)
 
@@ -307,7 +310,7 @@ async def create_url_images_job(
             "failed_urls": failed_urls,
             "upload_paths": upload_paths,
             "notes": body.notes,
-            "pipeline": "url-images → download → heightfield/TripoSR mesh → OBJ/GLB + PBR",
+            "pipeline": "url-images → secure download → heightfield mesh → OBJ/GLB + PBR",
         },
     )
     background_tasks.add_task(build_mesh_for_image_job, rec.job_id)
