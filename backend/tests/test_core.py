@@ -160,6 +160,16 @@ def test_pr47_site_ux_verification():
     assert data_bad.get("status") == "failed"
 
 
+def test_pr47_rag_url_validation_integration():
+    """PR #47 RAG 통합 및 URL 검증 로직 최신화 검증 테스트."""
+    client = TestClient(app)
+    # 내부망 및 사설 IP URL 검증 (RAG/인게스트 단계에서 차단 확인)
+    resp = client.post("/v1/jobs/url-images", json={"selected_urls": ["http://localhost:8000/test.png"]})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data.get("status") == "failed"
+
+
 def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
     """Verify TRELLIS runner integration or fallback gracefully when repository is absent."""
     from backend.app.services import triposr_runner

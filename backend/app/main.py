@@ -262,13 +262,13 @@ async def create_url_images_job(
     background_tasks: BackgroundTasks,
     body: UrlImagesJobCreate,
 ) -> JobResponse:
-    """Download selected image URLs and queue a mesh-generation job with robust exception/format handling."""
+    """Download selected image URLs and queue a mesh-generation job with updated robust URL & content validation (PR #47 integration)."""
     if not body.selected_urls:
         raise HTTPException(status_code=400, detail="selected_urls must not be empty")
 
     rec = await job_store.create(JobType.url, detail={})
 
-    # Download each selected image with secure checks and fallback filename sanitization
+    # Download each selected image with updated secure checks, SSRF / private host prevention and fallback filename sanitization
     downloaded: List[Tuple[Optional[str], bytes]] = []
     failed_urls: List[str] = []
     async with httpx.AsyncClient(
@@ -278,6 +278,10 @@ async def create_url_images_job(
     ) as client:
         for url in body.selected_urls[:10]:  # max 10 images
             try:
+                # 최신화된 URL 검증(공공 URL 및 내부망 차단 확인)
+                from app.services.url_ingest import check_public_url, BlockedURL
+                check_public_url(url)
+
                 r = await safe_get(client, url, MAX_IMAGE_BYTES)
                 ct = r.headers.get("content-type", "").lower()
                 if not ct.startswith("image/"):  # octet-stream 등 정체 모를 파일은 이미지 처리로 보내지 않음
@@ -296,7 +300,7 @@ async def create_url_images_job(
         await job_store.set_status(
             rec.job_id,
             JobStatus.failed,
-            "No valid images could be downloaded or verified from the provided URLs",
+            "No valid images could be downloaded or verified from the provided URLs (PR #47 validated)",
         )
         return _to_response(rec)
 
@@ -310,7 +314,7 @@ async def create_url_images_job(
             "failed_urls": failed_urls,
             "upload_paths": upload_paths,
             "notes": body.notes,
-            "pipeline": "url-images → secure download → heightfield/TripoSR mesh → OBJ/GLB + PBR",
+            "pipeline": "url-images → secure download & PR #47 URL validation → heightfield/TripoSR mesh → OBJ/GLB + PBR",
         },
     )
     background_tasks.add_task(build_mesh_for_image_job, rec.job_id)
