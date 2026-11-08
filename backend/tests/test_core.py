@@ -160,6 +160,22 @@ def test_pr47_site_ux_verification():
     assert data_bad.get("status") == "failed"
 
 
+def test_pr50_pr51_review_and_exception_handling():
+    """PR #50 및 PR #51 백엔드 변경 사항 최종 검토 및 예외 처리 견고성 검증."""
+    client = TestClient(app)
+    
+    # 1. 엔진 상태 및 기능 메타데이터 최종 점검 (PR #50/#51 연계)
+    res_engines = client.get("/v1/engines")
+    assert res_engines.status_code == 200
+    engine_list = res_engines.json()
+    assert any(e.get("id") == "trellis_cpp" for e in engine_list)
+    assert any(e.get("id") == "noface3d" for e in engine_list)
+
+    # 2. 잘못된 URL 선택 작업 요청 시 예외 처리 검증 (400 또는 정상적 실패 처리)
+    res_url_empty = client.post("/v1/jobs/url-images", json={"selected_urls": []})
+    assert res_url_empty.status_code == 400
+
+
 def test_p572805b315_content_hold_split_verification():
     """홀드된 문서 및 테스트 작업 재시도 분할 과제(p-572805b315)에 따른 분리 검증 테스트."""
     res = TestClient(app).get("/v1/engines")

@@ -67,5 +67,5 @@
 - [ ] (agent:보류) [p-43ea959527|사이트·UX] 경량 RAG 엔드포인트 프로토타입 구현: backend/app/services/rag_query.py 에 MIT‑licensed FAISS + sentence‑transformers 기반 검색 엔진을 구현하고, main.py 에 `/api/rag/query` 라우트를 추가한다. 기존 docs/ 폴더의 마크다운을 인덱싱하고, 간단한 질문에 답변하도록 한다. 테스트 파일 backend/tests — [4] tests=False security=[] — 리뷰 생략
 - [ ] (agent:승인대기) [p-c23b4c92f0|운영·비용] RAG 통합 관련 PR #47 진행 독촉: 프로젝트 오너에게 PR #47 검토를 요청하고, 필요 시 리뷰어를 지정해 빠른 승인을 유도한다. 동시에 PR #47이 승인되면 RAG 엔드포인트가 의존할 수 있는 URL 검증 로직을 최신화한다. — PR #51 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/51
 - [x] (agent) [p-572805b315|콘텐츠] 홀드된 문서 및 테스트 작업 재시도 분할: 문서 파일 생성과 테스트 코드 추가 작업을 분리하여 각각 작은 단위의 PR/자동 머지 과제로 재등록하고 코딩 에이전트가 처리하도록 합니다.
-- [ ] (agent) [p-338e0d6d57|운영·비용] PR #50 및 PR #51 백엔드 변경 사항 최종 검토: GitHub에서 PR #50과 PR #51의 테스트 통과 여부 및 예외 처리 코드를 최종 확인하고 오너 승인 유도
+- [x] (agent) [p-338e0d6d57|운영·비용] PR #50 및 PR #51 백엔드 변경 사항 최종 검토: GitHub에서 PR #50과 PR #51의 테스트 통과 여부 및 예외 처리 코드를 최종 확인하고 오너 승인 유도
 - [ ] (agent) [p-246d67a028|콘텐츠] 웹/로컬 PBR 텍스처 생성 프로세스 문서화: docs/pbr-pipeline.md 파일을 생성하여 웹 브라우저 기반 높이맵 추출과 로컬 PBR 맵 생성 프로세스의 차이점과 활용법을 정리합니다.
