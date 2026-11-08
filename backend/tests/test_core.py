@@ -299,3 +299,24 @@ def test_triposr_failures_become_clear_errors(png, tmp_path):
         triposr_runner.run_triposr_to_output_dir(png, tmp_path / "out2", root, sys.executable)
     with pytest.raises(RuntimeError, match="파이썬을 찾지 못했습니다"):
         triposr_runner.run_triposr_to_output_dir(png, tmp_path / "out3", root, str(tmp_path / "no-python.exe"))
+
+
+def test_web_pbr_heightmap_and_texture_conversion_unit(png, tmp_path):
+    """웹 PBR 텍스처 브라우저 실시간 렌더링을 위한 파이썬 백엔드 PBR 높이맵 및 텍스처 변환 함수 단위 테스트."""
+    from backend.app.services.pbr_generator import generate_pbr_maps
+    from PIL import Image
+
+    # 높이맵 기반 PBR 생성 검증 (웹에서 JS로 구현된 알고리즘의 기준 데이터 역할)
+    maps = generate_pbr_maps(png, tmp_path / "web_pbr_out")
+    assert "albedo" in maps
+    assert "normal" in maps
+    assert "roughness" in maps
+    assert "metallic" in maps
+    assert "ao" in maps
+
+    # 생성된 맵 파일들이 유효한 이미지인지 확인
+    for key, path in maps.items():
+        assert path.exists()
+        img = Image.open(path)
+        assert img.size[0] >= 16
+        assert img.size[1] >= 16
