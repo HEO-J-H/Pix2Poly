@@ -226,6 +226,11 @@ async def create_video_url_job(
 @app.post("/v1/jobs/url", response_model=JobResponse)
 async def create_url_job(body: UrlJobCreate) -> JobResponse:
     page = str(body.page_url)
+    try:
+        from app.services.url_ingest import check_public_url
+        check_public_url(page)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
     candidates, robots_ok, truncated = await fetch_page_image_candidates(
         page,
         max_candidates=body.max_candidates,

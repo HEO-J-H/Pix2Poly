@@ -271,17 +271,21 @@ def test_validate_pbr_input_errors(tmp_path):
 
 
 def test_fetch_image_from_url_validation_and_timeouts():
-    """잘못된 URL 입력, 프로토콜 및 타임아웃/예외 처리에 대한 단위 테스트."""
+    """잘못된 URL 입력, 프로토콜 및 타임아웃/예외 처리에 대한 단위 테스트 (PR #40 URL 스키마 및 프로토콜 유효성 검사 포함)."""
     import asyncio
-    from backend.app.services.url_ingest import fetch_image_from_url, BlockedURL
+    from backend.app.services.url_ingest import fetch_image_from_url, check_public_url, BlockedURL
 
     # 1. 잘못된 스킴 또는 빈 URL 검증
     for invalid_url in ["", "ftp://example.com/img.png", "not-a-url", "file:///etc/passwd"]:
+        with pytest.raises((BlockedURL, ValueError)):
+            check_public_url(invalid_url)
         with pytest.raises((BlockedURL, ValueError)):
             asyncio.run(fetch_image_from_url(invalid_url))
 
     # 2. 내부망/로컬 주소 차단 검증
     for internal_url in ["http://localhost/img.png", "http://127.0.0.1/img.png", "http://169.254.169.254/latest"]:
+        with pytest.raises(BlockedURL):
+            check_public_url(internal_url)
         with pytest.raises(BlockedURL):
             asyncio.run(fetch_image_from_url(internal_url))
 

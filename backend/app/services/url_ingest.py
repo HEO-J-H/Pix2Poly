@@ -31,6 +31,7 @@ class BlockedURL(ValueError):
 
 
 def check_public_url(url: str) -> None:
+    """URL의 스키마, 프로토콜 및 호스트 유효성 검사 (PR #40 재구현)."""
     if not url or not isinstance(url, str):
         raise BlockedURL("유효하지 않은 URL 형식입니다")
     try:
