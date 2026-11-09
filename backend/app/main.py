@@ -22,7 +22,7 @@ from app.schemas import (
 from app.services.jobs import JobRecord, job_store
 from app.services.mesh_worker import build_mesh_for_image_job
 from app.services.storage import OUTPUT_ROOT, UPLOAD_ROOT, save_job_files
-from app.services.url_ingest import safe_get, USER_AGENT, fetch_page_image_candidates
+from app.services.url_ingest import safe_get, USER_AGENT, fetch_page_image_candidates, validate_url_input
 from app.services.video_pipeline import build_video_job
 
 app = FastAPI(

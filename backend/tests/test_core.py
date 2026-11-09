@@ -271,7 +271,12 @@ def test_validate_pbr_input_errors(tmp_path):
 def test_fetch_image_from_url_validation_and_timeouts():
     """잘못된 URL 입력, 프로토콜 및 타임아웃/예외 처리에 대한 단위 테스트."""
     import asyncio
-    from backend.app.services.url_ingest import fetch_image_from_url, BlockedURL
+    from backend.app.services.url_ingest import fetch_image_from_url, validate_url_input, BlockedURL
+
+    # 0. validate_url_input 명시적 검증 (PR #42)
+    with pytest.raises(BlockedURL):
+        validate_url_input("ftp://example.com/img.png")
+    validate_url_input("https://example.com/img.png")
 
     # 1. 잘못된 스킴 또는 빈 URL 검증
     for invalid_url in ["", "ftp://example.com/img.png", "not-a-url", "file:///etc/passwd"]:
