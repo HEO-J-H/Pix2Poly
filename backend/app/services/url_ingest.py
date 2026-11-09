@@ -30,7 +30,8 @@ class BlockedURL(ValueError):
     pass
 
 
-def check_public_url(url: str) -> None:
+def validate_url_input(url: str) -> None:
+    """Validate URL format, scheme, and ensure target host is public (SSRF prevention)."""
     if not url or not isinstance(url, str):
         raise BlockedURL("유효하지 않은 URL 형식입니다")
     try:
@@ -41,6 +42,10 @@ def check_public_url(url: str) -> None:
         raise BlockedURL("http/https 주소만 가능합니다")
     if _host_is_private(p.hostname):
         raise BlockedURL("내부망·로컬 주소는 가져올 수 없습니다")
+
+
+def check_public_url(url: str) -> None:
+    validate_url_input(url)
 
 
 async def fetch_image_from_url(url: str, timeout_s: float = 10.0, max_bytes: int = 10 * 1024 * 1024) -> bytes:
