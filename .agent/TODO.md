@@ -45,7 +45,7 @@
 - [ ] (agent:승인대기) PR #40 다시 하기 — backend/app/services/url_ingest.py에 URL 스키마 및 프로토콜 유효성 검사 함수 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기 — PR #58 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/58
 - [x] (agent) PR #38 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 컬러 모드 및 알파 채널 검 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [x] (agent) PR #37 다시 하기 — validate_url_input(): backend/app/services/url_ingest.py에 UR · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
-- [ ] (agent) PR #36 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 색상 프로파일 및 채널 정규 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+- [x] (agent) PR #36 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 색상 프로파일 및 채널 정규 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #35 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 색상 프로파일 및 알파 채널 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #34 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 색상 모드(RGBA/RGB) · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #33 다시 하기 — backend/app/services/mesh_from_image.py의 generate_heightfiel · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
