@@ -73,3 +73,4 @@
 - [ ] (agent) PR #51 다시 하기 — RAG 통합 관련 PR #47 진행 독촉: 프로젝트 오너에게 PR #4 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [x] (agent) [p-1f3968740c|운영·비용] URL 검증 및 RAG 연동 PR 최종 검토 안내: GitHub에서 PR #55와 PR #56의 코드 변경 사항과 테스트 통과 여부를 확인하고 최종 승인 처리합니다.
 - [ ] (agent) PR #58 다시 하기 — PR #40 다시 하기 — backend/app/services/url_ingest.py에 URL 스키마 및 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+- [ ] (agent) PR #56 다시 하기 — PR #41 다시 하기 — backend/app/services/url_ingest.py의 validate_ · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
