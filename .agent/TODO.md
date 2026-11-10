@@ -47,7 +47,7 @@
 - [x] (agent) PR #37 다시 하기 — validate_url_input(): backend/app/services/url_ingest.py에 UR · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [x] (agent) PR #36 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 색상 프로파일 및 채널 정규 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [x] (agent) PR #35 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 색상 프로파일 및 알파 채널 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
-- [ ] (agent) PR #34 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 색상 모드(RGBA/RGB) · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+- [x] (agent) PR #34 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 색상 모드(RGBA/RGB) · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #33 다시 하기 — backend/app/services/mesh_from_image.py의 generate_heightfiel · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #29 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 포맷 및 크기 사전 검증 함 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #28 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 입력 유효성 검사 예외 처리 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
