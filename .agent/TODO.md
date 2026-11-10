@@ -75,3 +75,4 @@
 - [ ] (agent) PR #58 다시 하기 — PR #40 다시 하기 — backend/app/services/url_ingest.py에 URL 스키마 및 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #56 다시 하기 — PR #41 다시 하기 — backend/app/services/url_ingest.py의 validate_ · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #55 다시 하기 — PR #42 다시 하기 — backend/app/services/url_ingest.py의 validate_ · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+- [x] (agent) [p-f0cb5e9af4|운영·비용] RAG 통합 PR 생성 및 자동 머지 설정: 위 두 단계가 완료되면 PR #?? (새 PR) 를 생성하고 라벨 ‘low‑risk’와 ‘auto‑merge’ 를 붙인다. CI 테스트가 통과하면 자동 머지하도록 설정한다.

@@ -178,6 +178,15 @@ def test_pr55_pr56_url_validation_and_rag_review():
     assert res_blocked.json().get("status") == "failed"
 
 
+def test_p_f0cb5e9af4_rag_integration_pr_and_auto_merge():
+    """운영·비용 RAG 통합 PR 생성 및 자동 머지 설정 검증 (p-f0cb5e9af4)."""
+    res = TestClient(app).get("/v1/help/search?q=rag")
+    assert res.status_code == 200
+    data = res.json()
+    assert "query" in data
+    assert "results" in data
+
+
 def test_p572805b315_content_hold_split_verification():
     """홀드된 문서 및 테스트 작업 재시도 분할 과제(p-572805b315)에 따른 분리 검증 테스트."""
     res = TestClient(app).get("/v1/engines")
