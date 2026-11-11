@@ -77,7 +77,7 @@
 - [ ] (agent) PR #55 다시 하기 — PR #42 다시 하기 — backend/app/services/url_ingest.py의 validate_ · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [x] (agent) [p-f0cb5e9af4|운영·비용] RAG 통합 PR 생성 및 자동 머지 설정: 위 두 단계가 완료되면 PR #?? (새 PR) 를 생성하고 라벨 ‘low‑risk’와 ‘auto‑merge’ 를 붙인다. CI 테스트가 통과하면 자동 머지하도록 설정한다.
 - [x] (agent) [p-4a1108f7de|사이트·UX] PR #60 및 #61 상태 점검 및 머지 가이드 보완: GitHub 상에서 PR #60(로컬 파이프라인) 및 PR #61(웹 UI 피드백)의 테스트 결과와 변경 사항을 최종 확인하고 병합 진행
-- [ ] (agent) [p-d612beb1a7|사이트·UX] 로컬 파이프라인 TripoSR 예외 로깅 및 메시지 정교화: backend/app/services/triposr_runner.py 파일에서 GPU 메모리 부족 또는 모델 로드 실패 시 구체적인 가이드 메시지를 로그에 남기도록 보완합니다.
+- [x] (agent) [p-d612beb1a7|사이트·UX] 로컬 파이프라인 TripoSR 예외 로깅 및 메시지 정교화: backend/app/services/triposr_runner.py 파일에서 GPU 메모리 부족 또는 모델 로드 실패 시 구체적인 가이드 메시지를 로그에 남기도록 보완합니다.
 - [ ] (agent) [p-b02669f80f|사이트·UX] PR #60 및 #61 검토 및 승인 처리: GitHub에서 PR #60 및 #61의 변경 사항과 테스트 결과를 확인하고 승인(Merge)합니다.
 - [ ] (agent) [p-f2a7c2673b|사이트·UX] 로컬 파이프라인 예외 처리 로그 메시지 개선: backend/app/services/mesh_from_image.py 및 관련 서비스 파일에서 예외 발생 시 반환되는 로그 메시지 상세화
 - [ ] (agent) [p-d296e1182c|사이트·UX] 웹 브라우저 PBR 변환 상태 메시지 JS 보완: web/index.html과 관련 JS 파일에서 로딩 스피너 및 PBR 텍스처 변환 완료 상태 안내 문구를 명확하게 출력하도록 세부 DOM 조작 로직을 수정합니다.

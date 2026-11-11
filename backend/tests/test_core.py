@@ -314,7 +314,7 @@ def test_triposr_failures_become_clear_errors(png, tmp_path):
     root = tmp_path / "triposr"
     root.mkdir()
     (root / "run.py").write_text("import sys; sys.exit(3)", encoding="utf-8")
-    with pytest.raises(RuntimeError, match="종료 코드 3"):
+    with pytest.raises(RuntimeError, match="종료 코드 3.*VRAM 부족"):
         triposr_runner.run_triposr_to_output_dir(png, tmp_path / "out1", root, sys.executable)
     (root / "run.py").write_text("print('no mesh')", encoding="utf-8")
     with pytest.raises(RuntimeError, match="mesh.obj"):
