@@ -76,3 +76,6 @@
 - [ ] (agent) PR #56 다시 하기 — PR #41 다시 하기 — backend/app/services/url_ingest.py의 validate_ · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #55 다시 하기 — PR #42 다시 하기 — backend/app/services/url_ingest.py의 validate_ · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [x] (agent) [p-f0cb5e9af4|운영·비용] RAG 통합 PR 생성 및 자동 머지 설정: 위 두 단계가 완료되면 PR #?? (새 PR) 를 생성하고 라벨 ‘low‑risk’와 ‘auto‑merge’ 를 붙인다. CI 테스트가 통과하면 자동 머지하도록 설정한다.
+- [x] (agent) [p-c1d28b237d|사이트·UX] 웹 브라우저 PBR 변환 UI 피드백 및 안내 문구 보강: web/index.html 및 관련 JS 파일에서 변환 진행 상태(로딩 스피너 및 완료 메시지)를 사용자가 직관적으로 알 수 있도록 텍스트와 스타일을 미세 조정
+- [ ] (agent) [p-38e4a00ec2|운영·비용] PR #60 검토 및 로컬 파이프라인 병합: GitHub에서 PR #60의 테스트 통과 여부를 최종 확인하고 머지하여 로컬 파이프라인의 입력 안정성을 강화합니다.
+- [ ] (agent) [p-9eea3f45cd|운영·비용] 로컬 파이프라인 입력 검증 테스트 추가: backend/tests/test_mesh_from_image.py에 다양한 이미지 포맷(RGBA, RGB, 잘못된 포맷 등)에 대한 입력 검증 테스트를 추가합니다.

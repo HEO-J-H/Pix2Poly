@@ -86,7 +86,7 @@ input[type=url]{flex:1;min-width:0;min-height:44px;border:1px solid var(--line);
   <header>
     <div>
       <h1>🧱 Pix2Poly</h1>
-      <p>사진으로 3D 메시와 PBR 텍스처를 만듭니다.</p>
+      <p>사진 한 장으로 높이맵 3D 메시와 PBR 텍스처(Albedo·Normal·Roughness·Metallic·AO)를 브라우저에서 실시간 생성합니다.</p>
     </div>
     <div class="seg" role="tablist" aria-label="만들기 방식">
       <button role="tab" id="tabOne" aria-selected="true" data-mode="one">사진 1장 → 부조 3D</button>
@@ -311,8 +311,9 @@ $("go").onclick = async () => {
   $("go").disabled = true;
   const t0 = performance.now(), failed = [];
   $("status").classList.remove("err");
+  $("status").innerHTML = `<span class="spinner" aria-hidden="true"></span> 3D 메시 및 PBR 텍스처 생성 중…`;
   for (let k = 0; k < items.length; k++) {
-    $("status").textContent = `만드는 중… ${k + 1}/${items.length}`;
+    $("status").innerHTML = `<span class="spinner" aria-hidden="true"></span> 만드는 중… ${k + 1}/${items.length}장 처리 중`;
     await new Promise((r) => setTimeout(r, 30));   // 화면이 멈추지 않게 한 장씩
     try {
       items[k].result = build(items[k].img);
@@ -325,13 +326,13 @@ $("go").onclick = async () => {
   $("go").disabled = false;
   if (okIdx < 0) {
     $("status").classList.add("err");
-    $("status").textContent = "만들지 못했습니다 — " + failed.join(" / ");
+    $("status").textContent = "❌ 변환을 완료하지 못했습니다 — " + failed.join(" / ");
     return;
   }
   select(items[cur]?.result ? cur : okIdx);
   const n = items[cur].result.n;
-  $("status").textContent = `완료 ${items.length - failed.length}장 · 장당 정점 ${(n * n).toLocaleString()}개 · ${Math.round(performance.now() - t0)}ms`
-    + (items.length > 1 ? " · 썸네일을 눌러 하나씩 보기" : "") + (failed.length ? ` · 실패 ${failed.length}장: ${failed.join(" / ")}` : "");
+  $("status").textContent = `✨ 3D 변환이 성공적으로 완료되었습니다! (${items.length - failed.length}장 성공, 장당 정점 ${(n * n).toLocaleString()}개, ${Math.round(performance.now() - t0)}ms 소요)`
+    + (items.length > 1 ? " · 아래 썸네일을 눌러 각각의 결과와 PBR 맵을 확인하세요." : "");
   if (failed.length) $("status").classList.add("err");
   $("dlZip").hidden = items.length < 2; $("dlZip").disabled = false;
 };
