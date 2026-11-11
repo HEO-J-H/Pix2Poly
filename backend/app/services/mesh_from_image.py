@@ -79,14 +79,22 @@ def mesh_from_image_file(
     height_scale: float = 0.45,
 ):
     """
-    Read image from disk, validate input, build mesh, write model.obj and model.glb under output_dir.
+    Read image from disk, validate input format and resolution, build mesh, write model.obj and model.glb under output_dir.
     Returns paths to obj and glb (absolute).
     """
     validate_image_input(image_path)
     output_dir.mkdir(parents=True, exist_ok=True)
-    img_rgb = Image.open(image_path).convert("RGB").resize(
-        (grid, grid), Image.Resampling.LANCZOS
-    )
+    try:
+        with Image.open(image_path) as img:
+            # 추가 포맷 및 손상된 이미지 사전 검증 (verify)
+            img.verify()
+        img_rgb = Image.open(image_path).convert("RGB").resize(
+            (grid, grid), Image.Resampling.LANCZOS
+        )
+    except Exception as e:
+        if isinstance(e, ValueError):
+            raise
+        raise ValueError(f"Invalid or corrupted image format: {e}")
     gray = np.asarray(img_rgb.convert("L"), dtype=np.float64) / 255.0
     rgb_arr = np.asarray(img_rgb, dtype=np.uint8)
     mesh = heightfield_mesh(gray, height_scale=height_scale, rgb_arr=rgb_arr)
