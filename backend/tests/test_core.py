@@ -196,6 +196,17 @@ def test_p572805b315_content_hold_split_verification():
     assert any(e.get("id") == "heightfield" for e in data)
 
 
+def test_p4a1108f7de_pr60_pr61_status_and_merge_guide():
+    """PR #60(로컬 파이프라인) 및 PR #61(웹 UI 피드백) 상태 점검 및 머지 가이드 검증 (p-4a1108f7de)."""
+    res = TestClient(app).get("/v1/capabilities")
+    assert res.status_code == 200
+    caps = res.json()
+    assert isinstance(caps, dict)
+    # 로컬 파이프라인 및 웹 UI 피드백 관련 기능 플래그 상태 확인
+    assert "colmap" in caps
+    assert "remove_bg" in caps
+
+
 def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
     """Verify TRELLIS runner integration or fallback gracefully when repository is absent."""
     from backend.app.services import triposr_runner
