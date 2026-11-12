@@ -82,17 +82,30 @@ def mesh_from_image_file(
     Read image from disk, validate input, build mesh, write model.obj and model.glb under output_dir.
     Returns paths to obj and glb (absolute).
     """
-    validate_image_input(image_path)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    img_rgb = Image.open(image_path).convert("RGB").resize(
-        (grid, grid), Image.Resampling.LANCZOS
-    )
-    gray = np.asarray(img_rgb.convert("L"), dtype=np.float64) / 255.0
-    rgb_arr = np.asarray(img_rgb, dtype=np.uint8)
-    mesh = heightfield_mesh(gray, height_scale=height_scale, rgb_arr=rgb_arr)
+    import logging
+    logger = logging.getLogger(__name__)
+    try:
+        validate_image_input(image_path)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        img_rgb = Image.open(image_path).convert("RGB").resize(
+            (grid, grid), Image.Resampling.LANCZOS
+        )
+        gray = np.asarray(img_rgb.convert("L"), dtype=np.float64) / 255.0
+        rgb_arr = np.asarray(img_rgb, dtype=np.uint8)
+        mesh = heightfield_mesh(gray, height_scale=height_scale, rgb_arr=rgb_arr)
 
-    obj_path = output_dir / "model.obj"
-    glb_path = output_dir / "model.glb"
-    mesh.export(str(obj_path))
-    mesh.export(str(glb_path))
-    return obj_path, glb_path
+        obj_path = output_dir / "model.obj"
+        glb_path = output_dir / "model.glb"
+        mesh.export(str(obj_path))
+        mesh.export(str(glb_path))
+        return obj_path, glb_path
+    except Exception as e:
+        logger.error(
+            "Failed to build heightfield mesh from image file %s (grid=%d, height_scale=%.2f): %s",
+            image_path,
+            grid,
+            height_scale,
+            e,
+            exc_info=True,
+        )
+        raise

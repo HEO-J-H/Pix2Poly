@@ -33,6 +33,19 @@ def test_mesh_from_image_writes_obj_and_glb(png, tmp_path):
     assert paths and all(__import__("pathlib").Path(p).exists() for p in paths)
 
 
+def test_mesh_from_image_logs_detailed_error_on_failure(png, tmp_path, caplog):
+    """Verify that mesh_from_image_file logs detailed context when an exception occurs."""
+    import logging
+    from backend.app.services.mesh_from_image import mesh_from_image_file
+
+    bad_path = tmp_path / "nonexistent_mesh_input.png"
+    with caplog.at_level(logging.ERROR):
+        with pytest.raises(ValueError):
+            mesh_from_image_file(bad_path, tmp_path / "out_err")
+    assert "Failed to build heightfield mesh from image file" in caplog.text
+    assert str(bad_path) in caplog.text
+
+
 def test_pbr_maps_all_written_and_valid(png, tmp_path):
     from PIL import Image
     maps = generate_pbr_maps(png, tmp_path)
