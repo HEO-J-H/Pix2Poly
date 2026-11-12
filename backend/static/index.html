@@ -330,6 +330,11 @@
     }
     .progress-bar-inner.running { animation: pulse 1.2s ease-in-out infinite; }
     @keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+    /* PBR 진행 표시 스피너 (PR #68 이 .spin 을 썼지만 정의가 없어 보이지 않던 것) */
+    .spin { display:inline-block; width:12px; height:12px; border:2px solid currentColor; border-right-color:transparent;
+            border-radius:50%; animation: spin .7s linear infinite; vertical-align:-2px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spin { animation:none; } }
 
     /* ── Toast ───────────────────────────────────── */
     #toast-root {

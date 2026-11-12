@@ -383,15 +383,17 @@ def test_web_pbr_heightmap_and_texture_conversion_unit(png, tmp_path):
         assert img.size[1] >= 16
 
 
-def test_p26ebad3dc5_pbr_status_ui_markup():
-    """웹 브라우저 PBR 상태 안내 UI 마크업 및 스피너/완료 메시지 배치 검증 (p-26ebad3dc5)."""
+def test_pbr_status_ui_in_local_page():
+    """PC 버전 화면: PBR 진행 표시가 있고, 스피너 스타일이 실제로 정의돼 있어야 보임 (단어가 있는지만 보던 테스트 대체)."""
+    import re
     from pathlib import Path
-    backend_html = Path("backend/static/index.html").read_text(encoding="utf-8")
-    web_html = Path("web/index.html").read_text(encoding="utf-8")
-
-    assert "pbr-status-area" in backend_html or "pbrStatusBox" in web_html
-    assert "spin" in backend_html
-    assert "spin" in web_html
+    html = Path("backend/static/index.html").read_text(encoding="utf-8")
+    assert 'id="pbr-status-area"' in html and 'id="pbr-status-msg"' in html
+    assert re.search(r"\.spin\s*\{[^}]*animation", html) and "@keyframes spin" in html
+    for state in ("running", "succeeded", "failed"):
+        assert f'obj.status === "{state}"' in html
+    web = Path("web/index.html").read_text(encoding="utf-8")
+    assert web.count('class="spin"') <= 2 and "pbrStatusBox" not in web  # 웹은 버튼·상태줄 한 곳에서만 안내 (중복 상자 없음)
 
 
 
