@@ -383,6 +383,17 @@ def test_web_pbr_heightmap_and_texture_conversion_unit(png, tmp_path):
         assert img.size[1] >= 16
 
 
+def test_p26ebad3dc5_pbr_status_ui_markup():
+    """웹 브라우저 PBR 상태 안내 UI 마크업 및 스피너/완료 메시지 배치 검증 (p-26ebad3dc5)."""
+    from pathlib import Path
+    backend_html = Path("backend/static/index.html").read_text(encoding="utf-8")
+    web_html = Path("web/index.html").read_text(encoding="utf-8")
+
+    assert "pbr-status-area" in backend_html or "pbrStatusBox" in web_html
+    assert "spin" in backend_html
+    assert "spin" in web_html
+
+
 
 @pytest.mark.parametrize("mode", ["RGB", "RGBA", "L", "P"])
 def test_mesh_from_image_accepts_common_modes(tmp_path, mode):

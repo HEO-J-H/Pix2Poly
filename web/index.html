@@ -203,6 +203,10 @@ input[type=url]{flex:1;min-width:0;min-height:44px;border:1px solid var(--line);
       </div>
       <p class="hint">드래그: 회전 · 휠/두 손가락: 확대 · 오른쪽 드래그: 이동</p>
       <div class="maps" id="maps"></div>
+      <div id="pbrStatusBox" style="margin-top:12px;display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);" hidden>
+        <span class="spin" id="pbrSpin" aria-hidden="true"></span>
+        <span id="pbrMsg">대기 중…</span>
+      </div>
     </section>
   </div>
   <footer>Pix2Poly · 오픈소스 <a href="https://github.com/HEO-J-H/Pix2Poly">GitHub</a> · 3D 소식·가이드: <a href="https://heo-j-h.github.io/3dflowhub/">3dflowhub</a></footer>
@@ -314,6 +318,10 @@ $("go").onclick = async () => {
   $("go").disabled = true;
   const goLabel = $("go").textContent;
   $("go").innerHTML = '<span class="spin" aria-hidden="true"></span> 만드는 중…';
+  const pbrBox = $("pbrStatusBox"), pbrMsg = $("pbrMsg"), pbrSpin = $("pbrSpin");
+  if (pbrBox) pbrBox.hidden = false;
+  if (pbrSpin) pbrSpin.style.display = "inline-block";
+  if (pbrMsg) { pbrMsg.textContent = "높이맵 메시 및 PBR 텍스처 5종 생성 중…"; pbrMsg.style.color = "var(--accent)"; }
   const t0 = performance.now(), failed = [];
   $("status").classList.remove("err");
   for (let k = 0; k < items.length; k++) {
@@ -324,6 +332,16 @@ $("go").onclick = async () => {
     } catch (e) {   // 한 장이 실패해도 나머지는 계속 (외부 이미지 보안 제한·메모리 부족 등)
       items[k].result = null;
       failed.push(`${items[k].name}: ${friendlyBuildError(e)}`);
+    }
+  }
+  if (pbrSpin) pbrSpin.style.display = "none";
+  if (pbrMsg) {
+    if (failed.length) {
+      pbrMsg.textContent = "일부 생성 실패";
+      pbrMsg.style.color = "var(--warn)";
+    } else {
+      pbrMsg.textContent = "✓ PBR 텍스처 및 메시 생성 완료";
+      pbrMsg.style.color = "var(--ok)";
     }
   }
   const okIdx = items.findIndex((it) => it.result);
