@@ -83,7 +83,7 @@
 - [ ] (agent:보류) [p-d296e1182c|사이트·UX] 웹 브라우저 PBR 변환 상태 메시지 JS 보완: web/index.html과 관련 JS 파일에서 로딩 스피너 및 PBR 텍스처 변환 완료 상태 안내 문구를 명확하게 출력하도록 세부 DOM 조작 로직을 수정합니다. — [4] 패치 적용 실패: ['backend/static/index.html: search 블록이 정확히 1회 일치하지 않음']
 - [ ] (agent:보류) [p-c1d28b237d|사이트·UX] 웹 브라우저 PBR 변환 UI 피드백 및 안내 문구 보강: web/index.html 및 관련 JS 파일에서 변환 진행 상태(로딩 스피너 및 완료 메시지)를 사용자가 직관적으로 알 수 있도록 텍스트와 스타일을 미세 조정 — [4] review=revise tests=True security=[] approve=False
 - [x] (agent) [p-38e4a00ec2|운영·비용] PR #60 검토 및 로컬 파이프라인 병합: GitHub에서 PR #60의 테스트 통과 여부를 최종 확인하고 머지하여 로컬 파이프라인의 입력 안정성을 강화합니다.
-- [ ] (agent) [p-9eea3f45cd|운영·비용] 로컬 파이프라인 입력 검증 테스트 추가: backend/tests/test_mesh_from_image.py에 다양한 이미지 포맷(RGBA, RGB, 잘못된 포맷 등)에 대한 입력 검증 테스트를 추가합니다.
+- [ ] (agent:보류) [p-9eea3f45cd|운영·비용] 로컬 파이프라인 입력 검증 테스트 추가: backend/tests/test_mesh_from_image.py에 다양한 이미지 포맷(RGBA, RGB, 잘못된 포맷 등)에 대한 입력 검증 테스트를 추가합니다. — [4] 패치 적용 실패: 변경 없음
 - [ ] (agent) PR #63 다시 하기 — 로컬 파이프라인 TripoSR 예외 로깅 및 메시지 정교화: back · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #61 다시 하기 — 웹 브라우저 PBR 변환 UI 피드백 및 안내 문구 보강: web/i · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) [p-984809e9b8|사이트·UX] PR #64및#65코드변경사항검토: GitHub에서 PR #64 및 #65의 코드 변경 사항과 테스트 통과 여부를 검토하고 승인 처리를 진행합니다.
