@@ -367,3 +367,28 @@ def test_web_pbr_heightmap_and_texture_conversion_unit(png, tmp_path):
         img = Image.open(path)
         assert img.size[0] >= 16
         assert img.size[1] >= 16
+
+
+
+@pytest.mark.parametrize("mode", ["RGB", "RGBA", "L", "P"])
+def test_mesh_from_image_accepts_common_modes(tmp_path, mode):
+    """투명도(RGBA)·흑백(L)·팔레트(P) 이미지도 RGB 로 바꿔 메시를 만든다."""
+    from PIL import Image
+    from backend.app.services.mesh_from_image import mesh_from_image_file
+    p = tmp_path / f"in_{mode}.png"
+    Image.new(mode, (32, 32)).save(p)
+    obj, glb = mesh_from_image_file(p, tmp_path / f"out_{mode}", grid=16)
+    assert obj.exists() and glb.exists()
+
+
+def test_validate_image_input_rejects_bad_files(tmp_path):
+    from PIL import Image
+    from backend.app.services.mesh_from_image import validate_image_input
+    fake = tmp_path / "not_image.png"
+    fake.write_text("이미지가 아님", encoding="utf-8")
+    with pytest.raises(ValueError, match="Invalid or unreadable"):
+        validate_image_input(fake)
+    tiny = tmp_path / "tiny.png"
+    Image.new("RGB", (1, 1)).save(tiny)
+    with pytest.raises(ValueError, match="too low"):
+        validate_image_input(tiny)

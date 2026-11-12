@@ -9,6 +9,9 @@ from pathlib import Path
 import numpy as np
 import trimesh
 from PIL import Image
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def heightfield_mesh(
@@ -82,8 +85,6 @@ def mesh_from_image_file(
     Read image from disk, validate input, build mesh, write model.obj and model.glb under output_dir.
     Returns paths to obj and glb (absolute).
     """
-    import logging
-    logger = logging.getLogger(__name__)
     try:
         validate_image_input(image_path)
         output_dir.mkdir(parents=True, exist_ok=True)

@@ -10,7 +10,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCES = ["docs/user-guide.md", "README.md", "docs/system-design.md", "docs/gpu-worker.md"]
+SOURCES = ["docs/user-guide.md", "docs/pbr-pipeline.md", "README.md", "docs/system-design.md", "docs/gpu-worker.md"]
 
 
 def sections(path: Path) -> list[dict]:

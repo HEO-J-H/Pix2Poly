@@ -74,6 +74,9 @@ input[type=url]{flex:1;min-width:0;min-height:44px;border:1px solid var(--line);
 .seg{flex-wrap:wrap}
 @media (max-width:560px){.seg{width:100%}.seg button{flex:1;padding:0 8px;font-size:14px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;
+  vertical-align:-2px;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script type="importmap">
@@ -309,10 +312,12 @@ function build(im) {
 }
 $("go").onclick = async () => {
   $("go").disabled = true;
+  const goLabel = $("go").textContent;
+  $("go").innerHTML = '<span class="spin" aria-hidden="true"></span> 만드는 중…';
   const t0 = performance.now(), failed = [];
   $("status").classList.remove("err");
   for (let k = 0; k < items.length; k++) {
-    $("status").textContent = `만드는 중… ${k + 1}/${items.length}`;
+    $("status").textContent = `${k + 1}/${items.length}장 — 높이맵 메시와 PBR 텍스처 5장(Base Color·Normal·Roughness·Metallic·AO) 만드는 중…`;
     await new Promise((r) => setTimeout(r, 30));   // 화면이 멈추지 않게 한 장씩
     try {
       items[k].result = build(items[k].img);
@@ -323,6 +328,7 @@ $("go").onclick = async () => {
   }
   const okIdx = items.findIndex((it) => it.result);
   $("go").disabled = false;
+  $("go").textContent = goLabel;
   if (okIdx < 0) {
     $("status").classList.add("err");
     $("status").textContent = "만들지 못했습니다 — " + failed.join(" / ");
@@ -330,7 +336,8 @@ $("go").onclick = async () => {
   }
   select(items[cur]?.result ? cur : okIdx);
   const n = items[cur].result.n;
-  $("status").textContent = `완료 ${items.length - failed.length}장 · 장당 정점 ${(n * n).toLocaleString()}개 · ${Math.round(performance.now() - t0)}ms`
+  $("status").textContent = `✅ 완료 ${items.length - failed.length}장 · 장당 정점 ${(n * n).toLocaleString()}개 · ${(Math.round(performance.now() - t0) / 1000).toFixed(1)}초`
+    + " · 오른쪽에서 돌려 보고, 아래 3단계에서 GLB·OBJ·PBR 맵을 받으세요"
     + (items.length > 1 ? " · 썸네일을 눌러 하나씩 보기" : "") + (failed.length ? ` · 실패 ${failed.length}장: ${failed.join(" / ")}` : "");
   if (failed.length) $("status").classList.add("err");
   $("dlZip").hidden = items.length < 2; $("dlZip").disabled = false;
