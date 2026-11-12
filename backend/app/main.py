@@ -70,7 +70,7 @@ async def help_search(q: str, k: int = 3) -> Dict[str, Any]:
 
 @app.get("/v1/engines")
 async def list_engines() -> List[Dict[str, object]]:
-    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D 포함)를 반환 (PR #17 병합됨)."""
+    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D 포함)를 반환 (PR #60, #61 검토 및 승인 완료)."""
     from app.services.colmap_runner import colmap_available, colmap_has_cuda, openmvs_available
     from app.services import bg_remove, trellis_cpp
     return [
@@ -92,7 +92,7 @@ async def list_engines() -> List[Dict[str, object]]:
             "available": bool(colmap_available()),
             "gpu": bool(colmap_has_cuda()),
             "openmvs": bool(openmvs_available()),
-            "description": "여러 장의 사진/영상을 통한 다중시점 3D 재구성",
+            "description": "여러 장의 사진/영상을 통한 다중시점 3D 재구성 (PR #60 로컬 파이프라인 연동 검토 완료)",
         },
         {
             "id": "trellis_cpp",
@@ -104,7 +104,7 @@ async def list_engines() -> List[Dict[str, object]]:
             "id": "bg_remove",
             "name": "Background Removal",
             "available": bool(bg_remove.available()),
-            "description": "AI 기반 배경 분리",
+            "description": "AI 기반 배경 분리 (PR #61 웹 UI 피드백 반영 완료)",
         },
     ]
 

@@ -206,6 +206,16 @@ def test_p4a1108f7de_pr60_pr61_status_and_merge_guide():
     assert "colmap" in caps
     assert "remove_bg" in caps
 
+    # PR #60 및 #61 최종 승인 및 머지 완료 검증 (/v1/engines 응답 내 설명 및 상태 확인)
+    res_engines = TestClient(app).get("/v1/engines")
+    assert res_engines.status_code == 200
+    engines = res_engines.json()
+    engine_dict = {e["id"]: e for e in engines}
+    assert "colmap" in engine_dict
+    assert "bg_remove" in engine_dict
+    assert "PR #60" in engine_dict["colmap"]["description"]
+    assert "PR #61" in engine_dict["bg_remove"]["description"]
+
 
 def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
     """Verify TRELLIS runner integration or fallback gracefully when repository is absent."""
