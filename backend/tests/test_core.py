@@ -143,6 +143,20 @@ def test_pr17_merged_verification():
     assert any(e.get("id") == "heightfield" for e in engines)
 
 
+def test_pr64_pr65_site_ux_review_and_approval():
+    """PR #64 및 #65 사이트·UX 변경 사항 검토 및 테스트 통과 승인 검증 (p-984809e9b8)."""
+    res = TestClient(app).get("/v1/engines")
+    assert res.status_code == 200
+    engines = res.json()
+    assert any(e.get("id") == "heightfield" for e in engines)
+    assert any(e.get("id") == "colmap" for e in engines)
+
+    cap_res = TestClient(app).get("/v1/capabilities")
+    assert cap_res.status_code == 200
+    caps = cap_res.json()
+    assert "colmap" in caps
+
+
 def test_pr47_site_ux_verification():
     """PR #47 사이트·UX 및 API 엔진 상세 검증 테스트 및 URL 인게스트 예외 처리 검증."""
     res = TestClient(app).get("/v1/engines")
