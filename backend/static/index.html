@@ -599,6 +599,10 @@
     <!-- PBR Texture panel -->
     <div class="panel-section">
       <div class="panel-section-title">PBR 텍스처</div>
+      <div id="pbr-status-area" style="margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem;font-size:.78rem;">
+        <span id="pbr-spinner" class="spin" style="display:none;" aria-hidden="true"></span>
+        <span id="pbr-status-msg" style="color:var(--muted);">대기 중…</span>
+      </div>
       <div class="tex-tabs">
         <button class="tex-tab active" data-tex="albedo">Albedo</button>
         <button class="tex-tab" data-tex="normal">Normal</button>
@@ -762,6 +766,20 @@
 
     // Update texture panel
     var pbrUrls = obj.detail && obj.detail._pbr_urls;
+    var pbrSpinner = document.getElementById("pbr-spinner");
+    var pbrMsg = document.getElementById("pbr-status-msg");
+
+    if (obj.status === "running" || obj.status === "queued") {
+      if (pbrSpinner) pbrSpinner.style.display = "inline-block";
+      if (pbrMsg) { pbrMsg.textContent = "PBR 텍스처 및 메시 생성 중…"; pbrMsg.style.color = "var(--accent)"; }
+    } else if (obj.status === "succeeded") {
+      if (pbrSpinner) pbrSpinner.style.display = "none";
+      if (pbrMsg) { pbrMsg.textContent = "✓ PBR 텍스처 생성 완료"; pbrMsg.style.color = "var(--ok)"; }
+    } else if (obj.status === "failed") {
+      if (pbrSpinner) pbrSpinner.style.display = "none";
+      if (pbrMsg) { pbrMsg.textContent = "생성 실패"; pbrMsg.style.color = "var(--err)"; }
+    }
+
     if (pbrUrls) {
       window._currentPbrUrls = pbrUrls;
       updateTexPanel("albedo");

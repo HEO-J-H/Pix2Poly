@@ -87,4 +87,4 @@
 - [ ] (agent) PR #63 다시 하기 — 로컬 파이프라인 TripoSR 예외 로깅 및 메시지 정교화: back · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #61 다시 하기 — 웹 브라우저 PBR 변환 UI 피드백 및 안내 문구 보강: web/i · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [x] (agent) [p-984809e9b8|사이트·UX] PR #64및#65코드변경사항검토: GitHub에서 PR #64 및 #65의 코드 변경 사항과 테스트 통과 여부를 검토하고 승인 처리를 진행합니다.
-- [ ] (agent) [p-26ebad3dc5|사이트·UX] 웹 브라우저 PBR 상태 안내 UI 마크업 정돈: backend/static/index.html 또는 web/index.html의 PBR 상태 안내 DOM 구조를 확인하고 안전한 위치에 스피너 및 완료 메시지 요소를 재배치
+- [x] (agent) [p-26ebad3dc5|사이트·UX] 웹 브라우저 PBR 상태 안내 UI 마크업 정돈: backend/static/index.html 또는 web/index.html의 PBR 상태 안내 DOM 구조를 확인하고 안전한 위치에 스피너 및 완료 메시지 요소를 재배치
