@@ -207,6 +207,18 @@ def test_p4a1108f7de_pr60_pr61_status_and_merge_guide():
     assert "remove_bg" in caps
 
 
+def test_p_38e4a00ec2_pr60_local_pipeline_merge_verification(png, tmp_path):
+    """PR #60(로컬 파이프라인 입력 안정화 및 엔진 통합) 테스트 통과 및 최종 머지 검증 (p-38e4a00ec2)."""
+    from backend.app.services.mesh_from_image import mesh_from_image_file
+    out = mesh_from_image_file(png, tmp_path / "pr60_out", grid=32)
+    assert out is not None
+    res = TestClient(app).get("/v1/engines")
+    assert res.status_code == 200
+    engines = res.json()
+    assert any(e.get("id") == "colmap" for e in engines)
+    assert any(e.get("id") == "heightfield" for e in engines)
+
+
 def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
     """Verify TRELLIS runner integration or fallback gracefully when repository is absent."""
     from backend.app.services import triposr_runner
