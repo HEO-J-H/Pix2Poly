@@ -72,7 +72,7 @@ async def help_search(q: str, k: int = 3) -> Dict[str, Any]:
 async def list_engines() -> List[Dict[str, object]]:
     """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D 포함)를 반환 (PR #17 병합됨)."""
     from app.services.colmap_runner import colmap_available, colmap_has_cuda, openmvs_available
-    from app.services import bg_remove, trellis_cpp
+    from app.services import bg_remove, trellis_cpp, trellis_runner
     return [
         {
             "id": "heightfield",
@@ -99,6 +99,12 @@ async def list_engines() -> List[Dict[str, object]]:
             "name": "trellis.cpp (TRELLIS.2, local GPU)",
             "available": trellis_cpp.available()[0],
             "description": trellis_cpp.available()[1],
+        },
+        {
+            "id": "trellis",
+            "name": "TRELLIS (Microsoft, Python, local GPU)",
+            "available": trellis_runner.available()[0],
+            "description": trellis_runner.available()[1],
         },
         {
             "id": "bg_remove",

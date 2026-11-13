@@ -33,6 +33,12 @@
 ## 출처
 - https://github.com/pwilkin/trellis.cpp/wiki · https://huggingface.co/LocalAI-io/TRELLIS.2-4B-GGUF · https://huggingface.co/ilintar/trellis2-gguf · https://github.com/microsoft/TRELLIS
 
+## 원본 TRELLIS (Python) — `backend/app/services/trellis_runner.py` (2026-11-14)
+- trellis.cpp 와 같은 방식: 사용자가 github.com/microsoft/TRELLIS 를 설치하고 `TRELLIS_REPO`(설치 폴더)·`TRELLIS_PYTHON`(그 환경의 python)을 지정.
+- 사진 1장은 `pipeline.run`, 여러 각도 사진은 `pipeline.run_multi_image` → `postprocessing_utils.to_glb` (README 사용 예 그대로).
+- 엔진 목록 id `trellis` — 설치 안 됐으면 이유를 그대로 보여 주고 선택 불가. 테스트는 가짜 실행으로 인자·오류만 (`test_trellis_runner.py`).
+- 어떤 걸 쓸까: NVIDIA GPU 16GB 이상 + 리눅스/WSL → 원본 TRELLIS, Windows 가정용 PC·적은 VRAM → trellis.cpp(양자화 GGUF), GPU 없음 → 웹의 공개 데모.
+
 ## 진행 기록·배운 점
 - 2026-10-26 [보류] 1단계: backend/app/trellis_cpp.py available()/run() 과 가짜 subpr: 테스트 실패 — 24 passed, 1 warning in 1.20s 보안: ['위험 함수 사용: subprocess']
 - 2026-10-29 [보류] 1단계: backend/app/trellis_cpp.py available()/run() 과 가짜 subpr: 테스트 실패 — 26 passed, 1 warning in 1.91s 보안: ['위험 함수 사용: subprocess']
