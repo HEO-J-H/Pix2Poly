@@ -259,12 +259,11 @@ def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
 def test_trellis_integration_docs_verification():
     """Verify Microsoft TRELLIS design and integration doc exists in docs/."""
     from pathlib import Path
-    doc = Path("docs/trellis-integration.md")
+    doc = Path("docs/agent-guides/trellis_engine.md")
     if doc.exists():
         content = doc.read_text(encoding="utf-8")
         assert len(content) > 0
     else:
-        # If docs/trellis-integration.md is restricted/read-only in some test envs, verify tech-research or similar
         tech_doc = Path("docs/tech-research.md")
         assert tech_doc.exists()
 
