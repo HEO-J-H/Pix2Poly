@@ -89,3 +89,8 @@
 - [x] (agent) [p-984809e9b8|사이트·UX] PR #64및#65코드변경사항검토: GitHub에서 PR #64 및 #65의 코드 변경 사항과 테스트 통과 여부를 검토하고 승인 처리를 진행합니다.
 - [ ] (agent:승인대기) [p-26ebad3dc5|사이트·UX] 웹 브라우저 PBR 상태 안내 UI 마크업 정돈: backend/static/index.html 또는 web/index.html의 PBR 상태 안내 DOM 구조를 확인하고 안전한 위치에 스피너 및 완료 메시지 요소를 재배치 — PR #68 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/68
 - [ ] (agent:보류) [p-7b5ecfcde1|운영·비용] 깃허브 RAG 오픈소스 Pix2Poly 반영 타당성 검토: docs/rag_review.md 문서를 생성하여 RAG 오픈소스와 사진 기반 3D 생성 툴(Pix2Poly) 간의 연계 가능성 및 실효성을 검토합니다. — 같은 과제 2회 실패 — 마지막 사유: [4] review=revise tests=True security=[] approve=False
+- [x] (agent) [p-2fe606f45b|사이트·UX] Microsoft TRELLIS 설계 문서 기반 브랜치 작업 시작: docs/ 폴더에 TRELLIS 연동 세부 구현 계획을 보완하고 코딩 에이전트가 단위를 테스트하도록 유도합니다.
+- [ ] (agent) [p-538f5eccc3|사이트·UX] Microsoft TRELLIS 선택 엔진 설계 문서 작성: docs/agent-guides/trellis_engine.md 문서를 생성하여 TRELLIS 도입을 위한 아키텍처 및 요구사항을 정리합니다.
+- [ ] (agent) [p-12794ef36a|콘텐츠] Microsoft TRELLIS를 다중 각도 3D 생성 선택 엔진으로 도입 제안: multiview.md 설계에 맞춰 Microsoft TRELLIS(MIT)를 로컬/클라우드 선택 엔진으로 연동하여 다중 각도 3D 생성 품질 향상
+- [ ] (agent) [p-60012927b1|운영·비용] 웹 브라우저 높이맵 메시 생성 단위 테스트 추가: web/ 디렉토리 내에 브라우저용 이미지 전처리 및 높이맵 메시 생성 함수에 대한 간단한 단위 테스트 파일을 추가하여 회귀를 방지합니다.
+- [ ] (agent) [p-0f12bafce2|운영·비용] 3D 생성 프롬프트용 경량 텍스트 검색 구조 검토: docs/rag_review.md를 수정하여, 외부 대형 RAG 대신 로컬 메타데이터(예: 3D 모델 Prompt 가이드)를 위한 간단한 검색 및 참조 구조를 검토합니다.
