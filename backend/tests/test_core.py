@@ -206,12 +206,18 @@ def test_pr55_pr56_url_validation_and_rag_review():
 
 
 def test_p_f0cb5e9af4_rag_integration_pr_and_auto_merge():
-    """운영·비용 RAG 통합 PR 생성 및 자동 머지 설정 검증 (p-f0cb5e9af4)."""
-    res = TestClient(app).get("/v1/help/search?q=rag")
+    """운영·비용 RAG 통합 PR 생성 및 자동 머지 설정 검증 (p-f0cb5e9af4, PR #47 RAG 통합 다시 하기 반영)."""
+    client = TestClient(app)
+    res = client.get("/v1/help/search?q=rag")
     assert res.status_code == 200
     data = res.json()
     assert "query" in data
     assert "results" in data
+    
+    # 추가 RAG 통합 및 PR #47 검증 확인
+    res_engines = client.get("/v1/engines")
+    assert res_engines.status_code == 200
+    assert any(e.get("id") == "heightfield" for e in res_engines.json())
 
 
 def test_p572805b315_content_hold_split_verification():
