@@ -260,12 +260,32 @@ def test_trellis_integration_docs_verification():
     """Verify Microsoft TRELLIS design and integration doc exists in docs/."""
     from pathlib import Path
     doc = Path("docs/agent-guides/trellis_engine.md")
+    multiview_doc = Path("docs/agent-guides/multiview.md")
     if doc.exists():
         content = doc.read_text(encoding="utf-8")
+        assert len(content) > 0
+    elif multiview_doc.exists():
+        content = multiview_doc.read_text(encoding="utf-8")
         assert len(content) > 0
     else:
         tech_doc = Path("docs/tech-research.md")
         assert tech_doc.exists()
+
+
+def test_multiview_trellis_integration_module():
+    """Verify multiview JavaScript module and guide specifications for Microsoft TRELLIS."""
+    from pathlib import Path
+    mv_js = Path("web/multiview.js")
+    assert mv_js.exists()
+    js_content = mv_js.read_text(encoding="utf-8")
+    assert "trellis-community/TRELLIS" in js_content
+    assert "predict" in js_content
+
+    mv_doc = Path("docs/agent-guides/multiview.md")
+    assert mv_doc.exists()
+    doc_content = mv_doc.read_text(encoding="utf-8")
+    assert "TRELLIS" in doc_content
+    assert "Microsoft" in doc_content
 
 
 def test_validate_image_input_empty_and_low_res(tmp_path):
