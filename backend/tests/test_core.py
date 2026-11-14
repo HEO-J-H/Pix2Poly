@@ -143,6 +143,15 @@ def test_pr17_merged_verification():
     assert any(e.get("id") == "heightfield" for e in engines)
 
 
+def test_pr25_reapply_verification():
+    """PR #25 다시 하기 및 관련 PR 패치 통합 검증 테스트."""
+    res = TestClient(app).get("/v1/engines")
+    assert res.status_code == 200
+    engines = res.json()
+    assert any(e.get("id") == "noface3d" for e in engines)
+    assert any(e.get("id") == "heightfield" for e in engines)
+
+
 def test_pr64_pr65_site_ux_review_and_approval():
     """PR #64 및 #65 사이트·UX 변경 사항 검토 및 테스트 통과 승인 검증 (p-984809e9b8)."""
     res = TestClient(app).get("/v1/engines")

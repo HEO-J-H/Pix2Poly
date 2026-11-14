@@ -70,7 +70,7 @@ async def help_search(q: str, k: int = 3) -> Dict[str, Any]:
 
 @app.get("/v1/engines")
 async def list_engines() -> List[Dict[str, object]]:
-    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D 포함)를 반환 (PR #17 병합됨)."""
+    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D 포함)를 반환 (PR #25 재적용)."""
     from app.services.colmap_runner import colmap_available, colmap_has_cuda, openmvs_available
     from app.services import bg_remove, trellis_cpp, trellis_runner
     return [
