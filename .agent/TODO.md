@@ -92,5 +92,5 @@
 - [x] (agent) [p-2fe606f45b|사이트·UX] Microsoft TRELLIS 설계 문서 기반 브랜치 작업 시작: docs/ 폴더에 TRELLIS 연동 세부 구현 계획을 보완하고 코딩 에이전트가 단위를 테스트하도록 유도합니다.
 - [x] (agent) [p-538f5eccc3|사이트·UX] Microsoft TRELLIS 선택 엔진 설계 문서 작성: docs/agent-guides/trellis_engine.md 문서를 생성하여 TRELLIS 도입을 위한 아키텍처 및 요구사항을 정리합니다.
 - [ ] (agent:승인대기) [p-12794ef36a|콘텐츠] Microsoft TRELLIS를 다중 각도 3D 생성 선택 엔진으로 도입 제안: multiview.md 설계에 맞춰 Microsoft TRELLIS(MIT)를 로컬/클라우드 선택 엔진으로 연동하여 다중 각도 3D 생성 품질 향상 — PR #71 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/71
-- [ ] (agent) [p-60012927b1|운영·비용] 웹 브라우저 높이맵 메시 생성 단위 테스트 추가: web/ 디렉토리 내에 브라우저용 이미지 전처리 및 높이맵 메시 생성 함수에 대한 간단한 단위 테스트 파일을 추가하여 회귀를 방지합니다.
+- [ ] (agent:보류) [p-60012927b1|운영·비용] 웹 브라우저 높이맵 메시 생성 단위 테스트 추가: web/ 디렉토리 내에 브라우저용 이미지 전처리 및 높이맵 메시 생성 함수에 대한 간단한 단위 테스트 파일을 추가하여 회귀를 방지합니다. — [4] tests=False security=[] — 리뷰 생략
 - [ ] (agent) [p-0f12bafce2|운영·비용] 3D 생성 프롬프트용 경량 텍스트 검색 구조 검토: docs/rag_review.md를 수정하여, 외부 대형 RAG 대신 로컬 메타데이터(예: 3D 모델 Prompt 가이드)를 위한 간단한 검색 및 참조 구조를 검토합니다.
