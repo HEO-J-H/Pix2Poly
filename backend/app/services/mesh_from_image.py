@@ -75,6 +75,11 @@ def validate_image_input(image_path: Path, min_size: int = 2) -> None:
         raise ValueError(f"Invalid or unreadable image file: {e}")
 
 
+def va(image_path: Path, min_size: int = 2) -> None:
+    """Alias for validate_image_input (PR #26 compatibility)."""
+    return validate_image_input(image_path, min_size=min_size)
+
+
 def mesh_from_image_file(
     image_path: Path,
     output_dir: Path,

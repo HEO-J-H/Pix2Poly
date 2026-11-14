@@ -422,12 +422,16 @@ def test_mesh_from_image_accepts_common_modes(tmp_path, mode):
 
 def test_validate_image_input_rejects_bad_files(tmp_path):
     from PIL import Image
-    from backend.app.services.mesh_from_image import validate_image_input
+    from backend.app.services.mesh_from_image import validate_image_input, va
     fake = tmp_path / "not_image.png"
     fake.write_text("이미지가 아님", encoding="utf-8")
     with pytest.raises(ValueError, match="Invalid or unreadable"):
         validate_image_input(fake)
+    with pytest.raises(ValueError, match="Invalid or unreadable"):
+        va(fake)
     tiny = tmp_path / "tiny.png"
     Image.new("RGB", (1, 1)).save(tiny)
     with pytest.raises(ValueError, match="too low"):
         validate_image_input(tiny)
+    with pytest.raises(ValueError, match="too low"):
+        va(tiny)
