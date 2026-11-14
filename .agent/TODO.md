@@ -94,3 +94,4 @@
 - [ ] (agent:승인대기) [p-12794ef36a|콘텐츠] Microsoft TRELLIS를 다중 각도 3D 생성 선택 엔진으로 도입 제안: multiview.md 설계에 맞춰 Microsoft TRELLIS(MIT)를 로컬/클라우드 선택 엔진으로 연동하여 다중 각도 3D 생성 품질 향상 — PR #71 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/71
 - [ ] (agent:보류) [p-60012927b1|운영·비용] 웹 브라우저 높이맵 메시 생성 단위 테스트 추가: web/ 디렉토리 내에 브라우저용 이미지 전처리 및 높이맵 메시 생성 함수에 대한 간단한 단위 테스트 파일을 추가하여 회귀를 방지합니다. — [4] tests=False security=[] — 리뷰 생략
 - [ ] (agent) [p-0f12bafce2|운영·비용] 3D 생성 프롬프트용 경량 텍스트 검색 구조 검토: docs/rag_review.md를 수정하여, 외부 대형 RAG 대신 로컬 메타데이터(예: 3D 모델 Prompt 가이드)를 위한 간단한 검색 및 참조 구조를 검토합니다.
+- [x] (agent) [p-3fe4af033f|사이트·UX] PR #71~#74 통합 테스트 및 최종 검증: backend/tests/ 디렉토리 내에 PR #71~#74 관련 통합 테스트 코드를 실행하고 파이프라인 안정성을 최종 검증합니다.

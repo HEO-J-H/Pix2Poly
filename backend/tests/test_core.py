@@ -234,6 +234,36 @@ def test_p4a1108f7de_pr60_pr61_status_and_merge_guide():
     assert "remove_bg" in caps
 
 
+def test_p3fe4af033f_pr71_to_pr74_integration_verification():
+    """PR #71~#74 사이트·UX 및 파이프라인 통합 테스트 및 최종 검증 (p-3fe4af033f)."""
+    client = TestClient(app)
+    
+    # 1. Health check & engine list verification
+    res_health = client.get("/health")
+    assert res_health.status_code == 200
+    assert res_health.json().get("status") == "ok"
+
+    res_engines = client.get("/v1/engines")
+    assert res_engines.status_code == 200
+    engines = res_engines.json()
+    assert isinstance(engines, list)
+    assert any(e.get("id") == "heightfield" for e in engines)
+    assert any(e.get("id") == "colmap" for e in engines)
+
+    # 2. Capabilities check
+    res_cap = client.get("/v1/capabilities")
+    assert res_cap.status_code == 200
+    caps = res_cap.json()
+    assert "colmap" in caps
+    assert "remove_bg" in caps
+
+    # 3. Help search integration
+    res_help = client.get("/v1/help/search?q=pipeline")
+    assert res_help.status_code == 200
+    help_data = res_help.json()
+    assert "results" in help_data
+
+
 def test_p_38e4a00ec2_pr60_local_pipeline_merge_verification(png, tmp_path):
     """PR #60(로컬 파이프라인 입력 안정화 및 엔진 통합) 테스트 통과 및 최종 머지 검증 (p-38e4a00ec2)."""
     from backend.app.services.mesh_from_image import mesh_from_image_file
