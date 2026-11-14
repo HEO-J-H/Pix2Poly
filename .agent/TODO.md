@@ -51,7 +51,7 @@
 - [x] (agent) PR #33 다시 하기 — backend/app/services/mesh_from_image.py의 generate_heightfiel · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent:승인대기) PR #29 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 포맷 및 크기 사전 검증 함 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기 — PR #60 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/60
 - [x] (agent) PR #28 다시 하기 — backend/app/services/mesh_from_image.py에 이미지 입력 유효성 검사 예외 처리 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
-- [ ] (agent) PR #27 다시 하기 — backend/app/services/mesh_from_image.py의 validate_image_inpu · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+- [x] (agent) PR #27 다시 하기 — backend/app/services/mesh_from_image.py의 validate_image_inpu · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #26 다시 하기 — backend/app/services/mesh_from_image.py에 입력 이미지 유효성 검증 함수 va · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #25 다시 하기 — PR #22 다시 하기 — PR #20 다시 하기 — PR #18 다시 하기 — PR #15 다시 하기 — · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent) PR #24 다시 하기 — TRELLIS(MIT) 멀티뷰 3D 생성 엔진 통합 검토: 미국 컴퓨터 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
