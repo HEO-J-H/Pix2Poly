@@ -9,6 +9,7 @@ export const ENGINE = {
   space: "trellis-community/TRELLIS",
   name: "TRELLIS (Microsoft · MIT)",
   url: "https://huggingface.co/spaces/trellis-community/TRELLIS",
+  description: "다중 각도 이미지 2~8장을 입력받아 고품질 텍스처 GLB 메시를 생성하는 Microsoft TRELLIS 엔진 (MIT 라이선스)",
 };
 
 /** files: File[] (2~8장). onStatus(text) 로 진행 상황. 결과 {glbUrl, videoUrl, seconds} */
