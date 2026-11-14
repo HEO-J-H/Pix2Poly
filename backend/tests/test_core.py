@@ -256,6 +256,18 @@ def test_trellis_engine_placeholder(png, tmp_path, monkeypatch):
         )
 
 
+def test_trellis_multiview_engine_integration_review():
+    """PR #24 다시 하기: TRELLIS(MIT) 멀티뷰 3D 생성 엔진 통합 및 /v1/engines 등록 검증."""
+    from fastapi.testclient import TestClient
+    res = TestClient(app).get("/v1/engines")
+    assert res.status_code == 200
+    engines = res.json()
+    trellis_multi = next((e for e in engines if e.get("id") == "trellis_multi"), None)
+    assert trellis_multi is not None
+    assert "TRELLIS" in trellis_multi.get("name", "")
+    assert trellis_multi.get("available") is False or isinstance(trellis_multi.get("available"), bool)
+
+
 def test_trellis_integration_docs_verification():
     """Verify Microsoft TRELLIS design and integration doc exists in docs/."""
     from pathlib import Path

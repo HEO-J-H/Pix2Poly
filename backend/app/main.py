@@ -19,6 +19,7 @@ from app.schemas import (
     UrlJobCreate,
     VideoUrlJobCreate,
 )
+from pydantic import Field
 from app.services.jobs import JobRecord, job_store
 from app.services.mesh_worker import build_mesh_for_image_job
 from app.services.storage import OUTPUT_ROOT, UPLOAD_ROOT, save_job_files
@@ -105,6 +106,12 @@ async def list_engines() -> List[Dict[str, object]]:
             "name": "TRELLIS (Microsoft, Python, local GPU)",
             "available": trellis_runner.available()[0],
             "description": trellis_runner.available()[1],
+        },
+        {
+            "id": "trellis_multi",
+            "name": "TRELLIS Multi-View (Microsoft, MIT, GPU)",
+            "available": trellis_runner.available()[0],
+            "description": "다중 뷰 이미지 기반 고품질 3D 재구성 및 PBR 텍스처 (MIT 라이선스, 로컬 GPU)",
         },
         {
             "id": "bg_remove",

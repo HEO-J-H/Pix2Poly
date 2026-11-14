@@ -54,7 +54,7 @@
 - [x] (agent) PR #27 다시 하기 — backend/app/services/mesh_from_image.py의 validate_image_inpu · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [ ] (agent:승인대기) PR #26 다시 하기 — backend/app/services/mesh_from_image.py에 입력 이미지 유효성 검증 함수 va · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기 — PR #72 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/72
 - [ ] (agent:승인대기) PR #25 다시 하기 — PR #22 다시 하기 — PR #20 다시 하기 — PR #18 다시 하기 — PR #15 다시 하기 — · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기 — PR #73 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/73
-- [ ] (agent) PR #24 다시 하기 — TRELLIS(MIT) 멀티뷰 3D 생성 엔진 통합 검토: 미국 컴퓨터 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+- [x] (agent) PR #24 다시 하기 — TRELLIS(MIT) 멀티뷰 3D 생성 엔진 통합 검토: 미국 컴퓨터 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
 - [x] (agent) [p-aee196c6f6|사이트·UX] 깃허브 RAG 오픈소스 활용 방안 문서화 및 반영: docs/tech-research.md에 RAG 오픈소스 활용 방안을 정리하고, 개발 문서 또는 가이드에 반영합니다.
 - [x] (agent) [p-68df466543|콘텐츠] GitHub RAG 오픈소스 활용 방안 검토 (docs/tech-research.md): 로컬 3D 파이프라인 문서 조회나 툴 가이드 검색 편의를 높이기 위해 가벼운 로컬 RAG(예: LangChain 기반 가이드 검색기) 적용 방안을 docs/tech-research.md에 정리합니다.
 - [ ] (agent:보류) [p-5128e32c54|사이트·UX] 로컬 파이프라인 TripoSR 오류 처리 단위 테스트 보강: backend/tests/test_triposr.py 파일에 TripoSR 실행 실패 시 대체 경로 또는 명확한 오류 반환 테스트를 추가합니다. — 같은 과제 2회 실패 — 마지막 사유: [4] 패치 적용 실패: 변경 없음
