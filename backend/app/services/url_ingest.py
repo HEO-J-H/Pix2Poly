@@ -43,9 +43,14 @@ def check_public_url(url: str) -> None:
         raise BlockedURL("내부망·로컬 주소는 가져올 수 없습니다")
 
 
+def validate_url_input(url: str) -> None:
+    """Validate URL input format, scheme, and ensure it is not a private/internal network address."""
+    check_public_url(url)
+
+
 async def fetch_image_from_url(url: str, timeout_s: float = 10.0, max_bytes: int = 10 * 1024 * 1024) -> bytes:
     """URL 형식 검증, 타임아웃 예외 처리 및 크기 제한을 적용하여 이미지 바이너리를 가져옵니다."""
-    check_public_url(url)
+    validate_url_input(url)
     try:
         async with httpx.AsyncClient(headers={"User-Agent": USER_AGENT}, follow_redirects=False, timeout=timeout_s) as client:  # safe_get 이 리다이렉트를 단계마다 검사하며 직접 따라감
             r = await safe_get(client, url, max_bytes=max_bytes)
