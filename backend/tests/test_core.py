@@ -264,6 +264,16 @@ def test_p3fe4af033f_pr71_to_pr74_integration_verification():
     assert "results" in help_data
 
 
+def test_pr61_web_pbr_ui_feedback_and_guide_messages():
+    """PR #61 다시 하기: 웹 브라우저 PBR 변환 UI 피드백 및 안내 문구 보강 검증."""
+    res = TestClient(app).get("/v1/engines")
+    assert res.status_code == 200
+    engines = res.json()
+    heightfield = next((e for e in engines if e.get("id") == "heightfield"), None)
+    assert heightfield is not None
+    assert "웹 PBR 실시간 변환" in heightfield.get("description", "")
+
+
 def test_p_38e4a00ec2_pr60_local_pipeline_merge_verification(png, tmp_path):
     """PR #60(로컬 파이프라인 입력 안정화 및 엔진 통합) 테스트 통과 및 최종 머지 검증 (p-38e4a00ec2)."""
     from backend.app.services.mesh_from_image import mesh_from_image_file
