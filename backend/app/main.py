@@ -34,7 +34,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     # 아무 웹사이트나 이 PC 의 API 를 호출하지 못하게 — 로컬 화면과 공개 웹 버전만
-    allow_origins=["http://127.0.0.1:8000", "http://localhost:8000", "https://3dflowhub.kr"],
+    allow_origins=["http://127.0.0.1:8000", "http://localhost:8000", "https://heo-j-h.github.io"],
     allow_origin_regex=r"http://(127\.0\.0\.1|localhost):\d+",
     allow_credentials=False,
     allow_methods=["*"],
