@@ -395,14 +395,39 @@ function save(blob, name) {
   const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: name });
   a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
-$("dlGlb").onclick = () => new GLTFExporter().parse(mesh, (glb) => save(new Blob([glb], { type: "model/gltf-binary" }), "pix2poly.glb"),
-  (e) => alert("GLB 내보내기 실패: " + e), { binary: true });
-$("dlObj").onclick = () => {
-  save(new Blob([toOBJ(result.mesh)], { type: "text/plain" }), "model.obj");
-  save(new Blob(["newmtl pix2poly\nKd 1 1 1\nmap_Kd albedo.png\nnorm normal.png\nmap_Pr roughness.png\nmap_Pm metallic.png\n"],
-    { type: "text/plain" }), "model.mtl");
+// 내려받기 실패를 알림창 대신 상태 줄에 — 무엇이 안 됐고 어떻게 하면 되는지 (메모리 부족이 가장 흔함)
+function exportFail(what, e) {
+  console.error(what, e);
+  $("status").classList.add("err");
+  $("status").textContent = `${what} 내려받기에 실패했습니다 — ${e && e.message ? e.message : e}. `
+    + "해상도(메시 촘촘함)를 낮추거나 다른 탭을 닫고 다시 눌러 보세요.";
+}
+function exportOk(what) { $("status").classList.remove("err"); $("status").textContent = `✅ ${what} 내려받기를 시작했습니다`; }
+$("dlGlb").onclick = () => {
+  if (!mesh) return exportFail("GLB", "먼저 3D 를 만들어 주세요");
+  try {
+    new GLTFExporter().parse(mesh, (glb) => { save(new Blob([glb], { type: "model/gltf-binary" }), "pix2poly.glb"); exportOk("GLB"); },
+      (e) => exportFail("GLB", e), { binary: true });
+  } catch (e) { exportFail("GLB", e); }
 };
-$("dlPbr").onclick = () => { for (const [k, c] of Object.entries(result.canvases)) c.toBlob((b) => save(b, `${k}.png`)); };
+$("dlObj").onclick = () => {
+  if (!result) return exportFail("OBJ", "먼저 3D 를 만들어 주세요");
+  try {
+    save(new Blob([toOBJ(result.mesh)], { type: "text/plain" }), "model.obj");
+    save(new Blob(["newmtl pix2poly\nKd 1 1 1\nmap_Kd albedo.png\nnorm normal.png\nmap_Pr roughness.png\nmap_Pm metallic.png\n"],
+      { type: "text/plain" }), "model.mtl");
+    exportOk("OBJ");
+  } catch (e) { exportFail("OBJ", e); }
+};
+$("dlPbr").onclick = () => {
+  if (!result) return exportFail("PBR 텍스처", "먼저 3D 를 만들어 주세요");
+  const entries = Object.entries(result.canvases);
+  let bad = 0, left = entries.length;
+  for (const [k, c] of entries) c.toBlob((b) => {
+    if (b) save(b, `${k}.png`); else bad++;
+    if (--left === 0) bad ? exportFail("PBR 텍스처", `${bad}장을 이미지로 바꾸지 못함`) : exportOk(`PBR 텍스처 ${entries.length}장`);
+  });
+};
 // ── 여러 각도 → 하나의 3D (AI)
 let mvFiles = [];
 const mv = await import("./multiview.js").catch((e) => { $("mvStatus").textContent = "AI 기능을 불러오지 못했습니다: " + e.message; return null; });
