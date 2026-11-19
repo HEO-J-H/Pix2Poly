@@ -97,4 +97,4 @@
 - [x] (agent) [p-3fe4af033f|사이트·UX] PR #71~#74 통합 테스트 및 최종 검증: backend/tests/ 디렉토리 내에 PR #71~#74 관련 통합 테스트 코드를 실행하고 파이프라인 안정성을 최종 검증합니다.
 - [x] (agent:완료) [p-931299c5bc|사이트·UX] 로컬 파이프라인 안내 문서 수정: docs/local-pipeline.md 파일의 실제 목차와 일치하도록 search 블록을 수정하여 안전하게 문서 보완을 완료합니다. — 11/18 완료: docs/local-pipeline.md 는 없는 파일, 같은 내용은 docs/gpu-worker.md 에 있음
 - [ ] (agent:보류) [p-131adefe6d|사이트·UX] docs/agent-guides/img2threejs-impl.md 작성: docs/agent-guides/img2threejs-impl.md 가이드를 작성하여 img2threejs 호출 방식 및 예외 처리, 결과 파일 반환 규격을 정의 — 같은 과제 2회 실패 — 마지막 사유: [4] 패치 적용 실패: 변경 없음
-- [ ] (agent) [p-d1d6d8666f|사이트·UX] backend/tests/test_mesh_pipeline.py 테스트 추가: backend/tests/test_mesh_pipeline.py 파일을 생성하여 메시 생성 및 PBR 맵 출력 결과의 무결성을 검증하는 테스트 코드를 작성합니다.
+- [ ] (agent:보류) [p-d1d6d8666f|사이트·UX] backend/tests/test_mesh_pipeline.py 테스트 추가: backend/tests/test_mesh_pipeline.py 파일을 생성하여 메시 생성 및 PBR 맵 출력 결과의 무결성을 검증하는 테스트 코드를 작성합니다. — [4] 패치 적용 실패: 변경 없음
