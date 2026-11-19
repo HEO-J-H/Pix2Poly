@@ -129,6 +129,7 @@ input[type=url]{flex:1;min-width:0;min-height:44px;border:1px solid var(--line);
           <button id="dlPbr" disabled>PBR 맵 PNG</button>
           <button id="dlZip" disabled hidden>전체 ZIP</button>
         </div>
+        <p class="hint" style="margin:.4rem 0 0;font-size:.85rem;opacity:.75">GLB = 블렌더·웹·게임엔진에 한 파일로 · OBJ = 대부분의 3D 툴 · PBR 맵 = 재질 텍스처 5장</p>
       </div>
     </section>
 
@@ -403,12 +404,21 @@ function exportFail(what, e) {
     + "해상도(메시 촘촘함)를 낮추거나 다른 탭을 닫고 다시 눌러 보세요.";
 }
 function exportOk(what) { $("status").classList.remove("err"); $("status").textContent = `✅ ${what} 내려받기를 시작했습니다`; }
+// 만드는 동안 버튼을 잠그고 무엇을 하는지 보여 줌 (두 번 눌러 두 개 받는 일 방지)
+function exportBusy(id, on, what) {
+  const el = $(id); el.disabled = on; el.setAttribute("aria-busy", on ? "true" : "false");
+  if (on) { $("status").classList.remove("err"); $("status").textContent = `⏳ ${what} 파일을 만드는 중…`; }
+}
 $("dlGlb").onclick = () => {
   if (!mesh) return exportFail("GLB", "먼저 3D 를 만들어 주세요");
-  try {
-    new GLTFExporter().parse(mesh, (glb) => { save(new Blob([glb], { type: "model/gltf-binary" }), "pix2poly.glb"); exportOk("GLB"); },
-      (e) => exportFail("GLB", e), { binary: true });
-  } catch (e) { exportFail("GLB", e); }
+  exportBusy("dlGlb", true, "GLB");
+  setTimeout(() => {  // 상태 줄이 먼저 그려지게 한 박자 뒤에 변환
+    try {
+      new GLTFExporter().parse(mesh,
+        (glb) => { save(new Blob([glb], { type: "model/gltf-binary" }), "pix2poly.glb"); exportBusy("dlGlb", false); exportOk("GLB"); },
+        (e) => { exportBusy("dlGlb", false); exportFail("GLB", e); }, { binary: true });
+    } catch (e) { exportBusy("dlGlb", false); exportFail("GLB", e); }
+  }, 30);
 };
 $("dlObj").onclick = () => {
   if (!result) return exportFail("OBJ", "먼저 3D 를 만들어 주세요");

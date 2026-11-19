@@ -24,7 +24,7 @@ def _patch_host_is_private(monkeypatch):
 def test_health():
     res = TestClient(app).get("/health")
     assert res.status_code == 200
-    assert res.json() == {"status": "ok"}
+    assert res.json()["status"] == "ok" and "features" in res.json()
 
 
 def test_mesh_from_image_writes_obj_and_glb(png, tmp_path):

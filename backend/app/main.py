@@ -57,8 +57,14 @@ async def _read_limited(uf: UploadFile) -> bytes:
 
 
 @app.get("/health")
-async def health() -> Dict[str, str]:
-    return {"status": "ok"}
+async def health() -> Dict[str, Any]:
+    """서버 상태 + 이 서버로 할 수 있는 일 (웹 도구가 로컬 서버 연결 여부·기능을 알아볼 때 사용)."""
+    return {
+        "status": "ok",
+        "version": app.version,
+        "features": ["heightmap", "pbr", "glb", "obj", "fbx", "help-search"],
+        "web": "브라우저만으로도 사진→높이맵 메시·PBR 맵·GLB/OBJ 내보내기가 됩니다. 이 서버는 큰 모델(TripoSR·TRELLIS)과 FBX 용.",
+    }
 
 
 @app.get("/v1/help/search")
