@@ -70,7 +70,7 @@ async def health() -> Dict[str, Any]:
 @app.get("/v1/help/search")
 async def help_search(q: str, k: int = 3) -> Dict[str, Any]:
     """도움말 검색: README·문서에서 질문과 맞는 부분 (웹 ❓ 도움말과 같은 색인, 모델 없음)."""
-    from .services import help_search as hs
+    from app.services import help_search as hs
     return {"query": q, "results": hs.search(q[:200], k=max(1, min(k, 5)))}
 
 
