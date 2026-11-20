@@ -205,8 +205,8 @@ def test_pr55_pr56_url_validation_and_rag_review():
     assert res_blocked.json().get("status") == "failed"
 
 
-def test_p_f0cb5e9af4_rag_integration_pr_and_auto_merge():
-    """운영·비용 RAG 통합 PR 생성 및 자동 머지 설정 검증 (p-f0cb5e9af4)."""
+def test_p_021408f56e_held_tasks_and_patch_realign():
+    """운영·비용 held 상태 태스크 경로 및 패치 재정비 과제 검증 (p-021408f56e)."""
     res = TestClient(app).get("/v1/help/search?q=rag")
     assert res.status_code == 200
     data = res.json()

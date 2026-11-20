@@ -98,3 +98,12 @@
 - [x] (agent:완료) [p-931299c5bc|사이트·UX] 로컬 파이프라인 안내 문서 수정: docs/local-pipeline.md 파일의 실제 목차와 일치하도록 search 블록을 수정하여 안전하게 문서 보완을 완료합니다. — 11/18 완료: docs/local-pipeline.md 는 없는 파일, 같은 내용은 docs/gpu-worker.md 에 있음
 - [ ] (agent:보류) [p-131adefe6d|사이트·UX] docs/agent-guides/img2threejs-impl.md 작성: docs/agent-guides/img2threejs-impl.md 가이드를 작성하여 img2threejs 호출 방식 및 예외 처리, 결과 파일 반환 규격을 정의 — 같은 과제 2회 실패 — 마지막 사유: [4] 패치 적용 실패: 변경 없음
 - [ ] (agent:보류) [p-d1d6d8666f|사이트·UX] backend/tests/test_mesh_pipeline.py 테스트 추가: backend/tests/test_mesh_pipeline.py 파일을 생성하여 메시 생성 및 PBR 맵 출력 결과의 무결성을 검증하는 테스트 코드를 작성합니다. — [4] 패치 적용 실패: 변경 없음
+- [x] (agent) [p-021408f56e|운영·비용] held 상태 태스크 경로 및 패치 재정비: 실패한 패치 과제들의 대상 파일 경로를 검증하고 코딩 에이전트가 정상적으로 적용할 수 있도록 과제 명세 수정
+- [ ] (agent) [p-ed4859c32c|운영·비용] 홀드된 테스트 파일 과제 경로 및 패치 정비: docs/agent-guides/ 및 테스트 대상 파일 경로를 재점검하고 코딩 에이전트가 올바르게 패치를 적용할 수 있도록 과제 설명 수정
+- [ ] (agent) [p-d2708ab562|사이트·UX] 정체된 문서 가이드 및 테스트 과제 재정비: 해당 과제들을 더 작은 단위로 쪼개어 코딩 에이전트가 단일 파일 단위로 쉽게 패치할 수 있도록 재정의합니다.
+- [ ] (agent) [p-09f4a3fc36|사이트·UX] 웹 UI 높이맵 변환 로직 테스트 케이스 보강: web/ 디렉토리 내 JavaScript 기반 높이맵 변환 함수에 대한 단위 검증 Script 또는 문서화 추가
+- [ ] (agent) [p-442437035d|사이트·UX] 웹 UI 높이맵 메시 생성 기능 테스트 강화: web/ 디렉토리 내 JavaScript 기반 높이맵 변환 로직에 대한 테스트 케이스 추가 또는 검증 절차 문서화
+- [ ] (agent) [p-d235b40415|콘텐츠] RAG 통합 설계 가이드 작성: docs/agent-guides/rag-integration.md 파일을 새로 만들고, MIT/Apache‑2.0 라이선스가 허용되는 RAG 라이브러리(LangChain, LlamaIndex 등)와 GPU/CPU 요구사항, 호출 흐름, 예외 처리 방안을 정리합니다.
+- [ ] (agent) [p-b055500d38|사이트·UX] 간단한 RAG 서비스 프로토타입 구현: 선정된 MIT/Apache‑2.0 라이브러리를 사용해 backend/app/services/rag_service.py 모듈을 추가하고, 간단한 텍스트 검색·생성 API 엔드포인트를 구현합니다. 동시에 backend/tests/test_rag_service.py 단위 테스트를 작성하고, requirements.txt에 라이브러리를 추가한 PR을 생성합니다
+- [ ] (agent) [p-01bd387a39|콘텐츠] 실패한 문서 가이드 과제 재구성 및 분할: 파일 내용을 더 작게 쪼개어 docs/agent-guides/ 하위에 단계별로 생성하도록 과제를 재등록합니다.
+- [ ] (agent) [p-521c334758|사이트·UX] backend/tests/test_heightmap_service.py 신규 작성: backend/tests/test_heightmap_service.py 파일을 새로 생성하여 높이맵 메시 생성 함수의 기본 동작과 예외 처리를 검증
