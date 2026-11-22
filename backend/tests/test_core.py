@@ -136,11 +136,12 @@ def test_pr8_retry_validation():
 
 
 def test_pr17_merged_verification():
-    """PR #17 수동 병합 검증 테스트."""
+    """PR #17 수동 병합 및 Sprint3D 최적화 검토 엔진 목록 포함 검증 테스트."""
     res = TestClient(app).get("/v1/engines")
     assert res.status_code == 200
     engines = res.json()
     assert any(e.get("id") == "heightfield" for e in engines)
+    assert any(e.get("id") == "sprint3d" for e in engines)
 
 
 def test_pr64_pr65_site_ux_review_and_approval():

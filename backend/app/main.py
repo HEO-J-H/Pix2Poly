@@ -76,7 +76,7 @@ async def help_search(q: str, k: int = 3) -> Dict[str, Any]:
 
 @app.get("/v1/engines")
 async def list_engines() -> List[Dict[str, object]]:
-    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(NOFACE3D 포함)를 반환 (PR #17 병합됨)."""
+    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(Sprint3D 및 NOFACE3D 포함)를 반환."""
     from app.services.colmap_runner import colmap_available, colmap_has_cuda, openmvs_available
     from app.services import bg_remove, trellis_cpp, trellis_runner
     return [
@@ -85,6 +85,12 @@ async def list_engines() -> List[Dict[str, object]]:
             "name": "Heightfield CPU Mesh",
             "available": True,
             "description": "단일 이미지 기반 빠른 높이맵 메시 생성 (기본)",
+        },
+        {
+            "id": "sprint3d",
+            "name": "Sprint3D Optimization Review",
+            "available": False,  # 논문 최적화 기법 검토 단계 (속도 개선 연구)
+            "description": "Sprint3D 파이프라인 최적화 기법을 통한 백엔드 3D 생성 속도 개선 검토",
         },
         {
             "id": "noface3d",
