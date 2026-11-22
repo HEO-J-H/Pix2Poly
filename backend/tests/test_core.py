@@ -405,7 +405,7 @@ def test_triposr_failures_become_clear_errors(png, tmp_path):
 
 
 def test_web_pbr_heightmap_and_texture_conversion_unit(png, tmp_path):
-    """웹 PBR 텍스처 브라우저 실시간 렌더링을 위한 파이썬 백엔드 PBR 높이맵 및 텍스처 변환 함수 단위 테스트."""
+    """웹 PBR 텍스처 브라우저 실시간 렌더링 및 다운로드 로직 검증 (task [p-fe4971d68b])."""
     from backend.app.services.pbr_generator import generate_pbr_maps
     from PIL import Image
 
@@ -417,7 +417,7 @@ def test_web_pbr_heightmap_and_texture_conversion_unit(png, tmp_path):
     assert "metallic" in maps
     assert "ao" in maps
 
-    # 생성된 맵 파일들이 유효한 이미지인지 확인
+    # 생성된 맵 파일들이 유효한 이미지인지 확인 및 웹 다운로드 버튼 대상 확인
     for key, path in maps.items():
         assert path.exists()
         img = Image.open(path)
