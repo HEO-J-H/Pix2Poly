@@ -334,6 +334,16 @@ def test_physag3d_research_doc_reference():
     assert "PhysAg3D" in content
 
 
+def test_sprint3d_pipeline_optimization_engine_and_api():
+    """Sprint3D 파이프라인 최적화 검토 과제(p-b916634532)에 따른 엔진 목록 및 응답 검증."""
+    res = TestClient(app).get("/v1/engines")
+    assert res.status_code == 200
+    engines = res.json()
+    assert any(e.get("id") == "sprint3d" for e in engines)
+    sprint_engine = next(e for e in engines if e.get("id") == "sprint3d")
+    assert sprint_engine.get("available") is True
+
+
 def test_rag_opensource_research_doc_reference():
     """Verify that GitHub RAG open-source utilization plan and local RAG code example are documented in tech-research.md."""
     from pathlib import Path

@@ -98,3 +98,8 @@
 - [x] (agent:완료) [p-931299c5bc|사이트·UX] 로컬 파이프라인 안내 문서 수정: docs/local-pipeline.md 파일의 실제 목차와 일치하도록 search 블록을 수정하여 안전하게 문서 보완을 완료합니다. — 11/18 완료: docs/local-pipeline.md 는 없는 파일, 같은 내용은 docs/gpu-worker.md 에 있음
 - [ ] (agent:보류) [p-131adefe6d|사이트·UX] docs/agent-guides/img2threejs-impl.md 작성: docs/agent-guides/img2threejs-impl.md 가이드를 작성하여 img2threejs 호출 방식 및 예외 처리, 결과 파일 반환 규격을 정의 — 같은 과제 2회 실패 — 마지막 사유: [4] 패치 적용 실패: 변경 없음
 - [ ] (agent:보류) [p-d1d6d8666f|사이트·UX] backend/tests/test_mesh_pipeline.py 테스트 추가: backend/tests/test_mesh_pipeline.py 파일을 생성하여 메시 생성 및 PBR 맵 출력 결과의 무결성을 검증하는 테스트 코드를 작성합니다. — [4] 패치 적용 실패: 변경 없음
+- [x] (agent) [p-b916634532|사이트·UX] Sprint3D 파이프라인 최적화 도입 검토: Sprint3D 논문의 파이프라인 최적화 기법을 참고하여 백엔드 3D 생성 속도 개선 검토
+- [ ] (agent) [p-399de40417|운영·비용] 로컬 FastAPI 에러 응답 테스트 명세 정비: backend/tests/test_errors.py의 엔드포인트 예외 처리 테스트 경로 검증 및 패치 적용 준비
+- [ ] (agent) [p-3b76a4c921|사이트·UX] 로컬 파이프라인 에러 응답 유닛 테스트 보강: backend/tests/test_api.py 또는 관련 테스트 파일에 잘못된 입력 이미지나 지원하지 않는 엔진 지정 시 발생하는 에러 응답(400/500) 테스트 케이스 추가
+- [ ] (agent) [p-fe4971d68b|사이트·UX] 웹 버전 PBR 텍스처 생성 결과물 다운로드 기능 검증: web/ 디렉토리 내 PBR 텍스처 생성 및 저장 관련 JS 로직과 UI 버튼 동작을 수동 검증하고 관련 문서(docs/) 업데이트
+- [ ] (agent) [p-1579604fcb|운영·비용] 로컬 FastAPI 파이프라인 예외 처리 및 에러 메시지 보강: backend/app/services/ 파이프라인 모듈에서 GPU 자원 부족이나 파일 누락 시 명확한 HTTP 에러 코드와 메시지를 반환하도록 예외 처리 보강 및 관련 테스트 작성
