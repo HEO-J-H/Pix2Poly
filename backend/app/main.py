@@ -87,6 +87,12 @@ async def list_engines() -> List[Dict[str, object]]:
             "description": "단일 이미지 기반 빠른 높이맵 메시 생성 (기본)",
         },
         {
+            "id": "sprint3d",
+            "name": "Sprint3D Pipeline Optimization",
+            "available": True,
+            "description": "Sprint3D 파이프라인 최적화 기법을 참고한 고속 3D 메시 생성 및 병목 개선 검토",
+        },
+        {
             "id": "noface3d",
             "name": "NOFACE3D Detail Refinement",
             "available": False,  # 연구 단계 — 코드가 연결되지 않았으므로 '사용 가능'으로 표시하지 않음
