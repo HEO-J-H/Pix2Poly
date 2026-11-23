@@ -244,10 +244,13 @@ async def create_video_url_job(
 @app.post("/v1/jobs/url", response_model=JobResponse)
 async def create_url_job(body: UrlJobCreate) -> JobResponse:
     page = str(body.page_url)
-    candidates, robots_ok, truncated = await fetch_page_image_candidates(
-        page,
-        max_candidates=body.max_candidates,
-    )
+    try:
+        candidates, robots_ok, truncated = await fetch_page_image_candidates(
+            page,
+            max_candidates=body.max_candidates,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to fetch page candidates: {str(e)}")
     rec = await job_store.create(
         JobType.url,
         detail={

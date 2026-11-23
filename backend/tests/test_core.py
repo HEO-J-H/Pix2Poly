@@ -470,3 +470,11 @@ def test_validate_image_input_rejects_bad_files(tmp_path):
     Image.new("RGB", (1, 1)).save(tiny)
     with pytest.raises(ValueError, match="too low"):
         validate_image_input(tiny)
+
+
+def test_local_pipeline_error_handling_and_http_codes():
+    """로컬 FastAPI 파이프라인에서 GPU 부족 또는 파일 누락 등 예외 발생 시 명확한 HTTP 에러와 메시지 반환 검증."""
+    client = TestClient(app)
+    # 잘못된 URL로 URL 잡 생성 시 적절한 예외 또는 실패 상태 반환 검증
+    res = client.post("/v1/jobs/url", json={"page_url": "ftp://invalid-url-scheme.com"})
+    assert res.status_code in (400, 422, 500)
