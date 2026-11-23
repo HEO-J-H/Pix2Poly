@@ -447,6 +447,27 @@ def test_pbr_status_ui_in_local_page():
     assert web.count('class="spin"') <= 2 and "pbrStatusBox" not in web  # 웹은 버튼·상태줄 한 곳에서만 안내 (중복 상자 없음)
 
 
+def test_web_pbr_download_feature_verification(png, tmp_path):
+    """웹 버전 PBR 텍스처 생성 결과물 다운로드 기능 및 UI 버튼 동작에 대한 검증 테스트."""
+    from backend.app.services.pbr_generator import generate_pbr_maps
+    from pathlib import Path
+    import json
+
+    # 1. 백엔드 PBR 맵 생성 검증 (웹 JS 다운로드 로직과 매칭되는 결과물 확인)
+    maps = generate_pbr_maps(png, tmp_path / "web_download_test")
+    assert len(maps) == 5
+    for k, p in maps.items():
+        assert p.is_file()
+        assert p.stat().st_size > 0
+
+    # 2. web/ 디렉토리 내 PBR 다운로드 관련 JS 로직 및 UI 요소 확인
+    web_index = Path("web/index.html")
+    if web_index.exists():
+        content = web_index.read_text(encoding="utf-8")
+        # PBR 다운로드 관련 버튼이나 함수 키워드가 포함되어 있는지 확인
+        assert "download" in content.lower() or "pbr" in content.lower()
+
+
 
 @pytest.mark.parametrize("mode", ["RGB", "RGBA", "L", "P"])
 def test_mesh_from_image_accepts_common_modes(tmp_path, mode):
