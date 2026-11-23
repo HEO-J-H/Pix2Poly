@@ -325,6 +325,15 @@ def test_validate_image_input_empty_and_low_res(tmp_path):
         mesh_from_image_file(low_res, tmp_path / "out_low")
 
 
+def test_sprint3d_pipeline_optimization_review():
+    """Sprint3D 파이프라인 최적화 도입 검토 및 백엔드 엔진 메타데이터 검증."""
+    res = TestClient(app).get("/v1/engines")
+    assert res.status_code == 200
+    engines = res.json()
+    engine_ids = {e.get("id") for e in engines}
+    assert "sprint3d_opt" in engine_ids
+
+
 def test_physag3d_research_doc_reference():
     """Verify that PhysAg3D is documented in tech-research.md as part of simulation/deformation research."""
     from pathlib import Path
