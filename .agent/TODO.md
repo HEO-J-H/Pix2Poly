@@ -104,4 +104,4 @@
 - [ ] (agent:승인대기) [p-fe4971d68b|사이트·UX] 웹 버전 PBR 텍스처 생성 결과물 다운로드 기능 검증: web/ 디렉토리 내 PBR 텍스처 생성 및 저장 관련 JS 로직과 UI 버튼 동작을 수동 검증하고 관련 문서(docs/) 업데이트 — PR #86 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/86
 - [ ] (agent:승인대기) [p-1579604fcb|운영·비용] 로컬 FastAPI 파이프라인 예외 처리 및 에러 메시지 보강: backend/app/services/ 파이프라인 모듈에서 GPU 자원 부족이나 파일 누락 시 명확한 HTTP 에러 코드와 메시지를 반환하도록 예외 처리 보강 및 관련 테스트 작성 — PR #87 승인 대기 (핵심 코드 변경 — GitHub 에서 확인 후 머지): https://github.com/HEO-J-H/Pix2Poly/pull/87
 - [x] (agent) PR #82 다시 하기 — Sprint3D 파이프라인 최적화 도입 검토: Sprint3D 논문의 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
-- [ ] (agent) PR #81 다시 하기 — 웹 버전 PBR 텍스처 생성 결과물 다운로드 기능 검증: web/ 디 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
+- [x] (agent) PR #81 다시 하기 — 웹 버전 PBR 텍스처 생성 결과물 다운로드 기능 검증: web/ 디 · 사람 요청: 승인됨 — 최신 main 기준으로 같은 변경을 다시 만들기
