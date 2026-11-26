@@ -21,6 +21,9 @@ def heightfield_mesh(
     rgb_arr: np.ndarray | None = None,
 ) -> trimesh.Trimesh:
     """Grid heightfield: X/Y in [-xy_scale, xy_scale], Z = gray * height_scale."""
+    gray = np.asarray(gray)
+    if gray.ndim != 2:
+        raise ValueError(f"gray array must be 2D, got ndim={gray.ndim} (shape={gray.shape})")
     h, w = gray.shape
     if h < 2 or w < 2:
         raise ValueError("Image grid too small")
@@ -46,8 +49,12 @@ def heightfield_mesh(
     # Avoid fix_normals() here (pulls scipy via graph); normals are fine for heightfield.
     if rgb_arr is not None:
         rgb_arr = np.asarray(rgb_arr)
-        if rgb_arr.shape[:2] != (h, w) or rgb_arr.shape[2] < 3:
-            raise ValueError("rgb_arr must be (h, w, 3+) matching grid")
+        if rgb_arr.ndim != 3:
+            raise ValueError(f"rgb_arr must be a 3D array (H, W, C), got ndim={rgb_arr.ndim} (shape={rgb_arr.shape})")
+        if rgb_arr.shape[:2] != (h, w):
+            raise ValueError(f"rgb_arr spatial shape {rgb_arr.shape[:2]} does not match gray grid {(h, w)}")
+        if rgb_arr.shape[2] < 3:
+            raise ValueError(f"rgb_arr channel count must be at least 3, got {rgb_arr.shape[2]} (shape={rgb_arr.shape})")
         vc = np.zeros((v.shape[0], 4), dtype=np.uint8)
         for i in range(h):
             for j in range(w):
