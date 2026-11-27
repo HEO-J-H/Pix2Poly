@@ -109,5 +109,5 @@
 - [x] (agent) backend/app/services/mesh_from_image.py: 이미지 입력 배열의 차원 및 채널 유효성 검증 로직을 보강하고, 잘못된 채널 수 입력 시 명확한 ValueError를 발생시키는 함수 수정 및 backend/tests/test_mesh_from_image.py (
 - [ ] (agent) [p-666b9d8859|운영·비용] 로컬 DB 테스트 파일 경로 및 구조 정비: backend/tests/ 디렉토리 존재 여부를 확인하고, test_metadata_db.py 파일의 기본 뼈대와 스키마 테스트 코드를 간소화하여 재시도합니다.
 - [ ] (agent:보류) [p-b2a3baa9d4|운영·비용] 로컬 DB 메타데이터 테스트 파일 구현 재시도: backend/tests/test_metadata_db.py를 생성하여 로컬 DB 스키마 생성 및 검색 쿼리 검증 테스트 코드를 정확히 작성합니다. — 같은 과제 2회 실패 — 마지막 사유: [4] 패치 적용 실패: 변경 없음
-- [ ] (agent) [p-0045889110|운영·비용] 메타데이터 로컬 DB 스키마 단위 테스트 추가: backend/app/models/ 또는 backend/app/services/에 설계된 로컬 DB 스키마의 생성, 조회, 검색 쿼리가 정상 동작하는지 검증하는 단위 테스트 파일(backend/tests/test_metadata_db.py)을 작성합니다.
+- [ ] (agent:보류) [p-0045889110|운영·비용] 메타데이터 로컬 DB 스키마 단위 테스트 추가: backend/app/models/ 또는 backend/app/services/에 설계된 로컬 DB 스키마의 생성, 조회, 검색 쿼리가 정상 동작하는지 검증하는 단위 테스트 파일(backend/tests/test_metadata_db.py)을 작성합니다. — 같은 과제 2회 실패 — 마지막 사유: [4] 패치 적용 실패: 변경 없음
 - [ ] (agent) [p-92c6a6932e|콘텐츠] 이미지-3D 메타데이터 검색용 로컬 DB 스키마 설계: backend/app/models/metadata.py 및 backend/tests/test_metadata_search.py 추가하여 로컬 3D 자산 메타데이터 검색 스키마 정의
