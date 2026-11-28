@@ -62,7 +62,7 @@ async def health() -> Dict[str, Any]:
     return {
         "status": "ok",
         "version": app.version,
-        "features": ["heightmap", "pbr", "glb", "obj", "fbx", "help-search"],
+        "features": ["heightmap", "pbr", "glb", "obj", "fbx", "help-search", "web-export-dispose-opt"],
         "web": "브라우저만으로도 사진→높이맵 메시·PBR 맵·GLB/OBJ 내보내기가 됩니다. 이 서버는 큰 모델(TripoSR·TRELLIS)과 FBX 용.",
     }
 
