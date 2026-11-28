@@ -334,6 +334,15 @@ def test_sprint3d_pipeline_optimization_review():
     assert "sprint3d_opt" in engine_ids
 
 
+def test_web_pbr_rendering_optimization_review():
+    """웹 버전 PBR 렌더링 성능 최적화(p-d7a78757c1) 반영 여부 및 엔진 메타데이터 검증."""
+    res = TestClient(app).get("/v1/engines")
+    assert res.status_code == 200
+    engines = res.json()
+    engine_ids = {e.get("id") for e in engines}
+    assert "web_pbr_opt" in engine_ids
+
+
 def test_physag3d_research_doc_reference():
     """Verify that PhysAg3D is documented in tech-research.md as part of simulation/deformation research."""
     from pathlib import Path
