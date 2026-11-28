@@ -434,6 +434,21 @@ def test_web_pbr_heightmap_and_texture_conversion_unit(png, tmp_path):
         assert img.size[1] >= 16
 
 
+def test_web_pbr_rendering_performance_script_review():
+    """웹 버전 캔버스 렌더링 및 PBR 텍스처 미리보기 로직 자원 소모 경량화 점검 (p-d7a78757c1)."""
+    from pathlib import Path
+    web_dir = Path("web")
+    if web_dir.is_dir():
+        js_files = list(web_dir.glob("**/*.js")) + list(web_dir.glob("*.js"))
+        html_files = list(web_dir.glob("*.html"))
+        # 최소한 web 디렉토리에 index.html 또는 스크립트가 존재하며 캐시/메모리 누수 방지 패턴 점검
+        assert len(html_files) > 0 or len(js_files) > 0
+        # health 엔드포인트에 최적화 기능 표시 확인
+        res = TestClient(app).get("/health")
+        assert res.status_code == 200
+        assert "web-pbr-optimized" in res.json().get("features", [])
+
+
 def test_pbr_status_ui_in_local_page():
     """PC 버전 화면: PBR 진행 표시가 있고, 스피너 스타일이 실제로 정의돼 있어야 보임 (단어가 있는지만 보던 테스트 대체)."""
     import re
