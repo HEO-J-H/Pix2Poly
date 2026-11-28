@@ -76,7 +76,7 @@ async def help_search(q: str, k: int = 3) -> Dict[str, Any]:
 
 @app.get("/v1/engines")
 async def list_engines() -> List[Dict[str, object]]:
-    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(Sprint3D 최적화 검토 포함)를 반환."""
+    """사용 가능한 3D 파이프라인 엔진 목록과 상세 상태(Sprint3D 최적화 및 웹 PBR 렌더링 최적화 검토 포함)를 반환."""
     from app.services.colmap_runner import colmap_available, colmap_has_cuda, openmvs_available
     from app.services import bg_remove, trellis_cpp, trellis_runner
     return [
@@ -97,6 +97,12 @@ async def list_engines() -> List[Dict[str, object]]:
             "name": "Sprint3D Pipeline Optimization",
             "available": False,  # 백엔드 속도 개선 검토 단계 (Sprint3D 기법 참고)
             "description": "최신 3D 생성 논문 기반 파이프라인 최적화 및 속도 개선 검토",
+        },
+        {
+            "id": "web_pbr_opt",
+            "name": "Web PBR & Canvas Rendering Optimization",
+            "available": True,  # 웹 버전 캔버스 자원 해제 및 텍스처 미리보기 경량화 적용 완료
+            "description": "브라우저 자원 소모 방지 및 텍스처 dispose 최적화 (p-d7a78757c1)",
         },
         {
             "id": "colmap",
