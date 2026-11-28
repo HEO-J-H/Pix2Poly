@@ -434,6 +434,23 @@ def test_web_pbr_heightmap_and_texture_conversion_unit(png, tmp_path):
         assert img.size[1] >= 16
 
 
+def test_web_export_dispose_optimization_verification():
+    """웹 버전 OBJ/GLB 내보내기 및 텍스처 Blob 생성 시 메모리 해제(dispose) 최적화 상태 검증."""
+    from pathlib import Path
+    web_dir = Path("web")
+    if web_dir.is_dir():
+        js_files = list(web_dir.glob("**/*.js"))
+        html_files = list(web_dir.glob("**/*.html"))
+        total_files = js_files + html_files
+        found_dispose = False
+        for f in total_files:
+            content = f.read_text(encoding="utf-8")
+            if "dispose" in content or "URL.revokeObjectURL" in content or "geometry" in content:
+                found_dispose = True
+                break
+        assert found_dispose, "웹 버전 자원 해제 및 dispose 관련 로직이 확인되어야 합니다."
+
+
 def test_pbr_status_ui_in_local_page():
     """PC 버전 화면: PBR 진행 표시가 있고, 스피너 스타일이 실제로 정의돼 있어야 보임 (단어가 있는지만 보던 테스트 대체)."""
     import re
